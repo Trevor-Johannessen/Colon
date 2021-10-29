@@ -1086,6 +1086,8 @@ function shape(list)
 	elseif list[1] == "right_triangle" then
 		right_triangle(tonumber(list[2]), tonumber(list[3]), color_convert(list[4]), tonumber(list[5]), tonumber(list[6]))
 	
+	elseif list[1] == "point" then
+		point(tonumber(list[2]), tonumber(list[3]), color_convert(list[4]))
 	end
 	
 	
@@ -1227,6 +1229,13 @@ function left_triangle(x, y, color, base, height)
     end
 end
 
+
+function point(x, y, color)
+	
+	term.setCursorPos(x, y)
+	term.blit(" ", "a", color_to_hex(color))
+	
+end
 
 function redraw()
 	term.setBackgroundColor(background)
