@@ -5,6 +5,7 @@ app_storage = {} -- info for lua apps
 variables = {} -- info on variables
 printed_lines = {} -- all lines printed with the print or aprint command
 displayed_images = {} -- all images shown with the display command
+shapes = {} -- all shapes rendered
 buttons = {} -- all buttons registered in the page
 text_boxes = {} -- all text boxes registered in the program
 triggers = {} -- all triggers initialized with the when: statement
@@ -24,7 +25,7 @@ end_of_page = 1
 is_API = false
 
 function main()
-	print("Last Updated: 9/21/21")
+	print("Last Updated: 10/28/21")
 	
 	speaker = peripheral.find("speaker")
 	term.clear()
@@ -239,6 +240,7 @@ function interpret_line(list)
 		new_page = {true, list[2]}
 	elseif list[1] == "shape:" then
 		table.remove(list, 1)
+		table.insert(shapes, list)
 		shape(list)
 	end
 	
@@ -1034,30 +1036,55 @@ end
 
 
 function shape(list)
+	
 	if list[1] == "circle" then
 		--[[
 			Arguments:
 				1: X pos
 				2: Y pos
-				3: Radius
-				4: Color
+				3: Color
+				4: Radius
+				
 		]]--
-		local x,y = term.getCursorPos()
-		term.setCursorPos(list[1], list[2])
+		circle(tonumber(list[2]), tonumber(list[3]), color_convert(list[4]), tonumber(list[5]))
 			
+	elseif list[1] == "circle_outline" then
+		circle_outline(tonumber(list[2]), tonumber(list[3]), color_convert(list[4]), tonumber(list[5]))
+		
 	elseif list[1] == ("box" or "square" or "rectangle") then
 		--[[
 			Arguments:
-			1: "box"
 			2: X pos
 			3: Y pos
-			4: Length
-			5: Width
-			6: Color
+			4: Color
+			5: Length
+			6: Width
+			
 		]]--
-		rectangle(tonumber(list[2]), tonumber(list[3]), tonumber(list[4]), tonumber(list[5]), list[6])
 		
+		rectangle(tonumber(list[2]), tonumber(list[3]), color_convert(list[4]), tonumber(list[5]), tonumber(list[6]))
+		
+	
+	elseif list[1] == "boarder" then
+	
+		boarder(tonumber(list[2]), tonumber(list[3]), color_convert(list[4]), tonumber(list[5]), tonumber(list[6]))
+	
 	elseif list[1] == "triangle" then
+		--[[
+			Arguments:
+			2: x
+			3: y
+			4: base
+			5: height
+		]]--
+		
+		triangle(tonumber(list[2]), tonumber(list[3]), color_convert(list[4]) 	, tonumber(list[5]), tonumber(list[6]))
+	
+	elseif list[1] == "left_triangle" then
+		left_triangle(tonumber(list[2]), tonumber(list[3]), color_convert(list[4]), tonumber(list[5]), tonumber(list[6]))
+	
+	elseif list[1] == "right_triangle" then
+		right_triangle(tonumber(list[2]), tonumber(list[3]), color_convert(list[4]), tonumber(list[5]), tonumber(list[6]))
 	
 	end
 	
@@ -1065,42 +1092,139 @@ function shape(list)
 end
 
 
-function circle(x, y, radius)
-	for i = 1, y do
-		for j = 1, x do
-			if (x-i) + (y-i) <= radius^2 then
-				term.setCursorPos(j, i)
-				io.write("a")
+function circle(x, y, color, radius)
+	local new_background_color = color_to_hex(color)
+	
+	term.setCursorPos(x-radius, y-radius)
+	
+	for i = -radius, radius do
+		
+		for j = -radius, radius do
+			if ((i)^2) + ((j)^2) <= radius^2 then
+				term.blit(" ", "a", new_background_color)
+			else
+			    term.setCursorPos(x+j+1, y+i)
 			end
-		end
+    	end
+	    --print()
+		term.setCursorPos(x-radius, y+i+1)
+		--term.setCursorPos(x, y+i+1)
 	end
 end
 
 
-function rectangle(x, y, length, width, color)
+function circle_outline(x, y, color, radius)
+	local new_background_color = color_to_hex(color)
+	
+	term.setCursorPos(x-radius, y-radius)
+	
+	for i = -radius, radius do
+		for j = -radius, radius do
+			if ((i)^2) + ((j)^2) >= radius^2 then
+				term.blit(" ", "a", new_background_color)
+			else
+			    term.setCursorPos(x+j+1, y+i)
+			end
+    	end
+	    term.setCursorPos(x-radius, y+i+1)
+	end
+end
+
+
+function rectangle(x, y, color, length, width)
 	term.setCursorPos(x, y)
 	term.setBackgroundColor(color)
-		
-	for i = 1, width do
+	for i = 1, tonumber(width) do
 		print(string.rep(" ", length))
+		term.setCursorPos(x, y+i-1)
 	end
 		
 	term.setBackgroundColor(background)
 end
 
 
-function triangle(x, y, base, height)
-	area = .5*base*height
+function boarder(x, y, color, width, height)
+    
+    local new_background_color = color_to_hex(color)
+    
+    for i = 1, height do
+        term.setCursorPos(x, y+i-1)
+        term.blit(" ", "a", new_background_color)
+    end
+    
+    for i = 1, height do
+        term.setCursorPos(x+width, y+i-1)
+        term.blit(" ", "a", new_background_color)
+    end
+    
+    for i = 1, width do
+        term.setCursorPos(x+i-1, y)
+        term.blit(" ", "a", new_background_color)
+    end
+    
+    for i = 1, width+1 do
+        term.setCursorPos(x+i-1, y+height)
+        term.blit(" ", "a", new_background_color)
+    end
+    
+end
+
+
+function triangle(x, y, color, base, height)
+
+	term.setCursorPos(x, y)
 	
-	for i = 1, height do
-		for j = 1, base do
-			if .5*i*j >= area then
-				term.setCursorPos(x+j, y+i)
-				io.write("a")
-			end
-		end
-	end
-	os.sleep(1)
+	local new_background_color = color_to_hex(color)
+    local slope = height/(base/2)
+
+    for i = 1, height do
+        for j = 1, base do
+            if (j < (i/slope)+base/2) and (j > (i/-slope)+base/2) then
+                term.blit(" ", "a", new_background_color)
+			else
+			    term.setCursorPos(x+j, y+i)
+            end
+        end
+        term.setCursorPos(x, y+i+1)
+    end
+end
+
+
+function right_triangle(x, y, color, base, height)
+    term.setCursorPos(x, y)
+	local new_background_color = color_to_hex(color)
+	
+    local slope = height/(base)
+    
+    for i = 1, height do
+        for j = 1, base do
+            if (j > (i/-slope)+base) then
+                term.blit(" ", "a", new_background_color)
+			else
+			    term.setCursorPos(x+j, y+i)
+            end
+        end
+        term.setCursorPos(x, y+i+1)
+    end
+end
+
+
+function left_triangle(x, y, color, base, height)
+    term.setCursorPos(x, y)
+	local new_background_color = color_to_hex(color)
+	
+    local slope = height/(base)
+    
+    for i = 1, height do
+        for j = 1, base do
+            if (j < (i/slope)) then
+                term.blit(" ", "a", new_background_color)
+			else
+			    term.setCursorPos(x+j, y+i)
+            end
+        end
+        term.setCursorPos(x, y+i+1)
+    end
 end
 
 
@@ -1130,6 +1254,9 @@ function redraw()
 		draw_text_box(text_boxes[i])
 	end
 	
+	for i in pairs(shapes) do
+		shape(shapes[i])
+	end
 	
 	if not is_API then
 		for i = 1, screen_height do
