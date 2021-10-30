@@ -25,7 +25,7 @@ end_of_page = 1
 is_API = false
 
 function main()
-	print("Last Updated: 10/28/21")
+	print("Last Updated: 10/29/21")
 	
 	speaker = peripheral.find("speaker")
 	term.clear()
@@ -184,8 +184,8 @@ function interpret_line(list)
 		table.insert(displayed_images, {x, y, list[2]})
 		display(x, y, list[2])
 	elseif list[1] == "scroll:" then
-		list[3] = tonumber(list[3])
 		list[4] = tonumber(list[4])
+		list[3] = tonumber(list[3])
 		if list[4] > end_of_page then end_of_page = list[4]+1 end
 		scroll(arr_to_string(list, 4), list[2], list[3], list[4])
 	elseif list[1] == "gif:" then
@@ -288,11 +288,106 @@ function print_line(list)
 	if list[4] then
 		io.write(string.rep(" ", string.len(str)))
 	else
-		io.write(str)
+		parse_color(str)
 	end
 	term.setCursorPos(x, y)
 end
 
+	
+function parse_color(str)
+		
+		local baseTextColor = term.getTextColor()
+		local baseBackgroundColor = term.getBackgroundColor()
+		
+		local monitor_settings
+		
+		local text = str
+
+		local i = 1 -- while iterator
+		local stringTable = mysplit(text) -- string.split of words
+		local commandStack = {} -- stack that holds }
+		local colorStack = {baseTextColor} -- keeps track of what color we should be
+		local backgroundStack = {baseBackgroundColor} -- keeps track of what background we should be
+		
+		while stringTable[i] ~= nil
+		do
+			
+			
+			if(string.sub(tostring(stringTable[i]), 1, 1) == '$')
+			then
+				-- command found
+				--print("substring = " .. string.sub(tostring(stringTable[i]), 2, 5))
+				if (string.sub(tostring(stringTable[i]), 2, 6) == "color")
+				then
+					--print("colorCommand")
+										
+					local color = string.sub(tostring(stringTable[i]), 8, string.len(stringTable[i])-2)
+					--print("stringTable[i] = ", stringTable[i])
+					table.insert(commandStack, 1, "COLOR")
+					table.insert(colorStack, 1, term.getTextColor())
+					--print("color = ", color)
+					term.setTextColor(color_convert(color))
+					
+				elseif (string.sub(tostring(stringTable[i]), 2, 11) == "background")
+				then
+					--print("backgroundCommand")
+					--print("colorCommand")
+										
+					local background = string.sub(tostring(stringTable[i]), 13, string.len(stringTable[i])-2)
+
+					table.insert(commandStack, 1, "BACKGROUND")
+					table.insert(backgroundStack, 1, term.getBackgroundColor())
+					--print("color = ", color)
+					term.setBackgroundColor(color_convert(background))
+					
+				else
+					print("Invalid_Command")
+				end
+			elseif (string.sub(tostring(stringTable[i]), 1, 1) == '}')
+			then
+				local command = table.remove(commandStack, 1)
+				if command == "COLOR"
+				then
+					term.setTextColor(table.remove(colorStack, 1))	
+					--print("color = ", term.getTextColor())
+					if(colorStack[1] == nil)
+					then
+						table.insert(colorStack, 1)
+					end
+				elseif command == "BACKGROUND"
+				then
+					term.setBackgroundColor(table.remove(backgroundStack, 1))	
+					--print("color = ", term.getTextColor())
+					if(backgroundStack[1] == nil)
+					then
+						table.insert(backgroundStack, 32768)
+					end
+					
+				end
+			else
+					io.write(tostring(stringTable[i]) .. " ")
+			end
+			
+			i = i + 1
+			
+		end
+		
+	term.setTextColor(baseTextColor)
+	term.setBackgroundColor(baseBackgroundColor)
+end
+
+
+function mysplit (inputstr, sep)
+        if sep == nil then
+                sep = "%s"
+        end
+        local t={}
+        for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+                table.insert(t, str)
+        end
+        return t
+end	
+	
 	
 function replace_variables_old(str_in)
 	
@@ -439,7 +534,7 @@ function scroll(str, in_tickrate, x, y)
 	]]--
 	table.insert(animate_storage, {"scroll", str .. " ", y, 1, in_tickrate, x})
 	term.setCursorPos(x, y)
-	io.write(str)
+	parse_color(str)
 end
 
 
@@ -670,7 +765,7 @@ function draw_button(button)
 		else
 			text_x = button[2] + (width / 2) - math.floor((string.len(button[8]) / 2))
 			term.setCursorPos(text_x, text_y-page_line+1)
-			io.write(button[8])
+			parse_color(button[8])
 		end
 		
 		
@@ -691,7 +786,7 @@ function draw_text_box(text_box)
 	io.write(string.rep(" ", text_box[6]))
 	if text_box[8] ~= nil then
 		term.setCursorPos(text_box[2], text_box[3]-page_line+1)
-		io.write(text_box[8])
+		parse_color(text_box[8])
 	end
 	term.setBackgroundColor(background)
 	term.setTextColor(text)
@@ -1237,6 +1332,7 @@ function point(x, y, color)
 	
 end
 
+
 function redraw()
 	term.setBackgroundColor(background)
 	term.setTextColor(text)
@@ -1424,8 +1520,9 @@ function animate()
 				
 				term.setCursorPos(animate_storage[i][6], animate_storage[i][3])
 				--term.clearLine()
-				io.write(string.sub(animate_storage[i][2], cursor_pos+1))
-				io.write(string.sub(animate_storage[i][2], 1, cursor_pos))
+				
+				io.write(string.sub(animate_storage[i][2], cursor_pos+1) .. string.sub(animate_storage[i][2], 1, cursor_pos))
+				
 				animate_storage[i][4] = cursor_pos + 1
 				
 				if cursor_pos == string.len(str) then
