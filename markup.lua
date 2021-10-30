@@ -20,12 +20,12 @@ app_length = 25 --  length of the applet window
 tickrate = 0.05 -- tick rate of the program (20 tps max)
 low_resource_mode = false -- an argument for markup, if computer is slow
 speaker = nil
-page_line = 1
+page_line = 0
 end_of_page = 1
 is_API = false
 
 function main()
-	print("Last Updated: 10/29/21")
+	print("Last Updated: 10/30/21")
 	
 	speaker = peripheral.find("speaker")
 	term.clear()
@@ -180,7 +180,8 @@ function interpret_line(list)
 			x = tonumber(list[3])
 			y = tonumber(list[4])
 		end
-		if y > end_of_page then end_of_page = y+1 end
+		local imgx, imgy = get_image_size(list[2])
+		if y > end_of_page then end_of_page = y+imgy end
 		table.insert(displayed_images, {x, y, list[2]})
 		display(x, y, list[2])
 	elseif list[1] == "scroll:" then
@@ -500,7 +501,7 @@ function display(x, y, fileName)
 	--message("str = " .. string.sub(str, current_char, current_char+width-1 ))
 	
 	for i = 1, height do
-		if y+1 >= page_line and y+i < page_line + screen_height-1 then
+		if y+1 >= page_line and y+i <= page_line + screen_height then
 		term.blit(string.rep(" ", width), string.rep("1", width), string.sub(str, current_char, current_char+width-1 ) )
 		current_char = current_char + width
 		term.setCursorPos(x, y+i-page_line+1)
@@ -532,9 +533,7 @@ function scroll(str, in_tickrate, x, y)
 		5: tickrate (ms)
 		6: x pos
 	]]--
-	table.insert(animate_storage, {"scroll", str .. " ", y, 1, in_tickrate, x})
-	term.setCursorPos(x, y)
-	parse_color(str)
+	table.insert(animate_storage, {"scroll", str, y, 1, in_tickrate, x})
 end
 
 
@@ -765,7 +764,7 @@ function draw_button(button)
 		else
 			text_x = button[2] + (width / 2) - math.floor((string.len(button[8]) / 2))
 			term.setCursorPos(text_x, text_y-page_line+1)
-			parse_color(button[8])
+			io.write(button[8])
 		end
 		
 		
@@ -786,7 +785,7 @@ function draw_text_box(text_box)
 	io.write(string.rep(" ", text_box[6]))
 	if text_box[8] ~= nil then
 		term.setCursorPos(text_box[2], text_box[3]-page_line+1)
-		parse_color(text_box[8])
+		io.write(text_box[8])
 	end
 	term.setBackgroundColor(background)
 	term.setTextColor(text)
@@ -1340,7 +1339,7 @@ function redraw()
 	local x, y = term.getCursorPos()
 	for i in pairs(printed_lines) do
 		--message("y = " .. printed_lines[i][2])
-		if printed_lines[i][2] >= page_line and printed_lines[i][2] < page_line + screen_height-1 then
+		if printed_lines[i][2] >= page_line and printed_lines[i][2] < page_line + screen_height then
 			--print("array = ", arr_to_string(printed_lines[i][3], 1))
 			--print_line(printed_lines[i][3], 1)
 			print_line({printed_lines[i][1], printed_lines[i][2]-page_line+1, printed_lines[i][3], printed_lines[i][4]})
@@ -1518,13 +1517,14 @@ function animate()
 				local str = animate_storage[i][2]
 				local cursor_pos = animate_storage[i][4]
 				
-				term.setCursorPos(animate_storage[i][6], animate_storage[i][3])
-				--term.clearLine()
+				if animate_storage[i][3] >= page_line and animate_storage[i][3] <= page_line + screen_height then
 				
-				io.write(string.sub(animate_storage[i][2], cursor_pos+1) .. string.sub(animate_storage[i][2], 1, cursor_pos))
-				
+					term.setCursorPos(animate_storage[i][6], animate_storage[i][3] - page_line)
+					--term.clearLine()
+					io.write(string.sub(animate_storage[i][2], cursor_pos+1) .. string.sub(animate_storage[i][2], 1, cursor_pos))
+					
+				end
 				animate_storage[i][4] = cursor_pos + 1
-				
 				if cursor_pos == string.len(str) then
 					animate_storage[i][4] = 1
 				end
@@ -1640,14 +1640,14 @@ function animate()
 				break
 			
 			elseif event == "mouse_scroll" then
-				if event_id == -1 and page_line > 1 then
+				if event_id == -1 and page_line > 0 then
 					page_line = page_line - 1
 					redraw()
-					message("End of page: " .. end_of_page .. "\t page_line: " .. page_line)
+					--message("End of page: " .. end_of_page .. "\t page_line: " .. page_line)
 				elseif event_id == 1 and page_line+screen_height < end_of_page then
 					page_line = page_line + 1
 					redraw()
-					message("End of page: " .. end_of_page .. "\t page_line: " .. page_line)
+					--message("End of page: " .. end_of_page .. "\t page_line: " .. page_line)
 				end
 			elseif event == "timer" and event_id == myTimer then break end
 		end
