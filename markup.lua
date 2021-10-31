@@ -712,9 +712,15 @@ function button(list)
 	properties[3] = tonumber(list[4])
 	properties[4] = list[5]
 	properties[5] = list[6]
+	if properties[5] == nil then
+		properties[5] = ""
+	end
 	properties[6] = list[7]
 	properties[7] = list[8]
 	properties[8] = arr_to_string(list, 8)
+	if properties[8] == nil then
+		properties[8] = ""
+	end
 	properties[9] = properties[2] + x
 	properties[10] = properties[3] + y
 	properties[11] = table.getn(buttons)+1
@@ -1407,8 +1413,12 @@ function check_cursor(x, y)
 	--message("cursor at " .. x .. ", " .. y)
 	for i in pairs(buttons) do
 		if (x >= buttons[i][2] and x < buttons[i][9]) and (y >= buttons[i][3]-page_line+1 and y < buttons[i][10]-page_line+1) then
+			message("before check function")
+			print(buttons[i][5])
 			check_function(buttons[i][5])
+			message("past check function")
 			check_trigger(buttons[i])
+			message("past check trigger")
 			--check_function(buttons[i][4], {buttons[i][10]})
 		end
 	end
