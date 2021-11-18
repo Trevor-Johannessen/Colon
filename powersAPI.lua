@@ -52,6 +52,7 @@ function parse_color(str)
 					term.setBackgroundColor(color_convert(background))
 					
 				elseif (string.sub(tostring(stringTable[i]), 2, 10) == "hypertext")
+				then
 					local x, y = term.getCursorPos()
 					isHypertext = true
 					
@@ -116,7 +117,7 @@ function mysplit (inputstr, sep)
 end	
 
 
-function check_cursor(x, y)
+function check_links(x, y)
 	for link in pairs (hyperlinks) do
 		local command = link.remove(1)
 		
@@ -124,6 +125,7 @@ function check_cursor(x, y)
 		or (y > link[2] and  y < link[3]) -- checks for inbetween lines for paragraph hyperlinks
 		or (y == link[2] and x >= link[1]) -- checks first line for paragraph hyperlinks
 		or (y == link[4] and x <= link[3]) -- checks last line for paragraph hyperlinks
+		then	
 			return command
 		end
 		--[[
@@ -136,4 +138,54 @@ function check_cursor(x, y)
 	end
 	
 	return false
+end
+
+
+function color_convert(str)
+	str = string.lower(str)
+	
+	if tonumber(str) == nil  then
+		
+		if 	   str == "white" then return colors.white
+		elseif str == "orange" then return colors.orange
+		elseif str == "magenta" then return colors.magenta
+		elseif str == "lightblue" then return colors.lightBlue
+		elseif str == "yellow" then return colors.yellow
+		elseif str == "lime" then return colors.lime
+		elseif str == "pink" then return colors.pink
+		elseif str == "gray" then return colors.gray
+		elseif str == "lightgray" then return colors.lightGray
+		elseif str == "cyan" then return colors.cyan
+		elseif str == "purple" then return colors.purple
+		elseif str == "blue" then return colors.blue
+		elseif str == "brown" then return colors.brown
+		elseif str == "green" then return colors.green
+		elseif str == "red" then return colors.red
+		elseif str == "black" then return colors.black
+		end
+	end
+	
+	
+	return tonumber(str)
+end
+
+
+function color_to_hex(color)
+	if	   color == colors.white 		then return "0"
+	elseif color == colors.orange 		then return "1"
+	elseif color == colors.magenta 		then return "2"
+	elseif color == colors.lightBlue 	then return "3"
+	elseif color == colors.yellow 		then return "4"
+	elseif color == colors.lime 		then return "5"
+	elseif color == colors.pink 		then return "6"
+	elseif color == colors.gray 		then return "7"
+	elseif color == colors.lightGray 	then return "8"
+	elseif color == colors.cyan 		then return "9"
+	elseif color == colors.purple 		then return "a"
+	elseif color == colors.blue 		then return "b"
+	elseif color == colors.brown 		then return "c"
+	elseif color == colors.green 		then return "d"
+	elseif color == colors.red 			then return "e"
+	elseif color == colors.black 		then return "f"
+	end
 end
