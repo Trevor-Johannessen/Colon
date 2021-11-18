@@ -1507,7 +1507,7 @@ function animate()
 				break
 			
 			elseif event == "mouse_scroll" then
-				if event_id == -1 and page_line > 0 then
+				if event_id == -1 and page_line > 1 then
 					page_line = page_line - 1
 					redraw()
 					--message("End of page: " .. end_of_page .. "\t page_line: " .. page_line)
