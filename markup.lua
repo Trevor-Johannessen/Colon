@@ -225,13 +225,13 @@ function interpret_line(list)
 			7: variable name
 		]]--
 		if tonumber(list[4]) > end_of_page then end_of_page = tonumber(list[4])+1 end
-		table.insert(text_boxes, {list[2], tonumber(list[3]), tonumber(list[4]), color_convert(list[5]), color_convert(list[6]), tonumber(list[7]), list[8]})
+		table.insert(text_boxes, {list[2], tonumber(list[3]), tonumber(list[4]), powersAPI.color_convert(list[5]), powersAPI.color_convert(list[6]), tonumber(list[7]), list[8]})
 		draw_text_box(text_boxes[table.getn(text_boxes)])
 	elseif list[1] == "background:" then
-		background = color_convert(list[2])
+		background = powersAPI.color_convert(list[2])
 		redraw()
 	elseif list[1] == "text:" then
-		text = color_convert(list[2])
+		text = powersAPI.color_convert(list[2])
 		redraw()
 	elseif list[1] == "when:" then
 		local name = list[2]
@@ -290,107 +290,12 @@ function print_line(list)
 	if list[4] then
 		io.write(string.rep(" ", string.len(str)))
 	else
-		parse_color(str)
+		powersAPI.parse_color(str)
 	end
 	term.setCursorPos(x, y)
 end
 
-	
-function parse_color(str)
-		
-		local baseTextColor = term.getTextColor()
-		local baseBackgroundColor = term.getBackgroundColor()
-		
-		local monitor_settings
-		
-		local text = str
 
-		local i = 1 -- while iterator
-		local stringTable = mysplit(text) -- string.split of words
-		local commandStack = {} -- stack that holds }
-		local colorStack = {baseTextColor} -- keeps track of what color we should be
-		local backgroundStack = {baseBackgroundColor} -- keeps track of what background we should be
-		
-		while stringTable[i] ~= nil
-		do
-			
-			
-			if(string.sub(tostring(stringTable[i]), 1, 1) == '$')
-			then
-				-- command found
-				--print("substring = " .. string.sub(tostring(stringTable[i]), 2, 5))
-				if (string.sub(tostring(stringTable[i]), 2, 6) == "color")
-				then
-					--print("colorCommand")
-										
-					local color = string.sub(tostring(stringTable[i]), 8, string.len(stringTable[i])-2)
-					--print("stringTable[i] = ", stringTable[i])
-					table.insert(commandStack, 1, "COLOR")
-					table.insert(colorStack, 1, term.getTextColor())
-					--print("color = ", color)
-					term.setTextColor(color_convert(color))
-					
-				elseif (string.sub(tostring(stringTable[i]), 2, 11) == "background")
-				then
-					--print("backgroundCommand")
-					--print("colorCommand")
-										
-					local background = string.sub(tostring(stringTable[i]), 13, string.len(stringTable[i])-2)
-
-					table.insert(commandStack, 1, "BACKGROUND")
-					table.insert(backgroundStack, 1, term.getBackgroundColor())
-					--print("color = ", color)
-					term.setBackgroundColor(color_convert(background))
-					
-				else
-					print("Invalid_Command")
-				end
-			elseif (string.sub(tostring(stringTable[i]), 1, 1) == '}')
-			then
-				local command = table.remove(commandStack, 1)
-				if command == "COLOR"
-				then
-					term.setTextColor(table.remove(colorStack, 1))	
-					--print("color = ", term.getTextColor())
-					if(colorStack[1] == nil)
-					then
-						table.insert(colorStack, 1)
-					end
-				elseif command == "BACKGROUND"
-				then
-					term.setBackgroundColor(table.remove(backgroundStack, 1))	
-					--print("color = ", term.getTextColor())
-					if(backgroundStack[1] == nil)
-					then
-						table.insert(backgroundStack, 32768)
-					end
-					
-				end
-			else
-					io.write(tostring(stringTable[i]) .. " ")
-			end
-			
-			i = i + 1
-			
-		end
-		
-	term.setTextColor(baseTextColor)
-	term.setBackgroundColor(baseBackgroundColor)
-end
-
-
-function mysplit (inputstr, sep)
-        if sep == nil then
-                sep = "%s"
-        end
-        local t={}
-        for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-                table.insert(t, str)
-        end
-        return t
-end	
-	
-	
 function replace_variables_old(str_in)
 	
 	if type(str_in) == "string" then
@@ -760,8 +665,8 @@ function draw_button(button)
 	
 	if button[8] ~= (nil or "") then
 		
-		term.setTextColor(color_convert(button[6]))
-		term.setBackgroundColor(color_convert(button[7]))
+		term.setTextColor(powersAPI.color_convert(button[6]))
+		term.setBackgroundColor(powersAPI.color_convert(button[7]))
 		
 		
 		if string.sub(button[8], 1, 1) == "~" then
@@ -868,56 +773,6 @@ function menu(list)
 			list[5] = string.sub(list[5], 1, string.len(list[5])-1) .. ", " .. pos .. ")"
 		end
 		check_function(list[5])
-	end
-end
-
-
-function color_convert(str)
-	str = string.lower(str)
-	
-	if tonumber(str) == nil  then
-		
-		if 	   str == "white" then return colors.white
-		elseif str == "orange" then return colors.orange
-		elseif str == "magenta" then return colors.magenta
-		elseif str == "lightblue" then return colors.lightBlue
-		elseif str == "yellow" then return colors.yellow
-		elseif str == "lime" then return colors.lime
-		elseif str == "pink" then return colors.pink
-		elseif str == "gray" then return colors.gray
-		elseif str == "lightgray" then return colors.lightGray
-		elseif str == "cyan" then return colors.cyan
-		elseif str == "purple" then return colors.purple
-		elseif str == "blue" then return colors.blue
-		elseif str == "brown" then return colors.brown
-		elseif str == "green" then return colors.green
-		elseif str == "red" then return colors.red
-		elseif str == "black" then return colors.black
-		end
-	end
-	
-	
-	return tonumber(str)
-end
-
-
-function color_to_hex(color)
-	if	   color == colors.white 		then return "0"
-	elseif color == colors.orange 		then return "1"
-	elseif color == colors.magenta 		then return "2"
-	elseif color == colors.lightBlue 	then return "3"
-	elseif color == colors.yellow 		then return "4"
-	elseif color == colors.lime 		then return "5"
-	elseif color == colors.pink 		then return "6"
-	elseif color == colors.gray 		then return "7"
-	elseif color == colors.lightGray 	then return "8"
-	elseif color == colors.cyan 		then return "9"
-	elseif color == colors.purple 		then return "a"
-	elseif color == colors.blue 		then return "b"
-	elseif color == colors.brown 		then return "c"
-	elseif color == colors.green 		then return "d"
-	elseif color == colors.red 			then return "e"
-	elseif color == colors.black 		then return "f"
 	end
 end
 
@@ -1075,8 +930,8 @@ function destroy_page_manager(quick)
 	end
 	
 	local xPos = screen_width
-	local background_str = color_to_hex(background)
-	local text_str = color_to_hex(text)
+	local background_str = powersAPI.color_to_hex(background)
+	local text_str = powersAPI.color_to_hex(text)
 	for i = 1, 15 do
 		for j = 1, screen_height do
 			if i < 15 then
@@ -1147,10 +1002,10 @@ function shape(list)
 				4: Radius
 				
 		]]--
-		circle(tonumber(list[2]), tonumber(list[3]), color_convert(list[4]), tonumber(list[5]))
+		circle(tonumber(list[2]), tonumber(list[3]), powersAPI.color_convert(list[4]), tonumber(list[5]))
 			
 	elseif list[1] == "circle_outline" then
-		circle_outline(tonumber(list[2]), tonumber(list[3]), color_convert(list[4]), tonumber(list[5]))
+		circle_outline(tonumber(list[2]), tonumber(list[3]), powersAPI.color_convert(list[4]), tonumber(list[5]))
 		
 	elseif list[1] == ("box" or "square" or "rectangle") then
 		--[[
@@ -1163,12 +1018,12 @@ function shape(list)
 			
 		]]--
 		
-		rectangle(tonumber(list[2]), tonumber(list[3]), color_convert(list[4]), tonumber(list[5]), tonumber(list[6]))
+		rectangle(tonumber(list[2]), tonumber(list[3]), powersAPI.color_convert(list[4]), tonumber(list[5]), tonumber(list[6]))
 		
 	
 	elseif list[1] == "boarder" then
 	
-		boarder(tonumber(list[2]), tonumber(list[3]), color_convert(list[4]), tonumber(list[5]), tonumber(list[6]))
+		boarder(tonumber(list[2]), tonumber(list[3]), powersAPI.color_convert(list[4]), tonumber(list[5]), tonumber(list[6]))
 	
 	elseif list[1] == "triangle" then
 		--[[
@@ -1179,16 +1034,16 @@ function shape(list)
 			5: height
 		]]--
 		
-		triangle(tonumber(list[2]), tonumber(list[3]), color_convert(list[4]) 	, tonumber(list[5]), tonumber(list[6]))
+		triangle(tonumber(list[2]), tonumber(list[3]), powersAPI.color_convert(list[4]) 	, tonumber(list[5]), tonumber(list[6]))
 	
 	elseif list[1] == "left_triangle" then
-		left_triangle(tonumber(list[2]), tonumber(list[3]), color_convert(list[4]), tonumber(list[5]), tonumber(list[6]))
+		left_triangle(tonumber(list[2]), tonumber(list[3]), powersAPI.color_convert(list[4]), tonumber(list[5]), tonumber(list[6]))
 	
 	elseif list[1] == "right_triangle" then
-		right_triangle(tonumber(list[2]), tonumber(list[3]), color_convert(list[4]), tonumber(list[5]), tonumber(list[6]))
+		right_triangle(tonumber(list[2]), tonumber(list[3]), powersAPI.color_convert(list[4]), tonumber(list[5]), tonumber(list[6]))
 	
 	elseif list[1] == "point" then
-		point(tonumber(list[2]), tonumber(list[3]), color_convert(list[4]))
+		point(tonumber(list[2]), tonumber(list[3]), powersAPI.color_convert(list[4]))
 	end
 	
 	
@@ -1196,7 +1051,7 @@ end
 
 
 function circle(x, y, color, radius)
-	local new_background_color = color_to_hex(color)
+	local new_background_color = powersAPI.color_to_hex(color)
 	
 	term.setCursorPos(x-radius, y-radius)
 	
@@ -1217,7 +1072,7 @@ end
 
 
 function circle_outline(x, y, color, radius)
-	local new_background_color = color_to_hex(color)
+	local new_background_color = powersAPI.color_to_hex(color)
 	
 	term.setCursorPos(x-radius, y-radius)
 	
@@ -1248,7 +1103,7 @@ end
 
 function boarder(x, y, color, width, height)
     
-    local new_background_color = color_to_hex(color)
+    local new_background_color = powersAPI.color_to_hex(color)
     
     for i = 1, height do
         term.setCursorPos(x, y+i-1)
@@ -1277,7 +1132,7 @@ function triangle(x, y, color, base, height)
 
 	term.setCursorPos(x, y)
 	
-	local new_background_color = color_to_hex(color)
+	local new_background_color = powersAPI.color_to_hex(color)
     local slope = height/(base/2)
 
     for i = 1, height do
@@ -1295,7 +1150,7 @@ end
 
 function right_triangle(x, y, color, base, height)
     term.setCursorPos(x, y)
-	local new_background_color = color_to_hex(color)
+	local new_background_color = powersAPI.color_to_hex(color)
 	
     local slope = height/(base)
     
@@ -1314,7 +1169,7 @@ end
 
 function left_triangle(x, y, color, base, height)
     term.setCursorPos(x, y)
-	local new_background_color = color_to_hex(color)
+	local new_background_color = powersAPI.color_to_hex(color)
 	
     local slope = height/(base)
     
@@ -1334,7 +1189,7 @@ end
 function point(x, y, color)
 	
 	term.setCursorPos(x, y)
-	term.blit(" ", "a", color_to_hex(color))
+	term.blit(" ", "a", powersAPI.color_to_hex(color))
 	
 end
 
@@ -1411,7 +1266,7 @@ end
 
 function check_cursor(x, y)
 	local str
-	local command = powersAPI.check_link(x,y)
+	local command = powersAPI.check_links(x,y)
 	--message("cursor at " .. x .. ", " .. y)
 	for i in pairs(buttons) do
 		if (x >= buttons[i][2] and x < buttons[i][9]) and (y >= buttons[i][3]-page_line+1 and y < buttons[i][10]-page_line+1) then
@@ -1529,10 +1384,13 @@ function animate()
 				local str = animate_storage[i][2]
 				local cursor_pos = animate_storage[i][4]
 				
-				term.setCursorPos(animate_storage[i][6], animate_storage[i][3])
-				--term.clearLine()
-				io.write(string.sub(animate_storage[i][2], cursor_pos+1))
-				io.write(string.sub(animate_storage[i][2], 1, cursor_pos))
+				if animate_storage[i][3] >= page_line and animate_storage[i][3] <= page_line + screen_height then
+				
+					term.setCursorPos(animate_storage[i][6], animate_storage[i][3] - page_line)
+					--term.clearLine()
+					io.write(string.sub(animate_storage[i][2], cursor_pos+1) .. string.sub(animate_storage[i][2], 1, cursor_pos))
+					
+				end
 				animate_storage[i][4] = cursor_pos + 1
 				if cursor_pos == string.len(str) then
 					animate_storage[i][4] = 1
