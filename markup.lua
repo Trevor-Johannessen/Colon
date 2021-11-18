@@ -20,7 +20,7 @@ app_length = 25 --  length of the applet window
 tickrate = 0.05 -- tick rate of the program (20 tps max)
 low_resource_mode = false -- an argument for markup, if computer is slow
 speaker = nil
-page_line = 1
+page_line = 0
 end_of_page = 1
 is_API = false
 
@@ -1507,7 +1507,7 @@ function animate()
 				break
 			
 			elseif event == "mouse_scroll" then
-				if event_id == -1 and page_line > 1 then
+				if event_id == -1 and page_line > 0 then
 					page_line = page_line - 1
 					redraw()
 					--message("End of page: " .. end_of_page .. "\t page_line: " .. page_line)
