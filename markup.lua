@@ -20,7 +20,7 @@ app_length = 25 --  length of the applet window
 tickrate = 0.05 -- tick rate of the program (20 tps max)
 low_resource_mode = false -- an argument for markup, if computer is slow
 speaker = nil
-page_line = 0
+page_line = 1
 end_of_page = 1
 is_API = false
 
@@ -407,7 +407,7 @@ function display(x, y, fileName)
 	--message("str = " .. string.sub(str, current_char, current_char+width-1 ))
 	
 	for i = 1, height do
-		if y+1 >= page_line and y+i <= page_line + screen_height then
+		if y+1 >= page_line and y+i < page_line + screen_height then
 		term.blit(string.rep(" ", width), string.rep("1", width), string.sub(str, current_char, current_char+width-1 ) )
 		current_char = current_char + width
 		term.setCursorPos(x, y+i-page_line+1)
@@ -1201,7 +1201,7 @@ function redraw()
 	local x, y = term.getCursorPos()
 	for i in pairs(printed_lines) do
 		--message("y = " .. printed_lines[i][2])
-		if printed_lines[i][2] >= page_line and printed_lines[i][2] < page_line + screen_height-1 then
+		if printed_lines[i][2] >= page_line and printed_lines[i][2] < page_line + screen_height then
 			--print("array = ", arr_to_string(printed_lines[i][3], 1))
 			--print_line(printed_lines[i][3], 1)
 			print_line({printed_lines[i][1], printed_lines[i][2]-page_line+1, printed_lines[i][3], printed_lines[i][4]})
@@ -1386,7 +1386,7 @@ function animate()
 				
 				if animate_storage[i][3] >= page_line and animate_storage[i][3] <= page_line + screen_height then
 				
-					term.setCursorPos(animate_storage[i][6], animate_storage[i][3] - page_line)
+					term.setCursorPos(animate_storage[i][6], animate_storage[i][3] - page_line+1)
 					--term.clearLine()
 					io.write(string.sub(animate_storage[i][2], cursor_pos+1) .. string.sub(animate_storage[i][2], 1, cursor_pos))
 					
