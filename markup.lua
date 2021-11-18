@@ -20,7 +20,7 @@ app_length = 25 --  length of the applet window
 tickrate = 0.05 -- tick rate of the program (20 tps max)
 low_resource_mode = false -- an argument for markup, if computer is slow
 speaker = nil
-page_line = 0
+page_line = 1
 end_of_page = 1
 is_API = false
 
@@ -1346,7 +1346,7 @@ function redraw()
 	local x, y = term.getCursorPos()
 	for i in pairs(printed_lines) do
 		--message("y = " .. printed_lines[i][2])
-		if printed_lines[i][2] >= page_line and printed_lines[i][2] < page_line + screen_height then
+		if printed_lines[i][2] >= page_line and printed_lines[i][2] < page_line + screen_height-1 then
 			--print("array = ", arr_to_string(printed_lines[i][3], 1))
 			--print_line(printed_lines[i][3], 1)
 			print_line({printed_lines[i][1], printed_lines[i][2]-page_line+1, printed_lines[i][3], printed_lines[i][4]})
@@ -1411,7 +1411,7 @@ end
 
 function check_cursor(x, y)
 	local str
-	local powersAPI.check_cursor(x,y)
+	local command = powersAPI.check_link(x,y)
 	--message("cursor at " .. x .. ", " .. y)
 	for i in pairs(buttons) do
 		if (x >= buttons[i][2] and x < buttons[i][9]) and (y >= buttons[i][3]-page_line+1 and y < buttons[i][10]-page_line+1) then
@@ -1529,13 +1529,10 @@ function animate()
 				local str = animate_storage[i][2]
 				local cursor_pos = animate_storage[i][4]
 				
-				if animate_storage[i][3] >= page_line and animate_storage[i][3] <= page_line + screen_height then
-				
-					term.setCursorPos(animate_storage[i][6], animate_storage[i][3] - page_line)
-					--term.clearLine()
-					io.write(string.sub(animate_storage[i][2], cursor_pos+1) .. string.sub(animate_storage[i][2], 1, cursor_pos))
-					
-				end
+				term.setCursorPos(animate_storage[i][6], animate_storage[i][3])
+				--term.clearLine()
+				io.write(string.sub(animate_storage[i][2], cursor_pos+1))
+				io.write(string.sub(animate_storage[i][2], 1, cursor_pos))
 				animate_storage[i][4] = cursor_pos + 1
 				if cursor_pos == string.len(str) then
 					animate_storage[i][4] = 1
@@ -1652,7 +1649,7 @@ function animate()
 				break
 			
 			elseif event == "mouse_scroll" then
-				if event_id == -1 and page_line > 0 then
+				if event_id == -1 and page_line > 1 then
 					page_line = page_line - 1
 					redraw()
 					--message("End of page: " .. end_of_page .. "\t page_line: " .. page_line)
