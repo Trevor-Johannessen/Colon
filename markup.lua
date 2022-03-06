@@ -1285,12 +1285,9 @@ function check_cursor(x, y)
 	--message("cursor at " .. x .. ", " .. y)
 	for i in pairs(buttons) do
 		if (x >= buttons[i][2] and x < buttons[i][9]) and (y >= buttons[i][3]-page_line+1 and y < buttons[i][10]-page_line+1) then
-			message("before check function")
 			print(buttons[i][5])
 			check_function(buttons[i][5])
-			message("past check function")
 			check_trigger(buttons[i])
-			message("past check trigger")
 			--check_function(buttons[i][4], {buttons[i][10]})
 		end
 	end
