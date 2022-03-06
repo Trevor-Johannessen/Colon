@@ -407,12 +407,27 @@ function display(x, y, fileName)
 	--message("str = " .. string.sub(str, current_char, current_char+width-1 ))
 	
 	for i = 1, height do
-		if y+1 >= page_line and y+i < page_line + screen_height then
+		if y+i >= page_line and y+i <= page_line + screen_height then
+		term.blit(string.rep(" ", width), string.rep("1", width), string.sub(str, current_char, current_char+width-1 ) )
+		term.setCursorPos(x, y+i-page_line+1)
+		end
+		current_char = current_char + width
+	end
+	
+	--[[
+	--There's a bug here where when scrolling the image unfolds like a banner, could be useful later. 
+	for i = 1, height do
+		if y+i+1 > page_line and y+i <= page_line + screen_height then
+		message("y+i+1 = " .. (y+i+1) .. ", page_line = " .. page_line)
 		term.blit(string.rep(" ", width), string.rep("1", width), string.sub(str, current_char, current_char+width-1 ) )
 		current_char = current_char + width
 		term.setCursorPos(x, y+i-page_line+1)
 		end
 	end
+	
+	]]--
+	
+	
 	file:close()
 	term.setCursorPos(firstx, firsty)
 end
