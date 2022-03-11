@@ -35,8 +35,8 @@ function create(args)
 	
 	
 	-- draws the button
-	function button:draw()
-		button.sprite:draw()
+	function button:draw(offset_x, offset_y)
+		button.sprite:draw(offset_x, offset_y)
 	end
 	
 	
