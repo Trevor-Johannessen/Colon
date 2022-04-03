@@ -1,43 +1,47 @@
 
-
-function create(args) 
---[[
-	args:
-		args.x
-		args.y
-		args.func
-		args.image
-		args.hoverImage
-]]--
+function create_button(args)
+	
 	local button = {}
 	
-	--default values
-	button.x = 0
-	button.y = 0
-	button.func = function () end -- default function here
-	button.locked = false
-	button.image = "" -- TODO: Make default image and add here
-	button.hoverImage = "" -- TODO: make default image 2 and add here
+	button.x = tonumber(args.x) or 0
+	button.y = tonumber(args.y) or 0
+	button.func = args.func
+	button.locked = args.locked or false
+	button.spriteFile = args.sprite
+	button.hoverSpriteFile = args.hoverSprite
 	button.showingHover = false
-	
-	if args.x ~= nil then button.x = args.x end
-	if args.y ~= nil then button.y = args.y end
-	if args.func ~= nil then button.func = args.func end
-	if args.locked ~= nil then button.locked = args.locked end
-	if args.image ~= nil then button.image = args.image end
-	if args.hoverImage ~= nil then button.hoverImage = args.hoverImage end
-	
-	button.sprite = sprite.create({image=button.image, x=button.x, y=button.y})
-	
-	if button.locked == nil then
-		button.locked = false
-	end
+	button.sprite = sprite.create_sprite(button.spriteFile, button.x, button.y)
+	button.dynamic = false
+	button.interacive = true
+	button.height = button.sprite.height
 	
 	
 	-- draws the button
-	function button:draw(offset_x, offset_y)
-		button.sprite:draw(offset_x, offset_y)
+	function button:draw(x_offset, y_offset)
+		button.sprite:draw(x_offset, y_offset)
 	end
+	
+	-- implements functionality of button
+	function button:update(obj_args)
+		
+		if button:check_hover(obj_args["mouse_x"], obj_args["mouse_y"]) then	-- if the mouse is hovering the button
+			if obj_args["event"] == "mouse_up" then -- if the mouse is clicking the button
+				button:click()
+				button.sprite:setImage(button.spriteFile)
+				button:draw()
+				button.showingHover = false
+			elseif not button.showingHover then -- if the mouse is hovering the button
+				button.sprite:setImage(button.hoverSpriteFile)
+				button:draw()
+				button.showingHover = true
+			end
+		elseif button.showingHover then
+			button.sprite:setImage(button.spriteFile)
+			button:draw()
+			button.showingHover = false
+		end
+	end
+	
 	
 	
 	-- checks if a set of coordinates overlaps the buttons sprite
@@ -70,25 +74,8 @@ function create(args)
 	end
 	
 	
-	-- implements functionality of button
-	function button:update(clickX, clickY, action)
-		if button:check_hover(clickX, clickY) then	-- if the mouse is hovering the button
-			if action == "mouse_up" then -- if the mouse is clicking the button
-				button:click()
-				button.sprite:setImage(button.image)
-				button:draw()
-				button.showingHover = false
-			elseif not button.showingHover then -- if the mouse is hovering the button
-				button.sprite:setImage(button.hoverImage)
-				button:draw()
-				button.showingHover = true
-			end
-		elseif button.showingHover then
-			button.sprite:setImage(button.image)
-			button:draw()
-			button.showingHover = false
-		end
-	end
+	
+	
 	
 	return button
 end

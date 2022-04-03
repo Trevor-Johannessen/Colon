@@ -4,14 +4,15 @@ function create(args)
     
     
     -- draws the current rendition of menu
-    function menu:draw()
-        old_pos = {term.getCursorPos()} -- save current cursor pos
-        old_text_color = term.getTextColor() -- save text color
-		old_background_color = term.getBackgroundColor() -- save background color
-		
+    function menu:draw(offset_x, offset_y)
+        local old_pos = {term.getCursorPos()} -- save current cursor pos
+        local old_text_color = term.getTextColor() -- save text color
+		local old_background_color = term.getBackgroundColor() -- save background color
+		offset_x = offset_x or 0 -- default parameter values
+		offset_y = offset_y or 0
 		
         term.setCursorPos(menu.x, menu.y)
-        y_pos = menu.y -- y position for as we print list 
+        local y_pos = menu.y -- y position for as we print list 
         
         if menu.title then -- add title if not nil
             io.write(menu.title)
@@ -20,7 +21,7 @@ function create(args)
         
         y_pos = menu.y -- y position for as we print list 
         for i = menu.top_visible, menu.top_visible+menu.length, 1 do -- for values in list from the current top visible to whats allowed given visible_length
-            term.setCursorPos(menu.x, y_pos) -- set cursor to 1 down
+            term.setCursorPos(menu.x - offset_x, y_pos-offset_y) -- set cursor to 1 down
             y_pos = y_pos + 1 -- increment y position
 			if i == menu.pos then -- if we are printing the selected line
 				term.setTextColor(menu.selected_text_color)
@@ -42,10 +43,10 @@ function create(args)
 		term.setTextColor(old_text_color)
 		term.setBackgroundColor(old_background_color)
     end
-    
+	
     
     -- given input from program, executes what the menu should do
-    function menu:handle(key_input, key_id)
+    function menu:update(obj_args)
     
         -- maybe add selectable option where the menu only becomes interactable when you click on it
         -- would need selectable boolean
@@ -56,9 +57,9 @@ function create(args)
     
         -- if arrow up call moveUp()
         -- if arrow down call moveDown()
-		if key_input == "key" and key_id == 265 then menu:moveUp() menu:draw() 
-		elseif key_input == "key" and key_id == 264 then menu:moveDown() menu:draw()
-		elseif key_input == "key_up" and key_id == 257 then menu:select() end
+		if obj_args["event"] == "key" and obj_args["event_id"] == 265 then menu:moveUp() menu:draw() 
+		elseif obj_args["event"] == "key" and obj_args["event_id"] == 264 then menu:moveDown() menu:draw()
+		elseif obj_args["event"] == "key_up" and obj_args["event_id"] == 257 then menu:select() end
     end
     
     
@@ -90,7 +91,7 @@ function create(args)
     
     
     function longest(list)
-		long = 0
+		local long = 0
 		for i=1, #list do
 			if long < string.len(list[i]) then long = string.len(list[i]) end	
 		end
@@ -101,17 +102,19 @@ function create(args)
 	menu.list = args.list or {}
 	menu.width = longest(menu.list)
     menu.pos = 1
-    menu.x = args.x or 0
-    menu.y = args.y or 0
+    menu.x = tonumber(args.x) or 0
+    menu.y = tonumber(args.y) or 0
     menu.text_color = args.text_color or colors.white
     menu.selected_text_color = args.selected_text_color or colors.black
     menu.background_color = args.background_color or colors.black
     menu.selected_background_color = args.selected_background_color or colors.white
     menu.top_visible = 1 -- index of the top most visible option
-    menu.length = args.length or 7 -- the number of options shown at any given time
+    menu.length = tonumber(args.length) or 7 -- the number of options shown at any given time
     menu.title = args.title
 	menu.func = args.func or function() print("Selected: " .. menu.list[menu.pos]) end
-	
+	menu.dynamic = false
+	menu.interactive = true
+	menu.height = menu.length+1
 	
     return menu
 end

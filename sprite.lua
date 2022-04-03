@@ -3,21 +3,17 @@
 function create(args)
 	
 	local sprite = {}
-	sprite.x = 0
-	sprite.y = 0
+	sprite.x = tonumber(args.x) or 0
+	sprite.y = tonumber(args.y) or 0
 	sprite.file = "" -- TODO: make default image and place here
+	sprite.dynamic = false
+	sprite.interative = false
 	
-	if args.image ~= nil then
-		sprite.file = args.image
-	end
-	if args.x ~= nil then
-		sprite.x = args.x
-	end
-	if args.y ~= nil then
-		sprite.y = args.y
+	if args.src ~= nil then
+		sprite.src = args.src
 	end
 	
-	local f = io.open(sprite.file)
+	local f = io.open(sprite.src)
 	sprite.height = tonumber(f:read())
 	sprite.width = tonumber(f:read())
 	sprite.img = f:read()
@@ -31,12 +27,12 @@ function create(args)
 	
 		local firstx, firsty = term.getCursorPos()
 		local current_char = 1
-		term.setCursorPos(sprite.x, sprite.y)
+		term.setCursorPos(sprite.x-offset_x, sprite.y+0-offset_y)
 		
 		for i = 1, sprite.height do
 			term.blit(string.rep(" ", sprite.width), string.rep("1", sprite.width), string.sub(sprite.img, current_char, current_char+sprite.width-1 ) )
 			current_char = current_char + sprite.width
-			term.setCursorPos(sprite.x+offset_x, sprite.y+i+offset_y)
+			term.setCursorPos(sprite.x-offset_x, sprite.y+i-offset_y)
 		end
 		
 		term.setCursorPos(firstx, firsty)
