@@ -10,11 +10,13 @@ Old Objects:
 	Text:
 		Add variable replacement to Text
 		Add custom text and background colors to text
+	Var:
+		Figure out how to implement string var substitution without breaking the program if Var isnt there.
 
 New Objects:
 Textbox - Object to allow text input and push to a function
 Gif - Object to implement sequential .pgi files
-Variable - holds ALL variables and has functions to implement them
+Variable - holds ALL variables and has functions to implement them (DONE)
 
 Functions:
 When - When a NAMED function is activated, do something
