@@ -83,14 +83,14 @@ end
 
 
 function initalize()
-	if not fs.exists("/markup_apis/") then error("apis folder does not exist, try reinstalling") end
+	if not fs.exists("/colon_apis/") then error("apis folder does not exist, try reinstalling") end
 	
-	apis = fs.list("/markup_apis/")
+	apis = fs.list("/colon_apis/")
 	
 	for i=1, table.getn(apis) do
 		--print("apis[".. i .. "] = ", apis[i])
 		if not fs.isDir(apis[i]) then
-			os.loadAPI("/markup_apis/" .. apis[i])
+			os.loadAPI("/colon_apis/" .. apis[i])
 		end
 	end
 end
