@@ -1,0 +1,35 @@
+Testing:
+Test menu to make sure it works with the new program
+Test printable text in button and menu
+
+Old Objects:
+	General:
+		Replace standard text printing in objects with new Text Objects
+	Menu:
+		Update Menu to allow for it to be selected
+	Text:
+		Add variable replacement to Text
+		Add custom text and background colors to text
+
+New Objects:
+Textbox - Object to allow text input and push to a function
+Gif - Object to implement sequential .pgi files
+Variable - holds ALL variables and has functions to implement them
+
+Functions:
+When - When a NAMED function is activated, do something
+Run - Run a command when this line is read
+Api - Loads an API
+UnloadAPI - Unloads an API
+Background - changes background color
+Text - changes default text color
+
+Utilities:
+Debug mode - version of colon that outputs to rednet to be read by a reciever
+Debug reciever - program to take input from debug colon and provide a console
+
+Instruction:
+Write tutorial on how to write in language
+Write entry on all objects and properties
+Write tutorial on how to implement and expand the interpreter
+
