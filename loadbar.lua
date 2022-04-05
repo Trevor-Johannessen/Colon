@@ -12,6 +12,9 @@ function create(args)
     loadbar.background = args.background or "f" -- background color of loadbar
     loadbar.dynamic = false
 	loadbar.interactive = false
+	loadbar.name = args.name
+	loadbar.type = "loadbar"
+	
 	if text == "" then loadbar.height = 1 else loadbar.height = 2 end
     
     function loadbar:draw(offset_x, offset_y)

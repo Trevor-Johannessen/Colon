@@ -15,6 +15,8 @@ function create(args)
 	scroll.dynamic = true
 	scroll.interactive = false
 	scroll.height = 1
+	scroll.name = args.name
+	scroll.type = "scroll"
 	
 	if args.direction ~= nil then 
 		if string.lower(args.direction) == "right" then

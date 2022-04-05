@@ -8,6 +8,8 @@ function create(args)
 	text.dynamic = false
 	text.interactive = false
 	text.height = 1
+	text.name = args.name
+	text.type = "text"
 	
 	
 	function text:draw(offset_x, offset_y)

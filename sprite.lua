@@ -8,6 +8,8 @@ function create(args)
 	sprite.file = "" -- TODO: make default image and place here
 	sprite.dynamic = false
 	sprite.interative = false
+	sprite.name = args.name
+	sprite.type = "sprite"
 	
 	if args.src ~= nil then
 		sprite.src = args.src

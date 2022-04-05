@@ -115,6 +115,8 @@ function create(args)
 	menu.dynamic = false
 	menu.interactive = true
 	menu.height = menu.length+1
+	menu.name = args.name
+	menu.type = "menu"
 	
     return menu
 end

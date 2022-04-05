@@ -27,7 +27,6 @@ function main()
 		end
 	end
 	
-	
 	redraw()
 	interaction_loop()
 end
@@ -62,7 +61,7 @@ function parse(text, line_num)
 	
 	local obj = loadstring("return " .. object_type .. ".create")
 	
-	
+	print("obj() = ", obj())
 	return obj()(args)
 end
 
@@ -104,8 +103,7 @@ function interaction_loop()
 	local event, event_id, x, y
 	local obj_args = {}
 	
-	obj_args["x_offset"] = x_offset
-	obj_args["y_offset"] = y_offset
+	
 	obj_args["screen_height"] = screen_height
 	
 	
@@ -126,8 +124,11 @@ function interaction_loop()
 			obj_args["event_id"] = event_id
 			obj_args["mouse_x"] = x
 			obj_args["mouse_y"] = y
+			obj_args["x_offset"] = x_offset
+			obj_args["y_offset"] = y_offset
 			
 			-- give input to all objects that request it
+			message("x = " .. tostring(x) .. "\ty = " .. tostring(y))
 			for index, data in ipairs(objects) do
 				if data.interactive then data:update(obj_args) end
 			end
