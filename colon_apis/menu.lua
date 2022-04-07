@@ -59,7 +59,7 @@ function create(args)
         -- if arrow down call moveDown()
 		if obj_args["event"] == "key" and obj_args["event_id"] == 265 then menu:moveUp() menu:draw() 
 		elseif obj_args["event"] == "key" and obj_args["event_id"] == 264 then menu:moveDown() menu:draw()
-		elseif obj_args["event"] == "key_up" and obj_args["event_id"] == 257 then menu:select() end
+		elseif obj_args["event"] == "key_up" and obj_args["event_id"] == 257 then menu:select() return 1 end -- select and return true
     end
     
     

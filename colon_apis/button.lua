@@ -38,7 +38,7 @@ function create(args)
 					button.showingHover = false
 				end
 				button:draw(obj_args["x_offset"], obj_args["y_offset"])
-				
+				return true -- button has been clicked
 			elseif not button.showingHover and obj_args["event"] == "mouse_click" then -- if the mouse is hovering the button
 				button.sprite:setImage(button.hoverSpriteFile)
 				button:draw(obj_args["x_offset"], obj_args["y_offset"])
@@ -49,6 +49,7 @@ function create(args)
 			button:draw(obj_args["x_offset"], obj_args["y_offset"])
 			button.showingHover = false
 		end
+		return false -- not interacted with
 	end
 	
 	
