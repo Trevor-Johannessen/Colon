@@ -1,11 +1,11 @@
 args = {...}
 objects = {} -- storage for all objects
+when = {}
 screen_width, screen_height = term.getSize() -- dimensions of screen
 x_offset = 0
 y_offset = 0
 end_of_page = 0
 background = colors.black
-
 
 -- open file and lex lines into tables
 
@@ -17,14 +17,9 @@ function main()
 	local text = get_file_iterator()
 
 	-- parse lines to create objects and insert them into the objects list
-	line_num = 1
+	
 	for str in text do
-		local new_obj = parse(str, line_num)
-		if new_obj ~= -1 then
-			if new_obj.y+new_obj.height > end_of_page then end_of_page = new_obj.y+new_obj.height end -- adjust total page height
-			table.insert(objects, new_obj)
-			line_num = line_num + 1
-		end
+		interpret_line(str)
 	end
 	
 	redraw()
@@ -35,6 +30,14 @@ end
 function get_file_iterator()
 	if not fs.exists(args[1]) then error("file not found") end -- if file doesn't exist, error
 	return io.lines(args[1])
+end
+
+function interpret_line(str)
+	local new_obj = parse(str, line_num)
+	if new_obj ~= -1 then
+		if new_obj.y+new_obj.height > end_of_page then end_of_page = new_obj.y+new_obj.height end -- adjust total page height
+		table.insert(objects, new_obj)
+	end
 end
 
 
@@ -59,10 +62,19 @@ function parse(text, line_num)
 			args[string.sub(term, 0, equals_pos-1)] = string.sub(term, equals_pos+1) -- args[var_name] = var_value
 	end
 	
-	local obj = loadstring("return " .. object_type .. ".create")
-	
-	print("obj() = ", obj())
-	return obj()(args)
+	-- if when command
+	if object_type == "when" then 
+		construct_when(args)
+		return -1
+		
+		
+	-- if regular object
+	else
+		local obj = loadstring("return " .. object_type .. ".create")
+		
+		print("obj() = ", obj())
+		return obj()(args)
+	end
 end
 
 
@@ -96,6 +108,10 @@ function initalize()
 end
 
 
+function construct_when(args)
+	when[args.name] = args.command
+end
+
  -- INTERPRETING FUNCTIONS
  
 function interaction_loop()
@@ -104,16 +120,12 @@ function interaction_loop()
 	local obj_args = {}
 	
 	
-	obj_args["screen_height"] = screen_height
+	
 	
 	
 	while true do
 		obj_args["tick"] = tick
 		
-		-- update all dynamic objects
-		for index, data in ipairs(objects) do
-			if data.dynamic then data:update(obj_args) end
-		end
 		
 		-- update interactive elements
 		local timer = os.startTimer(0.05)
@@ -126,11 +138,13 @@ function interaction_loop()
 			obj_args["mouse_y"] = y
 			obj_args["x_offset"] = x_offset
 			obj_args["y_offset"] = y_offset
+			obj_args["screen_height"] = screen_height
 			
 			-- give input to all objects that request it
 			message("x = " .. tostring(x) .. "\ty = " .. tostring(y))
 			for index, data in ipairs(objects) do
-				if data.interactive then data:update(obj_args) end
+				if data.interactive and data:update(obj_args) then check_when_statement(data.name) end -- the update function for interactive objects should return a boolean for true if triggered, false it not
+				if data.dynamic then data:update(obj_args) end
 			end
 			
 			-- handels scrolling of page
@@ -148,6 +162,9 @@ function interaction_loop()
 			
 			if event == "timer" then break end
 		end
+		
+		
+		
 		
 		tick = tick + 1
 	end
@@ -174,6 +191,14 @@ function fill_screen()
 	end
 	term.setCursorPos(x, y)
 	term.setBackgroundColor(keep_background_color)
+end
+
+check_when_statements(name)
+	for k, v in range(when) do
+		if k == name then
+			interpret_line(v)
+		end
+	end
 end
 
 
