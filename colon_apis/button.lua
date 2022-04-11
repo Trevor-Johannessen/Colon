@@ -6,6 +6,7 @@ function create(args)
 	button.y = tonumber(args.y) or 0
 	button.func = args.func or loadstring("term.setCursorPos(1,1) print(\"hello world\")")
 	button.locked = args.locked or false
+	button.singleClick = args.singleClick or false
 	button.spriteFile = args.sprite
 	button.hoverSpriteFile = args.hoverSprite
 	button.showingHover = false
@@ -91,6 +92,7 @@ function create(args)
 	
 	-- applies the buttons function if not locked
 	function button:click()
+		if button.singleClick then button.locked = true end
 		button.func()
 	end
 	
