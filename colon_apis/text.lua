@@ -1,6 +1,7 @@
 function create(args)
 	
-	text = {}
+	local text = {}
+	
 	text.x = tonumber(args.x) or 0 -- x coordinate of text
 	text.y = tonumber(args.y) or 0 -- y coordinate of text
 	text.str = args.text or "default text"

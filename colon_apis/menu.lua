@@ -1,6 +1,6 @@
 function create(args)
     
-    menu = {}
+    local menu = {}
     
     
     -- draws the current rendition of menu

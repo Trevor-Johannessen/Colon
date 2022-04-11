@@ -1,4 +1,3 @@
-
 function create(args)
 	
 	local button = {}

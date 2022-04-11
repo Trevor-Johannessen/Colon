@@ -1,5 +1,3 @@
-
-
 function create(args)
 	
 	local scroll = {}

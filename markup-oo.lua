@@ -193,7 +193,7 @@ function fill_screen()
 	term.setBackgroundColor(keep_background_color)
 end
 
-check_when_statements(name)
+function check_when_statements(name)
 	for k, v in range(when) do
 		if k == name then
 			interpret_line(v)
