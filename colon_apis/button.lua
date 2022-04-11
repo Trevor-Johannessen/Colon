@@ -31,14 +31,13 @@ function create(args)
 	function button:update(obj_args)
 		if not obj_args["mouse_x"] or not obj_args["mouse_y"] or button.locked then return end
 		if button:check_hover(obj_args["mouse_x"], obj_args["mouse_y"], obj_args["y_offset"]) then	-- if the mouse is hovering the button
-			if obj_args["event"] == "mouse_up" then -- if the mouse is clicking the button
-				button:click()
+			if obj_args["event"] == "mouse_up" then -- if the mouse is clicking the button	
 				if button.showingHover then
 					button.sprite:setImage(button.spriteFile)
 					button.showingHover = false
 				end
 				button:draw(obj_args["x_offset"], obj_args["y_offset"])
-				return true -- button has been clicked
+				return button:click() -- button has been clicked
 			elseif not button.showingHover and obj_args["event"] == "mouse_click" then -- if the mouse is hovering the button
 				button.sprite:setImage(button.hoverSpriteFile)
 				button:draw(obj_args["x_offset"], obj_args["y_offset"])
@@ -92,8 +91,12 @@ function create(args)
 	
 	-- applies the buttons function if not locked
 	function button:click()
-		if button.singleClick then button.locked = true end
-		button.func()
+		if not button.locked then 
+			if button.singleClick then button.locked = true end
+			button.func()
+			return true
+		end
+		return false
 	end
 	
 	

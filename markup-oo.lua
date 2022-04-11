@@ -33,7 +33,7 @@ function get_file_iterator()
 end
 
 function interpret_line(str)
-	local new_obj = parse(str, line_num)
+	local new_obj = parse(str)
 	if new_obj ~= -1 then
 		if new_obj.y+new_obj.height > end_of_page then end_of_page = new_obj.y+new_obj.height end -- adjust total page height
 		table.insert(objects, new_obj)
@@ -42,28 +42,62 @@ end
 
 
 function parse(text, line_num)
+	
+	--os.sleep(1)
 	-- find what object type line is
 	local colon_pos = string.find(text, ":") -- position of colon used to mark a command
 	if not colon_pos then return -1 end -- if a colon is missing then ignore
 	local object_type = string.sub(text, 1, colon_pos-1)
+	
+	--[[
+	if object_type == "when" then
+		print("incoming text = ", text)
+	end
+	]]--
+	
 	text = string.sub(text, colon_pos+1)
 	
 	
 	-- create arguments in table
 	local args = {}
-	text = trim_input(text)	
+	
+	
+	
+	
+	text = trim_input(text)
+	
+	--[[
+	if object_type == "when" then
+		print("trim text = ", text)
+	end
+	]]--
+	
 	
 	text = string.gmatch(text, "([^,]*),*")
+	
+	--[[
+	if object_type == "when" then
+		print(text)
+	end
+	]]--
 	
 	-- turn arguments into parameters for the objects
 	for term in text do
 			--print("term = ", term)
 			local equals_pos = string.find(term, "=")
-			args[string.sub(term, 0, equals_pos-1)] = string.sub(term, equals_pos+1) -- args[var_name] = var_value
+			args[string.sub(term, 0, equals_pos-1)] = string.gsub(string.sub(term, equals_pos+1), string.char(9), ",") -- args[var_name] = var_value
 	end
 	
+	
+	
+	
 	-- if when command
-	if object_type == "when" then 
+	if object_type == "when" then
+		
+		for k, v in next, args do
+			print(k .. ": " .. v)
+		end
+		--os.sleep(1000)
 		construct_when(args)
 		return -1
 		
@@ -71,8 +105,6 @@ function parse(text, line_num)
 	-- if regular object
 	else
 		local obj = loadstring("return " .. object_type .. ".create")
-		
-		print("obj() = ", obj())
 		return obj()(args)
 	end
 end
@@ -89,7 +121,6 @@ function trim_input(text)
 		elseif string.sub(text, i, i) == " " and not in_quotes then text = string.sub(text, 0, i-1) .. string.sub(text, i+1) -- remove spaces
 		elseif string.sub(text, i, i) == "," and in_quotes then text = string.sub(text, 0, i-1) .. string.char(9) .. string.sub(text, i+1) end -- remove commas
 	end
-	
 	return text
 end
 
@@ -109,7 +140,9 @@ end
 
 
 function construct_when(args)
-	when[args.name] = args.command
+	--print("construct = ", string.sub(args.command, 2, -2))
+	--os.sleep(2)
+	when[args.name] = string.sub(args.command, 2, -2)
 end
 
  -- INTERPRETING FUNCTIONS
@@ -141,9 +174,9 @@ function interaction_loop()
 			obj_args["screen_height"] = screen_height
 			
 			-- give input to all objects that request it
-			message("x = " .. tostring(x) .. "\ty = " .. tostring(y))
+			--message("x = " .. tostring(x) .. "\ty = " .. tostring(y))
 			for index, data in ipairs(objects) do
-				if data.interactive and data:update(obj_args) then check_when_statement(data.name) end -- the update function for interactive objects should return a boolean for true if triggered, false it not
+				if data.interactive and data:update(obj_args) then check_when_statements(data.name) end -- the update function for interactive objects should return a boolean for true if triggered, false it not
 				if data.dynamic then data:update(obj_args) end
 			end
 			
@@ -175,7 +208,9 @@ function redraw()
 	
 	fill_screen()
 	
-	for index, data in ipairs(objects) do
+	for index, data in pairs(objects) do
+		term.setCursorPos(1, 9+index)
+		--print("printing: ", data.type)	
 		data:draw(x_offset, y_offset, screen_height)
 	end
 end
@@ -194,9 +229,11 @@ function fill_screen()
 end
 
 function check_when_statements(name)
-	for k, v in range(when) do
+	for k, v in next, when do
 		if k == name then
-			interpret_line(v)
+			term.clear()
+			interpret_line(string.gsub(v, "\\", ""))
+			redraw()
 		end
 	end
 end
