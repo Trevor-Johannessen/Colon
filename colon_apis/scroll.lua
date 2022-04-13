@@ -27,11 +27,20 @@ function create(args)
 	
 	function scroll:draw(offset_x, offset_y, screen_height, tick)
 		tick = tick or scroll.speed
+		
 		if tick % scroll.speed == 0 and scroll.y >= offset_y and scroll.y <= screen_height+offset_y then
+			
+			local save_text = term.getTextColor()
+			local save_background = term.getBackgroundColor()
+			
 			offset_x = offset_x or 0 -- default parameter x = 0
 			offset_y = offset_y or 0 -- default parameter y = 0
 			term.setCursorPos(scroll.x - offset_x, scroll.y - offset_y)
+			term.setTextColor(text.color)
+			term.setBackgroundColor(text.background)
 			io.write(string.sub(scroll.text, scroll.pointer) .. string.sub(scroll.text, 1, scroll.pointer))
+			term.setTextColor(save_text)
+			term.setBackgroundColor(save_background)
 		end
 	end
 	
