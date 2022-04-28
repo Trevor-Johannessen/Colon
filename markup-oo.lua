@@ -196,9 +196,6 @@ function interaction_loop()
 			if event == "timer" then break end
 		end
 		
-		
-		
-		
 		tick = tick + 1
 	end
 end

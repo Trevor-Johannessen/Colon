@@ -53,50 +53,6 @@ function create(args)
 		return output
 	end
 	
-	--[[
-	--These should not have their own function. For readability use rotate THEN draw.
-	function sprite:draw90(input)
-	
-		local str = input
-		if str == nil then
-			str = sprite.img
-		end
-		
-		
-		
-		
-		local final_str = ""
-		
-		for i = 1, sprite.width do
-			final_str = final_str .. grab(str, i)
-		end
-		
-		
-		term.setCursorPos(sprite.x, sprite.y)
-		local current_char = 1
-		
-		for i = 1, sprite.width do
-			term.blit(string.rep(" ", sprite.height), string.rep("1", sprite.height), string.sub(final_str, current_char, current_char+sprite.height-1 ) )
-			current_char = current_char + sprite.width
-			term.setCursorPos(sprite.x, sprite.y+i)
-		end
-		
-		
-		
-	end
-	
-	
-	function sprite:draw180()
-		sprite:draw(string.reverse(sprite.img))
-	end
-	
-	
-	function sprite:draw270()
-		sprite:draw90(string.reverse(sprite.img))
-	end
-	]]--
-
-	
 	function sprite:rotate270()
 		
 		local final_str = ""
