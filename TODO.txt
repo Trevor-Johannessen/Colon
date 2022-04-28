@@ -17,6 +17,11 @@ New Objects:
 Textbox - Object to allow text input and push to a function
 Gif - Object to implement sequential .pgi files
 Variable - holds ALL variables and has functions to implement them (DONE)
+NavBar - Navigation bar stuck to the top of the screen
+	Navbar should be a collection of objects with the "sticky" property.
+	It will ALWAYS include a sticky rectangle that is the width of the screen
+Div - Not an actual object but any properties applied to div will affect every object inside div
+
 
 Functions:
 When - When a NAMED function is activated, do something
@@ -25,6 +30,12 @@ Api - Loads an API
 UnloadAPI - Unloads an API
 Background - changes background color
 Text - changes default text color
+NewPage - Goes to a new page by running the initalization function on a new file
+NewTab - creates a new tab and runs colon on a file
+
+Properties:
+Sticky - coordinates independent of screen position
+
 
 Utilities:
 Debug mode - version of colon that outputs to rednet to be read by a reciever
