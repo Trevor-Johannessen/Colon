@@ -1,6 +1,8 @@
 args = {...}
 objects = {} -- storage for all objects
 when = {}
+tags = {}
+object_types = {}
 screen_width, screen_height = term.getSize() -- dimensions of screen
 x_offset = 0
 y_offset = 0
@@ -42,45 +44,40 @@ end
 
 
 function parse(text, line_num)
-	
+	local found_tag
 	--os.sleep(1)
 	-- find what object type line is
 	local colon_pos = string.find(text, ":") -- position of colon used to mark a command
 	if not colon_pos then return -1 end -- if a colon is missing then ignore
-	local object_type = string.sub(text, 1, colon_pos-1)
 	
-	--[[
-	if object_type == "when" then
-		print("incoming text = ", text)
+	
+	-- find object_type
+	local object_type = string.sub(text, 1, colon_pos-1)
+	for tag in tags do
+		if string.sub(object_type, 1, len(tag)-1) == tag then
+			if object_types[string.sub(object_type, len(tag))] then
+				object_type = object_types[string.sub(object_type, len(tag))]
+				found_tag = tag
+				break
+			end
+			
+		end
+		
+		
 	end
-	]]--
+	
+	
 	
 	text = string.sub(text, colon_pos+1)
-	
 	
 	-- create arguments in table
 	local args = {}
 	
-	
-	
-	
 	text = trim_input(text)
 	
-	--[[
-	if object_type == "when" then
-		print("trim text = ", text)
-	end
-	]]--
-	
-	
+
 	text = string.gmatch(text, "([^,]*),*")
-	
-	--[[
-	if object_type == "when" then
-		print(text)
-	end
-	]]--
-	
+
 	-- turn arguments into parameters for the objects
 	for term in text do
 			--print("term = ", term)
@@ -103,8 +100,17 @@ function parse(text, line_num)
 		
 		
 	-- if regular object
+	elseif object_type == "tag" then
+		tags[tag] = args
+		return -1
 	else
 		local obj = loadstring("return " .. object_type .. ".create")
+		if found_tag then
+			for k, v in tags[found_tag] do 
+				-- add all tag attributes to object here
+				obj[k] = v
+			end
+		end
 		return obj()(args)
 	end
 end
@@ -134,6 +140,7 @@ function initalize()
 		--print("apis[".. i .. "] = ", apis[i])
 		if not fs.isDir(apis[i]) then
 			os.loadAPI("/colon_apis/" .. apis[i])
+			object_types[string.sub(apis[i], 1, -5)] = true
 		end
 	end
 end

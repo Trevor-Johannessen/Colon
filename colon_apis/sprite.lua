@@ -106,8 +106,6 @@ function create(args)
 	end
 	
 	
-	
-	
 	return sprite
 end
 
