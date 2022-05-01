@@ -116,14 +116,16 @@ function parse(text, line_num)
 		term.setTextColor(color)
 		return -1
 	else
-		local obj = loadstring("return " .. object_type .. ".create")()(args)
 		if found_tag then
 			for k, v in next, tags[found_tag] do 
 				-- add all tag attributes to object here
-				obj[k] = v
+				print("arg[", k, "] = ", arg[k])
+				if args[k] == nil then
+					args[k] = v
+				end
 			end
 		end
-		print("type = ", obj.type)
+		local obj = loadstring("return " .. object_type .. ".create")()(args)
 		obj:corrections()
 		return obj
 	end

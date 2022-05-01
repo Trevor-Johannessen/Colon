@@ -25,11 +25,19 @@ function create(args)
 	
 	-- draws the button
 	function button:draw(x_offset, y_offset)
+		if button.sticky then 
+			x_offset = 0
+			y_offset = 0 
+		end
 		button.sprite:draw(x_offset, y_offset)
 	end
 	
 	-- implements functionality of button
 	function button:update(obj_args)
+		if button.sticky then 
+			obj_args["x_offset"] = 0
+			obj_args["y_offset"] = 0 
+		end
 		if not obj_args["mouse_x"] or not obj_args["mouse_y"] or button.locked then return end
 		if button:check_hover(obj_args["mouse_x"], obj_args["mouse_y"], obj_args["y_offset"]) then	-- if the mouse is hovering the button
 			if obj_args["event"] == "mouse_up" then -- if the mouse is clicking the button	
