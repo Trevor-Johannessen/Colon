@@ -13,6 +13,8 @@ function create(args)
 		
 	end
 	
+	function triangle:corrections()
+	end
 	
 	return shape
 end

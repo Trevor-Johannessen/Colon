@@ -98,6 +98,10 @@ function create(args)
 		return long
 	end
     
+	function menu:corrections()
+	end
+	
+	
 	
 	menu.list = args.list or {}
 	menu.width = longest(menu.list)

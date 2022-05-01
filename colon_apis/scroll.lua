@@ -15,6 +15,8 @@ function create(args)
 	scroll.height = 1
 	scroll.name = args.name
 	scroll.type = "scroll"
+	scroll.color = args.color or colors.white
+	scroll.background = args.background or colors.black
 	
 	if args.direction ~= nil then 
 		if string.lower(args.direction) == "right" then
@@ -36,8 +38,8 @@ function create(args)
 			offset_x = offset_x or 0 -- default parameter x = 0
 			offset_y = offset_y or 0 -- default parameter y = 0
 			term.setCursorPos(scroll.x - offset_x, scroll.y - offset_y)
-			term.setTextColor(text.color)
-			term.setBackgroundColor(text.background)
+			term.setTextColor(scroll.color)
+			term.setBackgroundColor(scroll.background)
 			io.write(string.sub(scroll.text, scroll.pointer) .. string.sub(scroll.text, 1, scroll.pointer))
 			term.setTextColor(save_text)
 			term.setBackgroundColor(save_background)
@@ -58,6 +60,17 @@ function create(args)
 		scroll.direction = scroll.direction * -1
 	end
 	
+	
+	-- correction to clean inputs
+	function scroll:corrections()
+		-- quick color format correction
+		if type(scroll.color) == "string" then
+			scroll.color = colors[scroll.color]
+		end 
+		if type(scroll.background) == "string" then
+			scroll.background = colors[scroll.background]
+		end 
+	end
 	
 	
 	return scroll

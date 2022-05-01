@@ -4,7 +4,7 @@ function create(args)
 	
 	text.x = tonumber(args.x) or 0 -- x coordinate of text
 	text.y = tonumber(args.y) or 0 -- y coordinate of text
-	text.str = args.text or "default text"
+	text.str = string.sub(args.text, 2, -2) or "default text"
 	text.visible = args.visible or true
 	text.dynamic = false
 	text.interactive = false
@@ -12,10 +12,11 @@ function create(args)
 	text.name = args.name
 	text.type = "text"
 	text.color = args.color or term.getTextColor()
-	text.background = args.background or term.getBackgroundColor()
+	text.background = colors[args.background] or term.getBackgroundColor()
 	
 	
 	function text:draw(offset_x, offset_y)
+	
 		local save_cursor = {term.getCursorPos()}
 		local save_text = term.getTextColor()
 		local save_background = term.getBackgroundColor()
@@ -29,6 +30,17 @@ function create(args)
 		term.setCursorPos(save_cursor[1], save_cursor[2])
 		term.setTextColor(save_text)
 		term.setBackgroundColor(save_background)
+	end
+	
+	-- correction to clean inputs
+	function text:corrections()
+		-- quick color format correction
+		if type(text.color) == "string" then
+			text.color = colors[text.color]
+		end 
+		if type(text.background) == "string" then
+			text.background = colors[text.background]
+		end 
 	end
 	
 	return text

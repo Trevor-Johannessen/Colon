@@ -63,6 +63,19 @@ function create(args)
 		loadbar.progress = 0
 	end
 	
+	-- correction to clean inputs
+	function loadbar:corrections()
+		-- quick color format correction
+		if type(loadbar.symbol_color) == "string" then
+			loadbar.symbol_color = colors[loadbar.symbol_color]
+		end 
+		if type(loadbar.background) == "string" then
+			loadbar.background = colors[loadbar.background]
+		end 
+	end
+	
+	
+	
     
     return loadbar
     

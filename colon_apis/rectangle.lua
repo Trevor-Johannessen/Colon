@@ -23,5 +23,8 @@ function create(args)
 		term.setBackgroundColor(save_background)
 	end
 	
+	function rectangle:corrections()
+	end
+	
 	return shape
 end

@@ -105,6 +105,8 @@ function create(args)
 		io.close(f)
 	end
 	
+	function sprite:corrections()
+	end
 	
 	return sprite
 end

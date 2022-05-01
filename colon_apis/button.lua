@@ -101,7 +101,8 @@ function create(args)
 	
 	
 	
-	
+	function button:corrections()
+	end
 	
 	return button
 end

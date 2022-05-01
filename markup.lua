@@ -53,10 +53,13 @@ function parse(text, line_num)
 	
 	-- find object_type
 	local object_type = string.sub(text, 1, colon_pos-1)
-	for tag in tags do
-		if string.sub(object_type, 1, len(tag)-1) == tag then
-			if object_types[string.sub(object_type, len(tag))] then
-				object_type = object_types[string.sub(object_type, len(tag))]
+	for tag in next, tags do
+		--print("object_type = ", object_type)
+		--print("trimmed type", string.sub(object_type, 2))
+		--print("tag = ", string.sub(object_type, 1, 1))
+		if string.sub(object_type, 1, 1) == tag then
+			if object_types[string.sub(object_type, 2)] then
+				object_type = string.sub(object_type, 2)
 				found_tag = tag
 				break
 			end
@@ -65,8 +68,6 @@ function parse(text, line_num)
 		
 		
 	end
-	
-	
 	
 	text = string.sub(text, colon_pos+1)
 	
@@ -83,8 +84,9 @@ function parse(text, line_num)
 			--print("term = ", term)
 			local equals_pos = string.find(term, "=")
 			args[string.sub(term, 0, equals_pos-1)] = string.gsub(string.sub(term, equals_pos+1), string.char(9), ",") -- args[var_name] = var_value
+			--print("arg = ", string.sub(term, 0, equals_pos-1))
+			--print("tag = ", args[string.sub(term, 0, equals_pos-1)])
 	end
-	
 	
 	
 	
@@ -101,17 +103,20 @@ function parse(text, line_num)
 		
 	-- if regular object
 	elseif object_type == "tag" then
-		tags[tag] = args
+		print("args[tag] = ", args["tag"])
+		tags[args["tag"]] = args
 		return -1
 	else
-		local obj = loadstring("return " .. object_type .. ".create")
+		local obj = loadstring("return " .. object_type .. ".create")()(args)
 		if found_tag then
-			for k, v in tags[found_tag] do 
+			for k, v in next, tags[found_tag] do 
 				-- add all tag attributes to object here
 				obj[k] = v
 			end
 		end
-		return obj()(args)
+		print("type = ", obj.type)
+		obj:corrections()
+		return obj
 	end
 end
 

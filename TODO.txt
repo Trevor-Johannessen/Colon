@@ -12,7 +12,9 @@ Old Objects:
 		Add custom text and background colors to text
 	Var:
 		Figure out how to implement string var substitution without breaking the program if Var isnt there.
-
+	Button:
+		add direct execution of commands on activation (remove need for when statement)
+		
 New Objects:
 Textbox - Object to allow text input and push to a function
 Gif - Object to implement sequential .pgi files
