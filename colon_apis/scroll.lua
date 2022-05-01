@@ -15,8 +15,8 @@ function create(args)
 	scroll.height = 1
 	scroll.name = args.name
 	scroll.type = "scroll"
-	scroll.color = args.color or colors.white
-	scroll.background = args.background or colors.black
+	scroll.color = args.color or term.getTextColor()
+	scroll.background = args.background or term.getBackgroundColor()
 	scroll.sticky = args.sticky or false
 	
 	if args.direction ~= nil then 

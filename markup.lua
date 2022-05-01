@@ -8,6 +8,7 @@ x_offset = 0
 y_offset = 0
 end_of_page = 0
 background = colors.black
+color = colors.white
 
 -- open file and lex lines into tables
 
@@ -105,6 +106,14 @@ function parse(text, line_num)
 	elseif object_type == "tag" then
 		print("args[tag] = ", args["tag"])
 		tags[args["tag"]] = args
+		return -1
+	elseif object_type == "background" then
+		background = colors[args["color"]]
+		term.setBackgroundColor(background)
+		return -1
+	elseif object_type == "color" then
+		color = colors[args["color"]]
+		term.setTextColor(color)
 		return -1
 	else
 		local obj = loadstring("return " .. object_type .. ".create")()(args)
