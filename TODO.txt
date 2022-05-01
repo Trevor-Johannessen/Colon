@@ -26,9 +26,7 @@ NavBar - Navigation bar stuck to the top of the screen
 Functions:
 Run - Run a command when this line is read
 Api - Loads an API
-UnloadAPI - Unloads an API
-Background - changes background color
-Text - changes default text color
+UnloadAPI - Unloads an AP
 NewPage - Goes to a new page by running the initalization function on a new file
 NewTab - creates a new tab and runs colon on a file
 
