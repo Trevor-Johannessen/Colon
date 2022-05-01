@@ -4,12 +4,12 @@ function create(args)
     
     
     -- draws the current rendition of menu
-    function menu:draw(offset_x, offset_y)
+    function menu:draw(x_offset, y_offset)
         local old_pos = {term.getCursorPos()} -- save current cursor pos
         local old_text_color = term.getTextColor() -- save text color
 		local old_background_color = term.getBackgroundColor() -- save background color
-		offset_x = offset_x or 0 -- default parameter values
-		offset_y = offset_y or 0
+		x_offset = x_offset or 0 -- default parameter values
+		y_offset = y_offset or 0
 		
         term.setCursorPos(menu.x, menu.y)
         local y_pos = menu.y -- y position for as we print list 
@@ -21,7 +21,7 @@ function create(args)
         
         y_pos = menu.y -- y position for as we print list 
         for i = menu.top_visible, menu.top_visible+menu.length, 1 do -- for values in list from the current top visible to whats allowed given visible_length
-            term.setCursorPos(menu.x - offset_x, y_pos-offset_y) -- set cursor to 1 down
+            term.setCursorPos(menu.x - x_offset, y_pos-y_offset) -- set cursor to 1 down
             y_pos = y_pos + 1 -- increment y position
 			if i == menu.pos then -- if we are printing the selected line
 				term.setTextColor(menu.selected_text_color)

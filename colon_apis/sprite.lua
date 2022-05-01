@@ -8,6 +8,8 @@ function create(args)
 	sprite.interative = false
 	sprite.name = args.name
 	sprite.type = "sprite"
+	sprite.sticky = args.sticky or false
+	
 	
 	if args.src ~= nil then
 		sprite.src = args.src
@@ -21,18 +23,23 @@ function create(args)
 	
 	
 	
-	function sprite:draw(offset_x, offset_y)
-		offset_x = offset_x or 0 -- default parameter values
-		offset_y = offset_y or 0
+	function sprite:draw(x_offset, y_offset)
+		x_offset = x_offset or 0 -- default parameter values
+		y_offset = y_offset or 0
 	
 		local firstx, firsty = term.getCursorPos()
 		local current_char = 1
-		term.setCursorPos(sprite.x-offset_x, sprite.y+0-offset_y)
+		term.setCursorPos(sprite.x-x_offset, sprite.y+0-y_offset)
+		
+		if sprite.sticky then 
+			y_offset = 0 
+			x_offset = 0
+		end
 		
 		for i = 1, sprite.height do
 			term.blit(string.rep(" ", sprite.width), string.rep("1", sprite.width), string.sub(sprite.img, current_char, current_char+sprite.width-1 ) )
 			current_char = current_char + sprite.width
-			term.setCursorPos(sprite.x-offset_x, sprite.y+i-offset_y)
+			term.setCursorPos(sprite.x-x_offset, sprite.y+i-y_offset)
 		end
 		
 		term.setCursorPos(firstx, firsty)
@@ -106,6 +113,11 @@ function create(args)
 	end
 	
 	function sprite:corrections()
+		if sprite.sticky == "true" or not type(sprite.sticky) == "boolean" then
+			sprite.sticky = true
+		else
+			sprite.sticky = false
+		end
 	end
 	
 	return sprite

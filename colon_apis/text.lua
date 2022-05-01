@@ -13,17 +13,23 @@ function create(args)
 	text.type = "text"
 	text.color = args.color or term.getTextColor()
 	text.background = colors[args.background] or term.getBackgroundColor()
+	text.sticky = args.sticky or false
 	
-	
-	function text:draw(offset_x, offset_y)
+	function text:draw(x_offset, y_offset)
 	
 		local save_cursor = {term.getCursorPos()}
 		local save_text = term.getTextColor()
 		local save_background = term.getBackgroundColor()
-		offset_x = offset_x or 0 -- default parameter values
-		offset_y = offset_y or 0
+		x_offset = x_offset or 0 -- default parameter values
+		y_offset = y_offset or 0
 		
-		term.setCursorPos(text.x-offset_x, text.y-offset_y)
+		
+		if text.sticky then 
+			y_offset = 0 
+			x_offset = 0
+		end
+		
+		term.setCursorPos(text.x-x_offset, text.y-y_offset)
 		term.setTextColor(text.color)
 		term.setBackgroundColor(text.background)
 		io.write(text.str)
@@ -41,6 +47,13 @@ function create(args)
 		if type(text.background) == "string" then
 			text.background = colors[text.background]
 		end 
+		
+		if text.sticky == "true" or not type(text.sticky) == "boolean" then
+			text.sticky = true
+		else
+			text.sticky = false
+		end
+		
 	end
 	
 	return text

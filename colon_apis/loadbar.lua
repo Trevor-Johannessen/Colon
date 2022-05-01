@@ -14,16 +14,22 @@ function create(args)
 	loadbar.interactive = false
 	loadbar.name = args.name
 	loadbar.type = "loadbar"
+	loadbar.sticky = args.sticky or false
 	
 	if text == "" then loadbar.height = 1 else loadbar.height = 2 end
     
-    function loadbar:draw(offset_x, offset_y)
-        offset_x = offset_x or 0 -- default parameter values
-        offset_y = offset_y or 0
+    function loadbar:draw(x_offset, y_offset)
+        x_offset = x_offset or 0 -- default parameter values
+        y_offset = y_offset or 0
     
+		if loadbar.sticky then 
+				y_offset = 0 
+				x_offset = 0
+		end
+	
         hold_cursor = {term.getCursorPos()}        -- save cursor position
         
-        term.setCursorPos(loadbar.x+offset_x, loadbar.y-offset_y)
+        term.setCursorPos(loadbar.x+x_offset, loadbar.y-y_offset)
         
         term.blit(string.rep(loadbar.symbol, loadbar.progress), string.rep(loadbar.symbol_color, loadbar.progress), string.rep(loadbar.background, loadbar.progress)) -- prints progressed part of loadbar
         -- may need to adjust cursor position here
@@ -72,6 +78,13 @@ function create(args)
 		if type(loadbar.background) == "string" then
 			loadbar.background = colors[loadbar.background]
 		end 
+		
+		if loadbar.sticky == "true" or not type(loadbar.sticky) == "boolean" then
+			loadbar.sticky = true
+		else
+			loadbar.sticky = false
+		end
+		
 	end
 	
 	

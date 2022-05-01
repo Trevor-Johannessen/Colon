@@ -14,6 +14,7 @@ function create(args)
 	button.interactive = true
 	button.name = args.name
 	button.type = "button"
+	button.sticky = args.sticky or false
 	
 	local sprite_args = {}
 	sprite_args["x"] = button.x
@@ -75,6 +76,8 @@ function create(args)
 			print("\t\tY=", (button.y-y_offset), "-", (button.y-y_offset+button.sprite.height))
 			]]--
 			
+			if button.sticky then y_offset = 0 end
+			
 			if 
 			inX >= button.x and
 			inX <= button.sprite.width+button.x-1 and
@@ -102,6 +105,11 @@ function create(args)
 	
 	
 	function button:corrections()
+		if button.sticky == "true" or not type(button.sticky) == "boolean" then
+			button.sticky = true
+		else
+			button.sticky = false
+		end
 	end
 	
 	return button

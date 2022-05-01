@@ -17,6 +17,7 @@ function create(args)
 	scroll.type = "scroll"
 	scroll.color = args.color or colors.white
 	scroll.background = args.background or colors.black
+	scroll.sticky = args.sticky or false
 	
 	if args.direction ~= nil then 
 		if string.lower(args.direction) == "right" then
@@ -27,17 +28,22 @@ function create(args)
 	
 	
 	
-	function scroll:draw(offset_x, offset_y, screen_height, tick)
+	function scroll:draw(x_offset, y_offset, screen_height, tick)
 		tick = tick or scroll.speed
-		
-		if tick % scroll.speed == 0 and scroll.y >= offset_y and scroll.y <= screen_height+offset_y then
+		if scroll.sticky then 
+			y_offset = 0 
+			x_offset = 0
+		end
+		if tick % scroll.speed == 0 and scroll.y >= y_offset and scroll.y <= screen_height+y_offset then
 			
 			local save_text = term.getTextColor()
 			local save_background = term.getBackgroundColor()
 			
-			offset_x = offset_x or 0 -- default parameter x = 0
-			offset_y = offset_y or 0 -- default parameter y = 0
-			term.setCursorPos(scroll.x - offset_x, scroll.y - offset_y)
+			
+			
+			x_offset = x_offset or 0 -- default parameter x = 0
+			y_offset = y_offset or 0 -- default parameter y = 0
+			term.setCursorPos(scroll.x - x_offset, scroll.y - y_offset)
 			term.setTextColor(scroll.color)
 			term.setBackgroundColor(scroll.background)
 			io.write(string.sub(scroll.text, scroll.pointer) .. string.sub(scroll.text, 1, scroll.pointer))
@@ -70,6 +76,12 @@ function create(args)
 		if type(scroll.background) == "string" then
 			scroll.background = colors[scroll.background]
 		end 
+		
+		if scroll.sticky == "true" or not type(scroll.sticky) == "boolean" then
+			scroll.sticky = true
+		else
+			scroll.sticky = false
+		end
 	end
 	
 	
