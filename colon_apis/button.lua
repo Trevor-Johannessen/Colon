@@ -102,9 +102,9 @@ function create(args)
 	
 	-- applies the buttons function if not locked
 	function button:click()
-		if not button.locked then 
+		if not button.locked and func ~= nil then 
 			if button.singleClick then button.locked = true end
-			button.func()
+				button.func()
 			return true
 		end
 		return false
