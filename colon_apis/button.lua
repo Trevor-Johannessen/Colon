@@ -2,9 +2,16 @@ function create(args)
 	
 	local button = {}
 	
+	
+	function setFunc()
+		button.func = loadstring(args.func)
+	end
+	
+	
 	button.x = tonumber(args.x) or 0
 	button.y = tonumber(args.y) or 0
-	button.func = loadstring(args.func)
+	button.func = nil
+	pcall(setFunc)
 	button.locked = args.locked or false
 	button.singleClick = args.singleClick or false
 	button.spriteFile = args.sprite
