@@ -16,26 +16,26 @@ Old Objects:
 		add direct execution of commands on activation (remove need for when statement) (NEEDS TESTING)
 		
 New Objects:
-Textbox - Object to allow text input and push to a function
-Gif - Object to implement sequential .pgi files
-
+	Textbox - Object to allow text input and push to a function
+	Gif - Object to implement sequential .pgi files
+	Action - given a specific action, waits for that action and then carries out a function. Can be named.
 
 Functions:
-Run - Run a command when this line is read
-Api - Loads an API
-UnloadAPI - Unloads an AP
-NewPage - Goes to a new page by running the initalization function on a new file
-NewTab - creates a new tab and runs colon on a file
+	Run - Run a command when this line is read
+	Api - Loads an API
+	UnloadAPI - Unloads an AP
+	NewPage - Goes to a new page by running the initalization function on a new file
+	NewTab - creates a new tab and runs colon on a file
 
 Properties:
 
 
 Utilities:
-Debug mode - version of colon that outputs to rednet to be read by a reciever
-Debug reciever - program to take input from debug colon and provide a console
+	Debug mode - version of colon that outputs to rednet to be read by a reciever
+	Debug reciever - program to take input from debug colon and provide a console
 
 Instruction:
-Write tutorial on how to write in language
-Write entry on all objects and properties
-Write tutorial on how to implement and expand the interpreter
+	Write tutorial on how to write in language
+	Write entry on all objects and properties
+	Write tutorial on how to implement and expand the interpreter
 
