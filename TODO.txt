@@ -8,19 +8,16 @@ Old Objects:
 	Menu:
 		Update Menu to allow for it to be selected
 	Text:
-		Add variable replacement to Text
+		Add variable replacement to Text (NEEDS TESTING)
 		Add custom text and background colors to text
 	Var:
 		Figure out how to implement string var substitution without breaking the program if Var isnt there.
 	Button:
-		add direct execution of commands on activation (remove need for when statement)
+		add direct execution of commands on activation (remove need for when statement) (NEEDS TESTING)
 		
 New Objects:
 Textbox - Object to allow text input and push to a function
 Gif - Object to implement sequential .pgi files
-NavBar - Navigation bar stuck to the top of the screen
-	Navbar should be a collection of objects with the "sticky" property.
-	It will ALWAYS include a sticky rectangle that is the width of the screen
 
 
 Functions:

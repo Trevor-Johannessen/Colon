@@ -4,7 +4,7 @@ function create(args)
 	
 	button.x = tonumber(args.x) or 0
 	button.y = tonumber(args.y) or 0
-	button.func = args.func or loadstring("term.setCursorPos(1,1) print(\"hello world\")")
+	button.func = loadstring(args.func)
 	button.locked = args.locked or false
 	button.singleClick = args.singleClick or false
 	button.spriteFile = args.sprite
