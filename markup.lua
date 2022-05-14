@@ -39,7 +39,12 @@ function interpret_line(str)
 	local new_obj = parse(str)
 	if new_obj ~= -1 then
 		if new_obj.y+new_obj.height > end_of_page then end_of_page = new_obj.y+new_obj.height end -- adjust total page height
-		table.insert(objects, new_obj)
+		
+		if new_obj.name ~= nil then
+			objects[new_obj.name] = new_obj
+		else
+			table.insert(objects, new_obj)
+		end
 	end
 end
 
@@ -149,16 +154,20 @@ end
 
 function initalize()
 	if not fs.exists("/colon_apis/") then error("apis folder does not exist, try reinstalling") end
+	if not fs.exists("/colon_apis/colon_objects/") then error("objects folder does not exist, try reinstalling") end
 	
-	apis = fs.list("/colon_apis/")
+	apis = fs.list("/colon_apis/colon_objects/")
 	
 	for i=1, table.getn(apis) do
 		--print("apis[".. i .. "] = ", apis[i])
 		if not fs.isDir(apis[i]) then
-			os.loadAPI("/colon_apis/" .. apis[i])
+			os.loadAPI("/colon_apis/colon_objects/" .. apis[i])
 			object_types[string.sub(apis[i], 1, -5)] = true
 		end
 	end
+	
+	os.loadAPI("/colon_apis/sharedFunctions.lua")
+	os.loadAPI("/colon_apis/var.lua")
 end
 
 
@@ -265,6 +274,11 @@ function printarr(arr, substr)
       print("arr[" .. i .. "] = ", arr[i])
 	  if substr then printarr(arr[i]) end
    end
+end
+
+
+function getObject(name)
+	return objects[name]
 end
 
 

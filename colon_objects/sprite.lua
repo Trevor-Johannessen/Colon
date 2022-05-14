@@ -15,6 +15,7 @@ function create(args)
 		sprite.src = args.src
 	end
 	
+	--print("src = ", sprite.src)
 	local f = io.open(sprite.src)
 	sprite.height = tonumber(f:read())
 	sprite.width = tonumber(f:read())

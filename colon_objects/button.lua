@@ -3,15 +3,9 @@ function create(args)
 	local button = {}
 	
 	
-	function setFunc()
-		button.func = loadstring(args.func)
-	end
-	
-	
 	button.x = tonumber(args.x) or 0
 	button.y = tonumber(args.y) or 0
-	button.func = nil
-	pcall(setFunc)
+	pcall(function () button.func = loadstring(args.func) end)
 	button.locked = args.locked or false
 	button.singleClick = args.singleClick or false
 	button.spriteFile = args.sprite
@@ -32,10 +26,14 @@ function create(args)
 	
 	-- draws the button
 	function button:draw(x_offset, y_offset)
+		x_offset = x_offset or 0
+		y_offset = y_offset or 0
+		
 		if button.sticky then 
 			x_offset = 0
 			y_offset = 0 
 		end
+		
 		button.sprite:draw(x_offset, y_offset)
 	end
 	
@@ -45,7 +43,13 @@ function create(args)
 			obj_args["x_offset"] = 0
 			obj_args["y_offset"] = 0 
 		end
-		if not obj_args["mouse_x"] or not obj_args["mouse_y"] or button.locked then return end
+		
+		obj_args["x_offset"] = obj_args["x_offset"] or 0
+		obj_args["y_offset"] = obj_args["y_offset"] or 0
+		
+		
+		
+		if not obj_args["mouse_x"] or not obj_args["mouse_y"] or button.locked then return false end
 		if button:check_hover(obj_args["mouse_x"], obj_args["mouse_y"], obj_args["y_offset"]) then	-- if the mouse is hovering the button
 			if obj_args["event"] == "mouse_up" then -- if the mouse is clicking the button	
 				if button.showingHover then
@@ -58,13 +62,14 @@ function create(args)
 				button.sprite:setImage(button.hoverSpriteFile)
 				button:draw(obj_args["x_offset"], obj_args["y_offset"])
 				button.showingHover = true
+				return 1 -- button is being hovered
 			end
 		elseif button.showingHover then
 			button.sprite:setImage(button.spriteFile)
 			button:draw(obj_args["x_offset"], obj_args["y_offset"])
 			button.showingHover = false
 		end
-		return false -- not interacted with
+		return 0 -- not interacted with
 	end
 	
 	
@@ -109,10 +114,10 @@ function create(args)
 	
 	-- applies the buttons function if not locked
 	function button:click()
-		if not button.locked and func ~= nil then 
+		if button.locked == false and button.func ~= nil then 
 			if button.singleClick then button.locked = true end
-				button.func()
-			return true
+			button.func()
+			return 2
 		end
 		return false
 	end
