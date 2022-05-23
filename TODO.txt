@@ -21,11 +21,15 @@ Old Objects:
 		add default color inversion for on black (for button color and text color)
 	Scroll:
 		Add length option
+	Textbox:
+		Finish textbox printing so its not weird and glitchy
+		Finish textbox text parsing for enter and backspace
+		Add ability to submit textbox text to a function on key press
 		
 New Objects:
-	Textbox - Object to allow text input and push to a function
 	Gif - Object to implement sequential .pgi files
 	Action - given a specific action, waits for that action and then carries out a function. Can be named.
+	Slider - slide bar that can have N notches. 
 
 Functions:
 	Run - Run a command when this line is read
