@@ -92,9 +92,9 @@ function create(args)
 			if obj_args["event"] == "char" and string.len(textbox.text) < textbox.max_string then
 				textbox.text = textbox.text .. obj_args["event_id"]
 				place_key(obj_args["event_id"], obj_args["y_offset"])
-			elseif obj_args["event"] == "key" and obj_args["event_id"] == 259 then -- backspace
-				place_key(obj_args["event_id"], obj_args["y_offset"])
-				textbox.text = string.sub(textbox.text, 1, -1)
+			elseif obj_args["event"] == "key" and obj_args["event_id"] == 259 and textbox.text ~= "" then -- backspace
+				place_key(" ", obj_args["y_offset"])
+				textbox.text = string.sub(textbox.text, 1, -2)
 			elseif obj_args["event"] == "key" and obj_args["event_id"] == 257 and string.len(textbox.text) < textbox.max_string-textbox.width then -- newline
 			end
 		end
@@ -106,16 +106,13 @@ function create(args)
 		local saveBackground = term.getBackgroundColor()
 		term.setTextColor(textbox.color)
 		term.setBackgroundColor(textbox.background)
-		if key == 259 then -- backspace
-			
 		
-			
-		else -- regular key
-			local xpos = textbox.x + string.len(textbox.text) % textbox.width
-			local ypos = textbox.y - y_offset + math.ceil(string.len(textbox.text) / textbox.width)-1
-			term.setCursorPos(xpos, ypos)
-			io.write(key)
-		end
+		
+		local xpos = (textbox.x + (string.len(textbox.text)-1) % textbox.width)
+		local ypos = textbox.y - y_offset + math.floor((string.len(textbox.text)-1) / textbox.width)
+		term.setCursorPos(xpos, ypos)
+		io.write(key)
+		
 		
 		
 		
