@@ -12,7 +12,7 @@ function create(args)
 	text.name = args.name
 	text.type = "text"
 	text.color = args.color or term.getTextColor()
-	text.background = colors[args.background] or term.getBackgroundColor()
+	text.background = args.background or term.getBackgroundColor()
 	text.sticky = args.sticky or false
 	
 	function text:draw(x_offset, y_offset)
@@ -57,6 +57,8 @@ function create(args)
 		end
 		
 	end
+	
+	text:corrections()
 	
 	return text
 end

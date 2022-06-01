@@ -1,4 +1,3 @@
-args = {...}
 objects = {} -- storage for all objects
 when = {}
 tags = {}
@@ -9,10 +8,13 @@ y_offset = 0
 end_of_page = 0
 background = colors.black
 color = colors.white
+scroll_lock = false
 
 -- open file and lex lines into tables
 
-function main()
+function main(inArgs)
+	args = inArgs
+
 	-- initalize to load apis
 	initalize()
 	
@@ -40,11 +42,14 @@ function interpret_line(str)
 	if new_obj ~= -1 then
 		if new_obj.y+new_obj.height > end_of_page then end_of_page = new_obj.y+new_obj.height end -- adjust total page height
 		
+		
 		if new_obj.name ~= nil then
 			objects[new_obj.name] = new_obj
 		else
 			table.insert(objects, new_obj)
 		end
+		
+		
 	end
 end
 
@@ -124,14 +129,14 @@ function parse(text, line_num)
 		if found_tag then
 			for k, v in next, tags[found_tag] do 
 				-- add all tag attributes to object here
-				print("arg[", k, "] = ", arg[k])
+				print("arg[", k, "] = ", args[k])
 				if args[k] == nil then
 					args[k] = v
 				end
 			end
 		end
 		local obj = loadstring("return " .. object_type .. ".create")()(args)
-		obj:corrections()
+		
 		return obj
 	end
 end
@@ -207,13 +212,13 @@ function interaction_loop()
 			
 			-- give input to all objects that request it
 			--message("x = " .. tostring(x) .. "\ty = " .. tostring(y))
-			for index, data in ipairs(objects) do
-				if data.interactive and data:update(obj_args) then check_when_statements(data.name) end -- the update function for interactive objects should return a boolean for true if triggered, false it not
-				if data.dynamic then data:update(obj_args) end
+			for index, data in pairs(objects) do
+				if data.interactive and data:update(obj_args) == (false or 0) then check_when_statements(data.name) end -- the update function for interactive objects should return a boolean for true if triggered, false it not
+				if data.dynamic and not data.interactive then data:update(obj_args) end
 			end
 			
 			-- handels scrolling of page
-			if event == "mouse_scroll" then
+			if event == "mouse_scroll" and not scroll_lock then
 				if event_id == -1 and y_offset+screen_height < end_of_page-1 then -- scroll up
 					y_offset = y_offset + 1
 					redraw()
@@ -238,7 +243,7 @@ function redraw()
 	fill_screen()
 	
 	for index, data in pairs(objects) do
-		term.setCursorPos(1, 9+index)
+		--term.setCursorPos(1, 9+index)
 		--print("printing: ", data.type)	
 		data:draw(x_offset, y_offset, screen_height)
 	end
@@ -281,6 +286,10 @@ function getObject(name)
 	return objects[name]
 end
 
+function scrollLock(bool)
+	scrollLock = bool
+end
+
 
 function message(message)
 	local orgx, orgy = term.getCursorPos()
@@ -289,5 +298,3 @@ function message(message)
 	io.write(message)
 	term.setCursorPos(orgx, orgy)
 end
-
-main()

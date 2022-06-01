@@ -121,6 +121,9 @@ function create(args)
 		end
 	end
 	
+	
+	sprite:corrections()
+	
 	return sprite
 end
 
