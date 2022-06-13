@@ -22,7 +22,6 @@ Old Objects:
 	Scroll:
 		Add length option
 	Textbox:
-		Finish textbox printing so its not weird and glitchy
 		Finish textbox text parsing for enter and backspace
 		Add ability to submit textbox text to a function on key press
 		

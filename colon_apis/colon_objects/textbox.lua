@@ -6,14 +6,16 @@ function create(args)
 	textbox.text = args.text or ""
 	textbox.color = args.color or term.getTextColor()
 	textbox.background = args.background or term.getBackgroundColor()
-	textbox.width = args.width or 10
-	textbox.height = args.height or 1
+	textbox.width = tonumber(args.width) or 10
+	textbox.height = tonumber(args.height) or 1
 	textbox.sticky = args.sticky or false
 	textbox.dynamic = false
 	textbox.interactive = true
 	textbox.selected = false
 	textbox.cursor = 1
 	textbox.max_string = textbox.width * textbox.height
+	
+	
 	function textbox:draw(x_offset, y_offset)
 		
 		local save_cursor = {term.getCursorPos()}
@@ -35,24 +37,13 @@ function create(args)
 		term.setTextColor(textbox.color)
 		term.setBackgroundColor(textbox.background)
 		
-		-- this characters remaining bullshit is super horrible and unreadable
-		-- and inefficient. its not even that hard to fix but im tired and it
-		-- worked so i guess its going to stay here for awhile. Sorry.
 		for i = 1, textbox.height do
 			--sharedFunctions.message("i = " .. i .. "/" .. textbox.height)
 			if textbox.y - y_offset >= 0 and textbox.y - y_offset + i - 1 < 20 then
-				if characters_remaining >= textbox.width then
-					next_characters_remaining = characters_remaining - textbox.width
-					padding = 0
-				elseif characters_remaining == -1 then
-					next_characters_remaining = -1
-					padding = textbox.width
-				else
-					padding = textbox.width - characters_remaining - 1
-					next_characters_remaining = -1
-				end
-				io.write(string.sub(textbox.text, string.len(textbox.text) - characters_remaining, string.len(textbox.text) - characters_remaining + textbox.width) .. string.rep(" ", padding))
-				characters_remaining = next_characters_remaining
+				
+				local string_on_line = string.sub(textbox.text, textbox.width * (i-1) + 1, textbox.width * i)
+				io.write(string_on_line .. string.rep(" ", textbox.width - string.len(string_on_line)))
+				
 			end
 			term.setCursorPos(textbox.x-x_offset, textbox.y+i-y_offset)
 			
@@ -80,11 +71,11 @@ function create(args)
 			if hit and obj_args["event"] == "mouse_up" then
 				textbox.active = true
 				if inColon then
-					markup.scrollLock(true)
+					colon.scrollLock(true)
 				end
 			else
 				textbox.active = false
-				markup.scrollLock(false)
+				colon.scrollLock(false)
 			end
 		
 		-- for typing in the textbox
@@ -124,4 +115,8 @@ function create(args)
 	sharedFunctions.corrections(textbox)
 	
 	return textbox
+end
+
+function monus(a, b)
+	return ((a-b)<0 and 0 or (a-b))
 end

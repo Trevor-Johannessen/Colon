@@ -158,21 +158,21 @@ end
 
 
 function initalize()
-	if not fs.exists("/colon_apis/") then error("apis folder does not exist, try reinstalling") end
-	if not fs.exists("/colon_apis/colon_objects/") then error("objects folder does not exist, try reinstalling") end
+	if not fs.exists("/colon/colon_apis/") then error("apis folder does not exist, try reinstalling") end
+	if not fs.exists("/colon/colon_apis/colon_objects/") then error("objects folder does not exist, try reinstalling") end
 	
-	apis = fs.list("/colon_apis/colon_objects/")
+	apis = fs.list("/colon/colon_apis/colon_objects/")
 	
 	for i=1, table.getn(apis) do
-		--print("apis[".. i .. "] = ", apis[i])
+		print("apis[".. i .. "] = ", apis[i])
 		if not fs.isDir(apis[i]) then
-			os.loadAPI("/colon_apis/colon_objects/" .. apis[i])
+			os.loadAPI("/colon/colon_apis/colon_objects/" .. apis[i])
 			object_types[string.sub(apis[i], 1, -5)] = true
 		end
 	end
 	
-	os.loadAPI("/colon_apis/sharedFunctions.lua")
-	os.loadAPI("/colon_apis/var.lua")
+	os.loadAPI("/colon/colon_apis/sharedFunctions.lua")
+	os.loadAPI("/colon/colon_apis/var.lua")
 end
 
 
@@ -213,8 +213,8 @@ function interaction_loop()
 			-- give input to all objects that request it
 			--message("x = " .. tostring(x) .. "\ty = " .. tostring(y))
 			for index, data in pairs(objects) do
-				if data.interactive and data:update(obj_args) == (false or 0) then check_when_statements(data.name) end -- the update function for interactive objects should return a boolean for true if triggered, false it not
-				if data.dynamic and not data.interactive then data:update(obj_args) end
+				if data.dynamic then data:update(obj_args) 
+				elseif data.interactive and data:update(obj_args) == (false or 0) then check_when_statements(data.name) end -- the update function for interactive objects should return a boolean for true if triggered, false it not
 			end
 			
 			-- handels scrolling of page
