@@ -92,7 +92,7 @@ function parse(text, line_num)
 
 	-- turn arguments into parameters for the objects
 	for term in text do
-			--print("term = ", term)
+			print("term = ", term)
 			local equals_pos = string.find(term, "=")
 			args[string.sub(term, 0, equals_pos-1)] = string.gsub(string.sub(term, equals_pos+1), string.char(9), ",") -- args[var_name] = var_value
 			--print("arg = ", string.sub(term, 0, equals_pos-1))
@@ -177,7 +177,7 @@ end
 
 
 function construct_when(args)
-	--print("construct = ", string.sub(args.command, 2, -2))
+	print("construct = ", string.sub(args.command, 2, -2))
 	--os.sleep(2)
 	when[args.name] = string.sub(args.command, 2, -2)
 end
@@ -214,7 +214,7 @@ function interaction_loop()
 			--message("x = " .. tostring(x) .. "\ty = " .. tostring(y))
 			for index, data in pairs(objects) do
 				if data.dynamic then data:update(obj_args) 
-				elseif data.interactive and data:update(obj_args) == (false or 0) then check_when_statements(data.name) end -- the update function for interactive objects should return a boolean for true if triggered, false it not
+				elseif data.interactive and data:update(obj_args) then check_when_statements(data.name) end -- the update function for interactive objects should return a boolean for true if triggered, false it not
 			end
 			
 			-- handels scrolling of page
@@ -264,8 +264,11 @@ end
 
 function check_when_statements(name)
 	for k, v in next, when do
+		print(k, " ", v)
 		if k == name then
-			term.clear()
+			--term.clear()
+			--print("Interpreting line: ", string.gsub(v, "\\", ""))
+			--os.sleep(2)
 			interpret_line(string.gsub(v, "\\", ""))
 			redraw()
 		end

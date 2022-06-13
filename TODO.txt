@@ -22,18 +22,15 @@ Old Objects:
 	Scroll:
 		Add length option
 	Textbox:
-		Finish textbox text parsing for enter and backspace
+		Finish textbox text parsing for enter
 		Add ability to submit textbox text to a function on key press
 		
 New Objects:
 	Gif - Object to implement sequential .pgi files
-	Action - given a specific action, waits for that action and then carries out a function. Can be named.
+	Action - given a specific action, waits for that action and then carries out a function. Can be named. (Event Listener)
 	Slider - slide bar that can have N notches. 
 
 Functions:
-	Run - Run a command when this line is read
-	Api - Loads an API
-	UnloadAPI - Unloads an AP
 	NewPage - Goes to a new page by running the initalization function on a new file
 	NewTab - creates a new tab and runs colon on a file
 

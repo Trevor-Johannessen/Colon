@@ -49,27 +49,25 @@ function create(args)
 		
 		
 		
-		if not obj_args["mouse_x"] or not obj_args["mouse_y"] or button.locked then return false end
+		if not obj_args["mouse_x"] or not obj_args["mouse_y"] or button.locked then return false end -- check that given action is mouse (and button is not locked)
 		if button:check_hover(obj_args["mouse_x"], obj_args["mouse_y"], obj_args["y_offset"]) then	-- if the mouse is hovering the button
-			if obj_args["event"] == "mouse_up" then -- if the mouse is clicking the button	
-				if button.showingHover then
-					button.sprite:setImage(button.spriteFile)
-					button.showingHover = false
-				end
+			if obj_args["event"] == "mouse_up" and button.showingHover then -- if the mouse is clicking the button	
+				button.sprite:setImage(button.spriteFile)
+				button.showingHover = false
 				button:draw(obj_args["x_offset"], obj_args["y_offset"])
 				return button:click() -- button has been clicked
 			elseif not button.showingHover and obj_args["event"] == "mouse_click" then -- if the mouse is hovering the button
 				button.sprite:setImage(button.hoverSpriteFile)
 				button:draw(obj_args["x_offset"], obj_args["y_offset"])
 				button.showingHover = true
-				return false, 1 -- button is being hovered
+				return false -- button is being hovered
 			end
 		elseif button.showingHover then
 			button.sprite:setImage(button.spriteFile)
 			button:draw(obj_args["x_offset"], obj_args["y_offset"])
 			button.showingHover = false
 		end
-		return false, 1 -- not interacted with
+		return false -- not interacted with
 	end
 	
 	
@@ -115,10 +113,10 @@ function create(args)
 	
 	-- applies the buttons function if not locked
 	function button:click()
-		if button.locked == false and button.func ~= nil then 
+		if button.locked == false then 
 			if button.singleClick then button.locked = true end
-			button.func()
-			return 2
+			if button.func ~= nil then button.func() end
+			return true
 		end
 		return false
 	end

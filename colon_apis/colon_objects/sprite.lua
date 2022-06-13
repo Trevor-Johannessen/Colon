@@ -27,7 +27,12 @@ function create(args)
 	function sprite:draw(x_offset, y_offset)
 		x_offset = x_offset or 0 -- default parameter values
 		y_offset = y_offset or 0
-	
+		
+		if sticky then 
+			x_offset = 0 
+			y_offset = 0
+		end
+		
 		local firstx, firsty = term.getCursorPos()
 		local current_char = 1
 		term.setCursorPos(sprite.x-x_offset, sprite.y+0-y_offset)
