@@ -15,6 +15,11 @@ function create(args)
 	button.interactive = true
 	button.name = args.name
 	button.type = "button"
+	button.text = args.text or ""
+	button.textColor = args.color or colors.black
+	button.backgroundColor = args.background or colors.white
+	button.hoverTextColor = args.hoverColor or colors.white
+	button.hoverBackgroundColor = args.hoverBackground or colors.black
 	button.sticky = args.sticky or false
 	
 	local sprite_args = {}
@@ -35,6 +40,23 @@ function create(args)
 		end
 		
 		button.sprite:draw(x_offset, y_offset)
+		
+		local midpoint = math.floor(button.sprite.height / 2)
+		local saved_1 = term.getTextColor()
+		local saved_2 = term.getBackgroundColor()
+		term.setCursorPos(math.floor(button.x + (button.sprite.width - string.len(button.text))/2), button.y+midpoint)
+		
+		if button.showingHover then
+			term.setTextColor(button.hoverTextColor)
+			term.setBackgroundColor(button.hoverBackgroundColor)
+		else
+			term.setTextColor(button.textColor)
+			term.setBackgroundColor(button.backgroundColor)
+		end
+		
+		io.write(button.text)
+		term.setTextColor(saved_1)
+		term.setBackgroundColor(saved_2)
 	end
 	
 	-- implements functionality of button
@@ -58,8 +80,8 @@ function create(args)
 				return button:click() -- button has been clicked
 			elseif not button.showingHover and obj_args["event"] == "mouse_click" then -- if the mouse is hovering the button
 				button.sprite:setImage(button.hoverSpriteFile)
-				button:draw(obj_args["x_offset"], obj_args["y_offset"])
 				button.showingHover = true
+				button:draw(obj_args["x_offset"], obj_args["y_offset"])
 				return false -- button is being hovered
 			end
 		elseif button.showingHover then

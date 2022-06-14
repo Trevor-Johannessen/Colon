@@ -46,3 +46,5 @@ Instruction:
 	Write entry on all objects and properties
 	Write tutorial on how to implement and expand the interpreter
 
+Bugs:
+	Cant correctly comment out when statements since they have 2 colons
