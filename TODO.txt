@@ -10,6 +10,7 @@ Old Objects:
 	Menu:
 		Update Menu to allow for it to be selected
 	Text:
+		NOTE: MAY BE BETTER IDEA TO CREATE NEW textbox: OBJECT
 		-separate aprint into 2 separate printing commands
 			aprint: (MAIN IDEA: lightweight simple text that should not lag the page)
 				-colored text
