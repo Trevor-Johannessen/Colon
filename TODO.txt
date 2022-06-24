@@ -10,8 +10,16 @@ Old Objects:
 	Menu:
 		Update Menu to allow for it to be selected
 	Text:
-		Add variable replacement to Text (NEEDS TESTING)
-		Add custom text and background colors to text
+		-separate aprint into 2 separate printing commands
+			aprint: (MAIN IDEA: lightweight simple text that should not lag the page)
+				-colored text
+				-textbox dimensions (text outside of the box will NOT be rednered
+				-textbox border (if border is on)
+			newaprint: (MAIN IDEA: This will be interactable and thus more resource intensive)
+				-everything aprint: has
+				-variable replacement
+				-hyperlink text
+				-if textbox dimensions are given and text overflows outside then box becomes scrollable
 	Var:
 		Figure out how to implement string var substitution without breaking the program if Var isnt there.
 	Button:
