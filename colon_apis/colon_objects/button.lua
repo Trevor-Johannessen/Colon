@@ -44,7 +44,7 @@ function create(args)
 		local midpoint = math.floor(button.sprite.height / 2)
 		local saved_1 = term.getTextColor()
 		local saved_2 = term.getBackgroundColor()
-		term.setCursorPos(math.floor(button.x + (button.sprite.width - string.len(button.text))/2), button.y+midpoint)
+		term.setCursorPos(math.floor(button.x + (button.sprite.width - string.len(button.text))/2), button.y+midpoint-y_offset)
 		
 		if button.showingHover then
 			term.setTextColor(button.hoverTextColor)
