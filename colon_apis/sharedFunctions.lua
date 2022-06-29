@@ -1,84 +1,39 @@
-function parse_color(str)
-		
-		local baseTextColor = term.getTextColor()
-		local baseBackgroundColor = term.getBackgroundColor()
-		
-		local monitor_settings
-		
-		local text = str
+screen_width, screen_height = term.getSize()
 
-		local i = 1 -- while iterator
-		local stringTable = mysplit(text) -- string.split of words
-		local commandStack = {} -- stack that holds }
-		local colorStack = {baseTextColor} -- keeps track of what color we should be
-		local backgroundStack = {baseBackgroundColor} -- keeps track of what background we should be
+--[[ 
+	FORMAT:
+	{c:color:text} -- color
+	{b:color:text} -- background
+	they can be nested.
+]]
+function parseColor(str)
+	colorString = string.rep(sharedFunctions.int_to_hex(term.getTextColor()), str:len())
+	backgroundString = string.rep(sharedFunctions.int_to_hex(term.getBackgroundColor()), str:len())
+	while true do
+		a,b = str:find("%b{}") -- get inside block
+		if not a and not b then break end
+		c = str:sub(a,b) -- get color
+		d, e = c:find("%b::")
+		if not d and not e then break end
+		f = c:sub(e+1,-2) -- the middle of the string = the end of the color substring to the end of the c substring-1
+		g = str:sub(a+1,a+1)
+		-- I just want to point out that I was doing b-a-1 instead of -2 and I feel bad about that
 		
-		while stringTable[i] ~= nil
-		do
+		if g=="c" then
+			colorString = colorString:sub(1, a-1) .. string.rep(sharedFunctions.str_to_hex(c:sub(d+1,e-1)), f:len()) .. colorString:sub(b+1) -- build the color string
+			backgroundString = backgroundString:sub(1,a-1) .. backgroundString:sub(a+e+1,b-1) .. backgroundString:sub(b)
 			
-			
-			if(string.sub(tostring(stringTable[i]), 1, 1) == '$')
-			then
-				-- command found
-				--print("substring = " .. string.sub(tostring(stringTable[i]), 2, 5))
-				if (string.sub(tostring(stringTable[i]), 2, 6) == "color")
-				then
-					--print("colorCommand")
-										
-					local color = string.sub(tostring(stringTable[i]), 8, string.len(stringTable[i])-2)
-					--print("stringTable[i] = ", stringTable[i])
-					table.insert(commandStack, 1, "COLOR")
-					table.insert(colorStack, 1, term.getTextColor())
-					--print("color = ", color)
-					term.setTextColor(str_to_int(color))
-					
-				elseif (string.sub(tostring(stringTable[i]), 2, 11) == "background")
-				then
-					--print("backgroundCommand")
-					--print("colorCommand")
-										
-					local background = string.sub(tostring(stringTable[i]), 13, string.len(stringTable[i])-2)
-
-					table.insert(commandStack, 1, "BACKGROUND")
-					table.insert(backgroundStack, 1, term.getBackgroundColor())
-					--print("color = ", color)
-					term.setBackgroundColor(str_to_int(background))
-					
-				else
-					print("Invalid_Command")
-				end
-			elseif (string.sub(tostring(stringTable[i]), 1, 1) == '}')
-			then
-				local command = table.remove(commandStack, 1)
-				if command == "COLOR"
-				then
-					term.setTextColor(table.remove(colorStack, 1))	
-					--print("color = ", term.getTextColor())
-					if(colorStack[1] == nil)
-					then
-						table.insert(colorStack, 1)
-					end
-				elseif command == "BACKGROUND"
-				then
-					term.setBackgroundColor(table.remove(backgroundStack, 1))	
-					--print("color = ", term.getTextColor())
-					if(backgroundStack[1] == nil)
-					then
-						table.insert(backgroundStack, 32768)
-					end
-					
-				end
-			else
-					io.write(tostring(stringTable[i]) .. " ")
-			end
-			
-			i = i + 1
-			
+		elseif g=="b" then
+			backgroundString = backgroundString:sub(1, a-1) .. string.rep(sharedFunctions.str_to_hex(c:sub(d+1,e-1)), f:len()) .. backgroundString:sub(b+1) -- build the background
+			colorString = colorString:sub(1,a-1) .. colorString:sub(a+e+1,b-1) .. colorString:sub(b)
+		else
+			break
 		end
-		
-	term.setTextColor(baseTextColor)
-	term.setBackgroundColor(baseBackgroundColor)
-end
+		str = str:sub(1,a-1) .. f .. str:sub(b+1) -- build the string
+	end
+	--term.blit(str, colorString, backgroundString)
+	return str, colorString, backgroundString
+end	
 
 
 function mysplit (inputstr, sep)
@@ -142,6 +97,27 @@ function int_to_hex(color)
 	end
 end
 
+function str_to_hex(str)
+	str = string.lower(str)
+	
+		if 	   str == "white"		then return "0"
+		elseif str == "orange"      then return "1"
+		elseif str == "magenta"     then return "2"
+		elseif str == "lightblue"   then return "3"
+		elseif str == "yellow"      then return "4"
+		elseif str == "lime"        then return "5"
+		elseif str == "pink"        then return "6"
+		elseif str == "gray"        then return "7"
+		elseif str == "lightgray"   then return "8"
+		elseif str == "cyan"        then return "9"
+		elseif str == "purple"      then return "a"
+		elseif str == "blue"        then return "b"
+		elseif str == "brown"       then return "c"
+		elseif str == "green"       then return "d"
+		elseif str == "red"         then return "e"
+		elseif str == "black"       then return "f"
+		end
+end
 
 function corrections(obj)
 	if type(obj.color) == "string" then
@@ -158,6 +134,25 @@ function corrections(obj)
 			obj.sticky = false
 		end
 	end
+	
+	
+	-- check for center args x
+	if obj.x == "center" then obj.x = screen_width/2 end
+	local first, last, middle = string.find(obj.x, "center[+-]()%d*")
+	if middle ~= nil then
+		local number = string.sub(obj.x, middle-1)
+		obj.x = math.ceil(screen_width/2) + tonumber(number)
+	end
+	
+	-- check for center args y
+	if obj.y == "center" then obj.y = screen_height/2 end
+	local first, last, middle = string.find(obj.y, "center[+-]()%d*")
+	if middle ~= nil then
+		local number = string.sub(obj.y, middle-1)
+		obj.y = math.ceil(screen_height/2) + tonumber(number)
+	end	
+	
+	
 end
 
 
@@ -170,8 +165,9 @@ function message(message)
 end
 
 
-
-
+function monus(a, b)
+	return ((a-b)<0 and 0 or (a-b))
+end
 
 
 

@@ -151,8 +151,10 @@ function create(args)
 		end
 	end
 	
-	--sharedFunctions:corrections()
-	button:corrections()
-	
+	--[[
+	if sharedFunctions then
+		sharedFunctions.corrections(button)
+	end
+	]]--
 	return button
 end

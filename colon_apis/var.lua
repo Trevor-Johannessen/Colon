@@ -1,4 +1,8 @@
-variables = {}
+
+function initalize()
+	variables = {}
+end
+
 
 function create(args)
 	setVariable(args.name, args.value)
@@ -22,16 +26,21 @@ end
 function replaceStr(str)
 	local replaceable = {}
 	
-	for i in string.gmatch(str, "~.-~") do
-		--print(i)
-		table.insert(replaceable, i)
+	--for i, s in string.gmatch(str, "()~.-~()") do
+		--print(string.sub(str, i, s))
+	while true do
+		local i, s = string.gmatch(str, "()~.-~()")()
+		if not i and not s then break end
+		--[[
+		print("i = ", i)
+		print("s = ", s)
+		print("substring = ", str:sub(i+1, s-2))
+		print("first = ", str:sub(1, i-1))
+		print("get var = ", getVariable(str:sub(i+1, s-2)))
+		print("last = ", str:sub(s+1))
+		]]
+		str = str:sub(1, i-1) .. getVariable(str:sub(i+1, s-2)) .. str:sub(s+1)
+		--print("str = ", str)
 	end
-
-	for k, v in pairs(replaceable) do
-		--print(v)
-		--print(getVariable(string.sub(v, 2, -2)))
-		if getVariable(string.sub(v, 2, -2)) then
-			str = string.gsub(str, v, tostring(getVariable(string.sub(v, 2, -2))))
-		end
-	end
+	return str
 end

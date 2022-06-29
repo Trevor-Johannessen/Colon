@@ -1,0 +1,2 @@
+add button text
+Add x=center, y=center option for all coordinate text

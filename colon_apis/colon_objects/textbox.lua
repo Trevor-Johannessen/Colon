@@ -112,7 +112,9 @@ function create(args)
 	end
 	
 	
-	sharedFunctions.corrections(textbox)
+	if sharedFunctions then
+		sharedFunctions.corrections(textbox)
+	end
 	
 	return textbox
 end

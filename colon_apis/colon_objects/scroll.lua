@@ -68,6 +68,7 @@ function create(args)
 	
 	
 	-- correction to clean inputs
+	--[[
 	function scroll:corrections()
 		-- quick color format correction
 		if type(scroll.color) == "string" then
@@ -83,7 +84,11 @@ function create(args)
 			scroll.sticky = false
 		end
 	end
-	
-	
+	]]--
+	--[[
+	if sharedFunctions then
+		sharedFunctions.corrections(scroll)
+	end
+	]]--
 	return scroll
 end

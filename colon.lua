@@ -55,6 +55,7 @@ end
 
 
 function parse(text, line_num)
+
 	local found_tag
 	--os.sleep(1)
 	-- find what object type line is
@@ -98,7 +99,6 @@ function parse(text, line_num)
 			--print("arg = ", string.sub(term, 0, equals_pos-1))
 			--print("tag = ", args[string.sub(term, 0, equals_pos-1)])
 	end
-	
 	
 	
 	-- if when command
@@ -171,8 +171,10 @@ function initalize()
 		end
 	end
 	
+	-- load apis
 	os.loadAPI("/colon/colon_apis/sharedFunctions.lua")
 	os.loadAPI("/colon/colon_apis/var.lua")
+	var.initalize()
 end
 
 

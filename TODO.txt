@@ -4,7 +4,6 @@ Test printable text in button and menu
 
 Old Objects:
 	All:
-		Add x=center, y=center option for all coordinate text
 	General:
 		Replace standard text printing in objects with new Text Objects
 	Menu:
@@ -25,7 +24,6 @@ Old Objects:
 		Figure out how to implement string var substitution without breaking the program if Var isnt there.
 	Button:
 		add direct execution of commands on activation (remove need for when statement) (NEEDS TESTING)
-		add button text
 		add solid color presets
 		add default color inversion for on black (for button color and text color)
 	Scroll:
