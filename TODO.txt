@@ -4,6 +4,7 @@ Test printable text in button and menu
 
 Old Objects:
 	All:
+		Redo object structure so everything is wrapped in pcall for better error handeling
 	General:
 		Replace standard text printing in objects with new Text Objects
 	Menu:
@@ -20,6 +21,10 @@ Old Objects:
 				-variable replacement
 				-hyperlink text
 				-if textbox dimensions are given and text overflows outside then box becomes scrollable
+	Scroll:
+		fix wrap around text for scroll:, similar to text: fix	
+	Sprite:
+		Add check to only draw when on screen and only draw what's one screen
 	Var:
 		Figure out how to implement string var substitution without breaking the program if Var isnt there.
 	Button:
@@ -34,7 +39,6 @@ Old Objects:
 		
 New Objects:
 	Gif - Object to implement sequential .pgi files
-	Action - given a specific action, waits for that action and then carries out a function. Can be named. (Event Listener)
 	Slider - slide bar that can have N notches. 
 
 Functions:

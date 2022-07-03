@@ -33,14 +33,14 @@ end
 
 
 function get_file_iterator()
-	if not fs.exists(args[1]) then error("file not found") end -- if file doesn't exist, error
+	if not fs.exists(args[1]) then error("file '" .. args[1] .. "' not found") end -- if file doesn't exist, error
 	return io.lines(args[1])
 end
 
 function interpret_line(str)
 	local new_obj = parse(str)
 	if new_obj ~= -1 then
-		if new_obj.y+new_obj.height > end_of_page then end_of_page = new_obj.y+new_obj.height end -- adjust total page height
+		if not new_obj.unplaceable and new_obj.y+new_obj.height > end_of_page then end_of_page = new_obj.y+new_obj.height end -- adjust total page height
 		
 		
 		if new_obj.name ~= nil then
@@ -103,14 +103,14 @@ function parse(text, line_num)
 	
 	-- if when command
 	if object_type == "when" then
-		
+		--[[
 		for k, v in next, args do
 			print(k .. ": " .. v)
 		end
+		]]
 		--os.sleep(1000)
 		construct_when(args)
 		return -1
-		
 		
 	-- if regular object
 	elseif object_type == "tag" then
@@ -247,7 +247,7 @@ function redraw()
 	for index, data in pairs(objects) do
 		--term.setCursorPos(1, 9+index)
 		--print("printing: ", data.type)	
-		data:draw(x_offset, y_offset, screen_height)
+		if not data.unplaceable then data:draw(x_offset, y_offset, screen_height) end
 	end
 end
 
