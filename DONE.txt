@@ -2,9 +2,7 @@ add button text
 Add x=center, y=center option for all coordinate text
 Action - given a specific action, waits for that action and then carries out a function. Can be named. (Event Listener)
 Gif - Object to implement sequential .pgi files
-
-
-
+LINE 4
 
 
 
