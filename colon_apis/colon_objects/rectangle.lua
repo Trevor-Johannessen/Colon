@@ -6,9 +6,9 @@ function create(args)
 	rectangle.y = args.y or 1.
 	rectangle.width = args.width or 10
 	rectangle.height = args.height or 15
-	--print("rectangle.color = ", rectangle.color)
+	print("rectangle.color = ", rectangle.color)
 	rectangle.color = args.color or colors.red
-	--print("rectangle.color = ", rectangle.color)
+	print("rectangle.color = ", rectangle.color)
 	os.sleep(2)
 	rectangle.sticky = args.sticky or false
 	rectangle.type = "rectangle"
