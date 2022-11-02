@@ -1,6 +1,9 @@
+os.loadAPI("/colon/colon_apis/colon_objects/template.lua")
+
 function create(args)
 	
-	local sprite = {}
+	local sprite = template.create()
+
 	sprite.x = tonumber(args.x) or 0
 	sprite.y = tonumber(args.y) or 0
 	sprite.file = "" -- TODO: make default image and place here
@@ -118,16 +121,7 @@ function create(args)
 		io.close(f)
 	end
 	
-	function sprite:corrections()
-		if sprite.sticky == "true" or not type(sprite.sticky) == "boolean" then
-			sprite.sticky = true
-		else
-			sprite.sticky = false
-		end
-	end
-	
-	
-	sprite:corrections()
+	sprite:corrections(sprite)
 	
 	return sprite
 end

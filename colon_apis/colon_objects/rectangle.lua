@@ -1,6 +1,8 @@
+os.loadAPI("/colon/colon_apis/colon_objects/template.lua")
+
 function create(args)
 	
-	local rectangle = {}
+	local rectangle = template.create()
 	
 	rectangle.x = args.x or 1
 	rectangle.y = args.y or 1.
@@ -35,20 +37,7 @@ function create(args)
 		term.setBackgroundColor(save_background)
 	end
 	
-	function rectangle:corrections()
-		if type(rectangle.color) == "string" then
-			rectangle.color = colors[rectangle.color]
-		end 
-		
-		if rectangle.sticky == "true" or not type(rectangle.sticky) == "boolean" then
-			rectangle.sticky = true
-		else
-			rectangle.sticky = false
-		end
-		
-	end
-	
-	rectangle:corrections()
+	rectangle:corrections(rectangle)
 	
 	return rectangle
 end

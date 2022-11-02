@@ -1,6 +1,8 @@
+os.loadAPI("/colon/colon_apis/colon_objects/template.lua")
+
 function create(args)
 	
-	local button = {}
+	local button = template.create()
 	
 	
 	button.x = tonumber(args.x) or 0
@@ -47,11 +49,11 @@ function create(args)
 		term.setCursorPos(math.floor(button.x + (button.sprite.width - string.len(button.text))/2), button.y+midpoint-y_offset)
 		
 		if button.showingHover then
-			term.setTextColor(str_to_int(button.hoverTextColor))
-			term.setBackgroundColor(str_to_int(button.hoverBackgroundColor))
+			term.setTextColor(button:str_to_int(button.hoverTextColor))
+			term.setBackgroundColor(button:str_to_int(button.hoverBackgroundColor))
 		else
-			term.setTextColor(str_to_int(button.textColor))
-			term.setBackgroundColor(str_to_int(button.backgroundColor))
+			term.setTextColor(button:str_to_int(button.textColor))
+			term.setBackgroundColor(button:str_to_int(button.backgroundColor))
 		end
 		
 		io.write(button.text)
@@ -151,38 +153,7 @@ function create(args)
 		end
 	end
 	
-	--[[
-	if sharedFunctions then
-		sharedFunctions.corrections(button)
-	end
-	]]--
+	button:corrections(button)
+	
 	return button
-end
-
-function str_to_int(str)
-	str = string.lower(str)
-	
-	if tonumber(str) == nil  then
-		
-		if 	   str == "white" then return colors.white
-		elseif str == "orange" then return colors.orange
-		elseif str == "magenta" then return colors.magenta
-		elseif str == "lightblue" then return colors.lightBlue
-		elseif str == "yellow" then return colors.yellow
-		elseif str == "lime" then return colors.lime
-		elseif str == "pink" then return colors.pink
-		elseif str == "gray" then return colors.gray
-		elseif str == "lightgray" then return colors.lightGray
-		elseif str == "cyan" then return colors.cyan
-		elseif str == "purple" then return colors.purple
-		elseif str == "blue" then return colors.blue
-		elseif str == "brown" then return colors.brown
-		elseif str == "green" then return colors.green
-		elseif str == "red" then return colors.red
-		elseif str == "black" then return colors.black
-		end
-	end
-	
-	
-	return tonumber(str)
 end

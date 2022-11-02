@@ -1,6 +1,8 @@
+os.loadAPI("/colon/colon_apis/colon_objects/template.lua")
+
 function create(args)
 	
-	local scroll = {}
+	local scroll = template.create()
 	
 	
 	scroll.scrolls_right = 1
@@ -67,28 +69,7 @@ function create(args)
 	end
 	
 	
-	-- correction to clean inputs
-	--[[
-	function scroll:corrections()
-		-- quick color format correction
-		if type(scroll.color) == "string" then
-			scroll.color = colors[scroll.color]
-		end 
-		if type(scroll.background) == "string" then
-			scroll.background = colors[scroll.background]
-		end 
-		
-		if scroll.sticky == "true" or not type(scroll.sticky) == "boolean" then
-			scroll.sticky = true
-		else
-			scroll.sticky = false
-		end
-	end
-	]]--
-	--[[
-	if sharedFunctions then
-		sharedFunctions.corrections(scroll)
-	end
-	]]--
+	scroll:corrections(scroll)
+	
 	return scroll
 end

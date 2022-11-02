@@ -1,6 +1,9 @@
+os.loadAPI("/colon/colon_apis/colon_objects/template.lua")
+
 function create(args)
 	
-	textbox = {}
+	textbox = template.create()
+
 	textbox.x = tonumber(args.x) or 1
 	textbox.y = tonumber(args.y) or 1
 	textbox.text = args.text or ""
@@ -38,7 +41,6 @@ function create(args)
 		term.setBackgroundColor(textbox.background)
 		
 		for i = 1, textbox.height do
-			--sharedFunctions.message("i = " .. i .. "/" .. textbox.height)
 			if textbox.y - y_offset >= 0 and textbox.y - y_offset + i - 1 < 20 then
 				
 				local string_on_line = string.sub(textbox.text, textbox.width * (i-1) + 1, textbox.width * i)
@@ -112,9 +114,7 @@ function create(args)
 	end
 	
 	
-	if sharedFunctions then
-		sharedFunctions.corrections(textbox)
-	end
+	textbox:corrections(textbox)
 	
 	return textbox
 end
