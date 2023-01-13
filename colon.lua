@@ -1,14 +1,13 @@
-objects = {} -- storage for all objects
-when = {}
-tags = {}
-object_types = {}
 screen_width, screen_height = term.getSize() -- dimensions of screen
-x_offset = 0
-y_offset = 0
-end_of_page = 0
-background = colors.black
-color = colors.white
-scroll_lock = false
+object_types = {}
+
+pages = {}
+currentpage = ""
+
+
+
+
+
 
 -- open file and lex lines into tables
 
@@ -16,37 +15,43 @@ function main(inArgs)
 	args = inArgs
 
 	-- initalize to load apis
-	initalize()
+	initalize(args)
 	
-	-- open file and get line iterator
-	local text = get_file_iterator()
-
-	-- parse lines to create objects and insert them into the objects list
-	
-	for str in text do
-		interpret_line(str)
-	end
-	
-	redraw()
+	processFile(args[1])
 	interaction_loop()
 end
 
+function processFile(fileName)
+	-- open file and get line iterator
+	local text = get_file_iterator(fileName)
 
-function get_file_iterator()
-	if not fs.exists(args[1]) then error("file '" .. args[1] .. "' not found") end -- if file doesn't exist, error
-	return io.lines(args[1])
+	-- parse lines to create objects and insert them into the objects list
+	for str in text do
+		interpret_line(str, fileName)
+	end
+	
+	redraw()
 end
 
-function interpret_line(str)
-	local new_obj = parse(str)
+
+function get_file_iterator(fileName)
+	if not fs.exists(fileName) then error("file '" .. fileName .. "' not found") end -- if file doesn't exist, error
+	return io.lines(fileName)
+end
+
+function interpret_line(str, givenPage)
+	local new_obj = parse(str, givenPage)
 	if new_obj ~= -1 then
-		if not new_obj.unplaceable and new_obj.y+new_obj.height > end_of_page then end_of_page = new_obj.y+new_obj.height end -- adjust total page height
+		if 	not new_obj.unplaceable and 
+			new_obj.y+new_obj.height > pages[currentPage].end_of_page then 
+				pages[currentPage].end_of_page = new_obj.y+new_obj.height 
+		end -- adjust total page height
 		
 		
 		if new_obj.name ~= nil then
-			objects[new_obj.name] = new_obj
+			pages[currentPage].objects[new_obj.name] = new_obj
 		else
-			table.insert(objects, new_obj)
+			table.insert(pages[currentPage].objects, new_obj)
 		end
 		
 		
@@ -54,9 +59,10 @@ function interpret_line(str)
 end
 
 
-function parse(text, line_num)
+function parse(text, givenPage)
 
 	local found_tag
+	--os.sleep(1)
 	-- find what object type line is
 	local colon_pos = string.find(text, ":") -- position of colon used to mark a command
 	if not colon_pos then return -1 end -- if a colon is missing then ignore
@@ -64,7 +70,7 @@ function parse(text, line_num)
 	
 	-- find object_type
 	local object_type = string.sub(text, 1, colon_pos-1)
-	for tag in next, tags do
+	for tag in next, pages[givenPage].tags do
 		--print("object_type = ", object_type)
 		--print("trimmed type", string.sub(object_type, 2))
 		--print("tag = ", string.sub(object_type, 1, 1))
@@ -102,27 +108,33 @@ function parse(text, line_num)
 	
 	-- if when command
 	if object_type == "when" then
-		construct_when(args)
+		--[[
+		for k, v in next, args do
+			print(k .. ": " .. v)
+		end
+		]]
+		--os.sleep(1000)
+		construct_when(args, givenPage)
 		return -1
 		
 	-- if regular object
 	elseif object_type == "tag" then
-		--print("args[tag] = ", args["tag"])
-		tags[args["tag"]] = args
+		print("args[tag] = ", args["tag"])
+		pages[givenPage].tags[args["tag"]] = args
 		return -1
 	elseif object_type == "background" then
-		background = colors[args["color"]]
-		term.setBackgroundColor(background)
+		pages[givenPage].background = colors[args["color"]]
+		term.setBackgroundColor(pages[givenPage].background)
 		return -1
 	elseif object_type == "color" then
-		color = colors[args["color"]]
-		term.setTextColor(color)
+		pages[givenPage].color = colors[args["color"]]
+		term.setTextColor(pages[givenPage].color)
 		return -1
 	else
 		if found_tag then
-			for k, v in next, tags[found_tag] do 
+			for k, v in next, pages[givenPage].tags[found_tag] do 
 				-- add all tag attributes to object here
-				--print("arg[", k, "] = ", args[k])
+				print("arg[", k, "] = ", args[k])
 				if args[k] == nil then
 					args[k] = v
 				end
@@ -150,14 +162,14 @@ function trim_input(text)
 end
 
 
-function initalize()
+function initalize(args)
 	if not fs.exists("/colon/colon_apis/") then error("apis folder does not exist, try reinstalling") end
 	if not fs.exists("/colon/colon_apis/colon_objects/") then error("objects folder does not exist, try reinstalling") end
 	
 	apis = fs.list("/colon/colon_apis/colon_objects/")
 	
 	for i=1, table.getn(apis) do
-		--print("apis[".. i .. "] = ", apis[i])
+		print("apis[".. i .. "] = ", apis[i])
 		if not fs.isDir(apis[i]) then
 			os.loadAPI("/colon/colon_apis/colon_objects/" .. apis[i])
 			object_types[string.sub(apis[i], 1, -5)] = true
@@ -168,13 +180,25 @@ function initalize()
 	os.loadAPI("/colon/colon_apis/sharedFunctions.lua")
 	os.loadAPI("/colon/colon_apis/var.lua")
 	var.initalize()
+	
+	pages[args[1]] = {}
+	pages[args[1]].when = {}
+	pages[args[1]].objects = {} -- storage for all objects
+	pages[args[1]].tags = {}
+	pages[args[1]].x_offset = 0
+	pages[args[1]].y_offset = 0
+	pages[args[1]].end_of_page = 0
+	pages[args[1]].background = colors.black
+	pages[args[1]].color = colors.white
+	pages[args[1]].scroll_lock = false
+	
+	currentPage = args[1]
 end
 
 
-function construct_when(args)
-	--print("construct = ", string.sub(args.command, 2, -2))
-	--os.sleep(2)
-	when[args.name] = string.sub(args.command, 2, -2)
+function construct_when(args, givenPage)
+	print("construct = ", string.sub(args.command, 2, -2))
+	pages[givenPage].when[args.name] = string.sub(args.command, 2, -2)
 end
 
  -- INTERPRETING FUNCTIONS
@@ -201,24 +225,24 @@ function interaction_loop()
 			obj_args["event_id"] = event_id
 			obj_args["mouse_x"] = x
 			obj_args["mouse_y"] = y
-			obj_args["x_offset"] = x_offset
-			obj_args["y_offset"] = y_offset
+			obj_args["x_offset"] = pages[currentPage].x_offset
+			obj_args["y_offset"] = pages[currentPage].y_offset
 			obj_args["screen_height"] = screen_height
 			
 			-- give input to all objects that request it
 			--message("x = " .. tostring(x) .. "\ty = " .. tostring(y))
-			for index, data in pairs(objects) do
+			for index, data in pairs(pages[currentPage].objects) do
 				if data.dynamic then data:update(obj_args) 
 				elseif data.interactive and data:update(obj_args) then check_when_statements(data.name) end -- the update function for interactive objects should return a boolean for true if triggered, false it not
 			end
 			
 			-- handels scrolling of page
-			if event == "mouse_scroll" and not scroll_lock then
-				if event_id == -1 and y_offset+screen_height < end_of_page-1 then -- scroll up
-					y_offset = y_offset + 1
+			if event == "mouse_scroll" and not pages[currentPage].scroll_lock then
+				if event_id == -1 and pages[currentPage].y_offset+screen_height < pages[currentPage].end_of_page-1 then -- scroll up
+					pages[currentPage].y_offset = pages[currentPage].y_offset + 1
 					redraw()
-				elseif event_id == 1 and y_offset >= 1 then -- scroll down
-					y_offset = y_offset - 1
+				elseif event_id == 1 and pages[currentPage].y_offset >= 1 then -- scroll down
+					pages[currentPage].y_offset = pages[currentPage].y_offset - 1
 					redraw() -- we call redraw twice because it messes with dynamic objects when scrolling at top or bottom of page
 				end
 				obj_args["y_offset"] = y_offset
@@ -233,22 +257,26 @@ function interaction_loop()
 end
 
 
-function redraw()
-	
-	fill_screen()
-	
-	for index, data in pairs(objects) do
-		--term.setCursorPos(1, 9+index)
-		--print("printing: ", data.type)	
-		if not data.unplaceable then data:draw(x_offset, y_offset, screen_height) end
+function redraw(args)
+	args = args or {pages={currentPage}}
+	for counter, pageName in pairs(args.pages) do
+		fill_screen(pages[pageName])
+		print(pageName)
+		for index, data in pairs(pages[pageName].objects) do
+			if not data.unplaceable then data:draw(pages[pageName].x_offset, pages[pageName].y_offset, screen_height) end
+		end
 	end
 end
 
+function setCurrentPage(newPage)
+	currentpage = newPage
+end
 
-function fill_screen()
+
+function fill_screen(page)
 	local x, y = term.getCursorPos()
 	local keep_background_color = term.getBackgroundColor()
-	term.setBackgroundColor(background)
+	term.setBackgroundColor(page.background)
 	term.setCursorPos(1,1)
 	for i = 1, screen_height do
 		print(string.rep(" ", screen_width))
@@ -257,15 +285,14 @@ function fill_screen()
 	term.setBackgroundColor(keep_background_color)
 end
 
--- why is this not a dictionary?
 function check_when_statements(name)
-	for k, v in next, when do
-		--print(k, " ", v)
+	for k, v in next, pages[currentPage].when do
+		print(k, " ", v)
 		if k == name then
 			--term.clear()
 			--print("Interpreting line: ", string.gsub(v, "\\", ""))
 			--os.sleep(2)
-			interpret_line(string.gsub(v, "\\", ""))
+			interpret_line(string.gsub(v, "\\", ""), currentPage)
 			redraw()
 		end
 	end
@@ -275,7 +302,7 @@ end
 -- HELPER FUNCTIONS
 function printarr(arr, substr)
    for i in pairs(arr) do
-      --print("arr[" .. i .. "] = ", arr[i])
+      print("arr[" .. i .. "] = ", arr[i])
 	  if substr then printarr(arr[i]) end
    end
 end
