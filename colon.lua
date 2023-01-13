@@ -57,7 +57,6 @@ end
 function parse(text, line_num)
 
 	local found_tag
-	--os.sleep(1)
 	-- find what object type line is
 	local colon_pos = string.find(text, ":") -- position of colon used to mark a command
 	if not colon_pos then return -1 end -- if a colon is missing then ignore
@@ -103,12 +102,6 @@ function parse(text, line_num)
 	
 	-- if when command
 	if object_type == "when" then
-		--[[
-		for k, v in next, args do
-			print(k .. ": " .. v)
-		end
-		]]
-		--os.sleep(1000)
 		construct_when(args)
 		return -1
 		
@@ -264,6 +257,7 @@ function fill_screen()
 	term.setBackgroundColor(keep_background_color)
 end
 
+-- why is this not a dictionary?
 function check_when_statements(name)
 	for k, v in next, when do
 		--print(k, " ", v)
