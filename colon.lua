@@ -142,10 +142,6 @@ function parse(text, givenPage)
 		initalize_page(args["file"])
 		process_file(args["file"])
 		return -1
-	elseif object_type == "run" then
-		print("command = " .. string.gsub(args["command"], "\\", ""))
-		print(loadstring(args["command"]))
-		return -1
 	else
 		if found_tag then
 			for k, v in next, pages[givenPage].tags[found_tag] do 
@@ -310,8 +306,16 @@ function get_object(name)
 	return pages[currentPage].objects[name]
 end
 
+function edit_object(page, name, property, value)
+	pages[page].objects[name][property] = value
+end
+
 function set_current_page(newPage)
 	currentPage = newPage
+end
+
+function get_current_page()
+	return pages[current_page]
 end
 
 function get_page(name)
@@ -346,5 +350,7 @@ return{
 	setBackground=set_background,
 	setColor=set_color,
 	scrollLock=scrollLock,
-	redraw=redraw
+	redraw=redraw,
+	getCurrentPage=get_current_page,
+	editObject=edit_object
 }
