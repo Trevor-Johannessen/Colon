@@ -219,19 +219,14 @@ function interaction_loop()
 	local event, event_id, x, y
 	local obj_args = {}
 	
-	
-	
-	
-	
 	while true do
 		obj_args["tick"] = tick
-		
 		
 		-- update interactive elements
 		local timer = os.startTimer(0.05)
 		while true do
 			event, event_id, x, y = os.pullEvent()
-
+			message("Tick: " .. tick)
 			obj_args["event"] = event
 			obj_args["event_id"] = event_id
 			obj_args["mouse_x"] = x
@@ -242,10 +237,12 @@ function interaction_loop()
 			
 			-- give input to all objects that request it
 			--message("x = " .. tostring(x) .. "\ty = " .. tostring(y))
+			local foundWhen = false
 			for index, data in pairs(pages[currentPage].objects) do
-				if data.dynamic then data:update(obj_args) 
-				elseif data.interactive and data:update(obj_args) then check_when_statements(data.name) end -- the update function for interactive objects should return a boolean for true if triggered, false it not
+				if data.dynamic then data:update(obj_args)
+				elseif data.interactive and data:update(obj_args) then foundWhen = foundWhen or check_when_statements(data.name) end -- the update function for interactive objects should return a boolean for true if triggered, false it not
 			end
+			if foundWhen then os.cancelTimer(timer) break end -- time taken to run when statement may cause timer desync
 			
 			-- handels scrolling of page
 			if event == "mouse_scroll" and not pages[currentPage].scroll_lock then
@@ -262,7 +259,6 @@ function interaction_loop()
 			
 			if event == "timer" then break end
 		end
-		
 		tick = tick + 1
 	end
 end
@@ -271,48 +267,40 @@ end
 function redraw(args)
 	local args = args or {pageName=currentPage}
 	local pageName = args.pageName or currentPage
-	
-	print(pageName)
-	print(pages[pageName])
 	local x_offset = args.x_offset or pages[pageName].x_offset
 	local y_offset = args.y_offset or pages[pageName].y_offset
 	
-	fill_screen(pages[pageName])
+	fill_screen(args)
 	for index, data in pairs(pages[pageName].objects) do
-		if not data.unplaceable then data:draw(x_offset, y_offset, screen_height) end
+		if not data.unplaceable then data:draw(x_offset, y_offset) end
 	end
 end
 
-function setcurrentPage(newPage)
-	currentPage = newPage
-end
-
-
-function fill_screen(page)
-	local x, y = term.getCursorPos()
-	local keep_background_color = term.getBackgroundColor()
-	term.setBackgroundColor(page.background)
-	term.setCursorPos(1,1)
-	for i = 1, screen_height do
-		print(string.rep(" ", screen_width))
+function fill_screen(args)
+	local x_inital = args.x_inital or 0
+	local x_final = args.x_final or screen_width
+	local y_inital = args.y_inital or 0
+	local y_final = args.y_final or screen_height
+	
+	term.setBackgroundColor(pages[args.pageName].background)
+	for i = y_inital, y_final do
+		term.setCursorPos(x_inital, i)
+		io.write(string.rep(" ", x_final - x_inital+1))
 	end
-	term.setCursorPos(x, y)
-	term.setBackgroundColor(keep_background_color)
 end
 
 function check_when_statements(name)
+	local matched = false
 	for k, v in next, pages[currentPage].when do
 		print(k, " ", v)
 		if k == name then
-			--term.clear()
-			--print("Interpreting line: ", string.gsub(v, "\\", ""))
-			--os.sleep(2)
+			matched = true
 			interpret_line(string.gsub(v, "\\", ""), currentPage)
 			redraw()
 		end
 	end
+	return matched
 end
-
 
 -- HELPER FUNCTIONS
 function printarr(arr, substr)
@@ -322,13 +310,24 @@ function printarr(arr, substr)
    end
 end
 
-
 function getObject(name)
 	return pages[currentPage].objects[name]
 end
 
+function set_current_page(newPage)
+	currentPage = newPage
+end
+
 function getPage(name)
 	return pages[name]
+end
+
+function setBackground(name)
+	term.setBackgroundColor(pages[name].background)
+end
+
+function setColor(name)
+	term.setTextColor(pages[name].color)
 end
 
 function scrollLock(bool)
