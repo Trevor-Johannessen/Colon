@@ -2,7 +2,7 @@ screen_width, screen_height = term.getSize() -- dimensions of screen
 object_types = {}
 
 pages = {}
-currentpage = ""
+currentPage = ""
 
 
 
@@ -17,11 +17,11 @@ function main(inArgs)
 	-- initalize to load apis
 	initalize(args)
 	
-	processFile(args[1])
+	process_file(args[1])
 	interaction_loop()
 end
 
-function processFile(fileName)
+function process_file(fileName)
 	-- open file and get line iterator
 	local text = get_file_iterator(fileName)
 
@@ -43,19 +43,32 @@ function interpret_line(str, givenPage)
 	local new_obj = parse(str, givenPage)
 	if new_obj ~= -1 then
 		if 	not new_obj.unplaceable and 
-			new_obj.y+new_obj.height > pages[currentPage].end_of_page then 
-				pages[currentPage].end_of_page = new_obj.y+new_obj.height 
+			new_obj.y+new_obj.height > pages[givenPage].end_of_page then 
+				pages[givenPage].end_of_page = new_obj.y+new_obj.height 
 		end -- adjust total page height
 		
 		
 		if new_obj.name ~= nil then
-			pages[currentPage].objects[new_obj.name] = new_obj
+			pages[givenPage].objects[new_obj.name] = new_obj
 		else
-			table.insert(pages[currentPage].objects, new_obj)
+			table.insert(pages[givenPage].objects, new_obj)
 		end
 		
 		
 	end
+end
+
+function initalize_page(pageName)
+	pages[pageName] = {}
+	pages[pageName].when = {}
+	pages[pageName].objects = {} -- storage for all objects
+	pages[pageName].tags = {}
+	pages[pageName].x_offset = 0
+	pages[pageName].y_offset = 0
+	pages[pageName].end_of_page = 0
+	pages[pageName].background = colors.black
+	pages[pageName].color = colors.white
+	pages[pageName].scroll_lock = false
 end
 
 
@@ -130,6 +143,14 @@ function parse(text, givenPage)
 		pages[givenPage].color = colors[args["color"]]
 		term.setTextColor(pages[givenPage].color)
 		return -1
+	elseif object_type == "load" then
+		initalize_page(args["file"])
+		process_file(args["file"])
+		return -1
+	elseif object_type == "run" then
+		print("command = " .. string.gsub(args["command"], "\\", ""))
+		print(loadstring(args["command"]))
+		return -1
 	else
 		if found_tag then
 			for k, v in next, pages[givenPage].tags[found_tag] do 
@@ -181,17 +202,7 @@ function initalize(args)
 	os.loadAPI("/colon/colon_apis/var.lua")
 	var.initalize()
 	
-	pages[args[1]] = {}
-	pages[args[1]].when = {}
-	pages[args[1]].objects = {} -- storage for all objects
-	pages[args[1]].tags = {}
-	pages[args[1]].x_offset = 0
-	pages[args[1]].y_offset = 0
-	pages[args[1]].end_of_page = 0
-	pages[args[1]].background = colors.black
-	pages[args[1]].color = colors.white
-	pages[args[1]].scroll_lock = false
-	
+	initalize_page(args[1])
 	currentPage = args[1]
 end
 
@@ -258,18 +269,22 @@ end
 
 
 function redraw(args)
-	args = args or {pages={currentPage}}
-	for counter, pageName in pairs(args.pages) do
-		fill_screen(pages[pageName])
-		print(pageName)
-		for index, data in pairs(pages[pageName].objects) do
-			if not data.unplaceable then data:draw(pages[pageName].x_offset, pages[pageName].y_offset, screen_height) end
-		end
+	local args = args or {pageName=currentPage}
+	local pageName = args.pageName or currentPage
+	
+	print(pageName)
+	print(pages[pageName])
+	local x_offset = args.x_offset or pages[pageName].x_offset
+	local y_offset = args.y_offset or pages[pageName].y_offset
+	
+	fill_screen(pages[pageName])
+	for index, data in pairs(pages[pageName].objects) do
+		if not data.unplaceable then data:draw(x_offset, y_offset, screen_height) end
 	end
 end
 
-function setCurrentPage(newPage)
-	currentpage = newPage
+function setcurrentPage(newPage)
+	currentPage = newPage
 end
 
 
@@ -309,13 +324,16 @@ end
 
 
 function getObject(name)
-	return objects[name]
+	return pages[currentPage].objects[name]
+end
+
+function getPage(name)
+	return pages[name]
 end
 
 function scrollLock(bool)
-	scrollLock = bool
+	pages[currentPage].scrollLock = bool
 end
-
 
 function message(message)
 	local orgx, orgy = term.getCursorPos()
