@@ -1,15 +1,15 @@
 # COLON
 
 ### Table of Contents:
-* Introduction
-* Installation
-* Syntax
-* Objects
-* Tags
-* Functions
-* Transitions
-* Extension
-* Interfacing
+* [Introduction](https://github.com/Trevor-Johannessen/markup#Introduction)
+* [Installation](https://github.com/Trevor-Johannessen/markup#Installation)
+* [Syntax](https://github.com/Trevor-Johannessen/markup#Syntax)
+* [Objects](https://github.com/Trevor-Johannessen/markup#Objects)
+* [Tags](https://github.com/Trevor-Johannessen/markup#Tags)
+* [Functions](https://github.com/Trevor-Johannessen/markup#Functions)
+* [Transitions](https://github.com/Trevor-Johannessen/markup#Transitions)
+* [Extension](https://github.com/Trevor-Johannessen/markup#Extension)
+* [Interfacing](https://github.com/Trevor-Johannessen/markup#Interfacing)
 
 
 ## Introduction:
