@@ -78,8 +78,10 @@ For more information on each function please see the wiki (ATTATCH WIKI HERE)
 ## Transitions
 Transitions can be used to move between two loaded pages. Transitions are declared as an object with the to= and from= parameters (Ex. `swipe: to=temp.txt, from=temp2.txt`). If from is left blank, a transition should transition from the current page. If a transition is declared without a when: statement it will immediately transition on render.
 
-There is currently 1 transition:
- * swipe
+There is currently 3 transition:
+ * swipeLeft
+ * swipeRight
+ * jumpcut
 
 For more information on each function please see the wiki (ATTATCH WIKI HERE)
 
