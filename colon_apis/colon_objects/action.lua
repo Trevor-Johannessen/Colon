@@ -14,4 +14,7 @@ function create(args)
 	return action
 end
 
+return {
+	create=create
+}
 

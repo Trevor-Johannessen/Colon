@@ -124,3 +124,7 @@ function create(args)
 	
     return menu
 end
+
+return{
+	create=create
+}

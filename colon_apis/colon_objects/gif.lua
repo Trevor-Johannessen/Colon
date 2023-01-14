@@ -1,7 +1,5 @@
-os.loadAPI("/colon/colon_apis/colon_objects/template.lua")
-
 function create(args)
-	gif = template.create()
+	gif = {}
 	
 	gif.x = tonumber(args.x) or 1
 	gif.y = tonumber(args.y) or 1
@@ -42,9 +40,10 @@ function create(args)
 			if gif.frame > #gif.images and gif.replay then gif.frame = 1 end -- loop gif if over
 		end
 	end
-	
-	
-	gif:corrections(gif)
-	
+		
 	return gif
 end
+
+return{
+	create=create
+}

@@ -1,8 +1,15 @@
-os.loadAPI("/colon/colon_apis/colon_objects/template.lua")
+scrollModule = {}
+
+
+screen_width, screen_height = term.getSize() -- dimensions of screen
+
+function monus(a, b)
+	return ((a-b)<0 and 0 or (a-b))
+end
 
 function create(args)
 	
-	local scroll = template.create()
+	local scroll = {}
 	
 	
 	scroll.scrolls_right = 1
@@ -30,33 +37,29 @@ function create(args)
 	
 	
 	
-	function scroll:draw(x_offset, y_offset, screen_height, tick)
+	function scroll:draw(x_offset, y_offset, tick)
 		tick = tick or scroll.speed
 		if scroll.sticky then 
 			y_offset = 0 
 			x_offset = 0
 		end
 		if tick % scroll.speed == 0 and scroll.y >= y_offset and scroll.y <= screen_height+y_offset then
-			
-			local save_text = term.getTextColor()
-			local save_background = term.getBackgroundColor()
-			
-			
-			
 			x_offset = x_offset or 0 -- default parameter x = 0
 			y_offset = y_offset or 0 -- default parameter y = 0
-			term.setCursorPos(scroll.x - x_offset, scroll.y - y_offset)
+			local pointer = scroll.pointer
+			term.setCursorPos(scroll.x + x_offset, scroll.y - y_offset)
 			term.setTextColor(scroll.color)
 			term.setBackgroundColor(scroll.background)
-			io.write(string.sub(scroll.text, scroll.pointer) .. string.sub(scroll.text, 1, scroll.pointer))
-			term.setTextColor(save_text)
-			term.setBackgroundColor(save_background)
+			local spaceLeft = monus(screen_width-scroll.x, x_offset)
+			if spaceLeft < #scroll.text then
+				io.write(string.sub(scroll.text, pointer, pointer+spaceLeft))
+			else io.write(string.sub(scroll.text, pointer) .. string.sub(scroll.text, 1, pointer)) end
 		end
 	end
 	
 	
 	function scroll:update(obj_args)
-		scroll:draw(obj_args["x_offset"], obj_args["y_offset"], obj_args["screen_height"], obj_args["tick"])
+		scroll:draw(obj_args["x_offset"], obj_args["y_offset"], obj_args["tick"])
 		
 		scroll.pointer = scroll.pointer + scroll.direction
 		if scroll.pointer == string.len(scroll.text) and scroll.direction == 1 then scroll.pointer = 1
@@ -68,8 +71,9 @@ function create(args)
 		scroll.direction = scroll.direction * -1
 	end
 	
-	
-	scroll:corrections(scroll)
-	
 	return scroll
 end
+
+return{
+	create=create
+}

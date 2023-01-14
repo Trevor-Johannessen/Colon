@@ -11,7 +11,7 @@ currentPage = ""
 
 -- open file and lex lines into tables
 
-function main(inArgs)
+function run(inArgs)
 	args = inArgs
 
 	-- initalize to load apis
@@ -161,9 +161,11 @@ function parse(text, givenPage)
 				end
 			end
 		end
-		local obj = loadstring("return " .. object_type .. ".create")()(args)
-		
-		return obj
+		--local obj = loadstring("return " .. object_type .. ".create")()(args)
+		--return obj
+		print(object_type)
+		print(object_types[object_type])
+		return object_types[object_type].create(args)
 	end
 end
 
@@ -192,15 +194,14 @@ function initalize(args)
 	for i=1, table.getn(apis) do
 		print("apis[".. i .. "] = ", apis[i])
 		if not fs.isDir(apis[i]) then
-			os.loadAPI("/colon/colon_apis/colon_objects/" .. apis[i])
-			object_types[string.sub(apis[i], 1, -5)] = true
+			local noExtension = string.sub(apis[i], 1, -5)
+			object_types[noExtension] = require("colon_apis/colon_objects/" .. noExtension) 
 		end
 	end
 	
 	-- load apis
-	os.loadAPI("/colon/colon_apis/sharedFunctions.lua")
-	os.loadAPI("/colon/colon_apis/var.lua")
-	var.initalize()
+	--os.loadAPI("/colon/colon_apis/var.lua")
+	--var.initalize()
 	
 	initalize_page(args[1])
 	currentPage = args[1]
@@ -226,7 +227,6 @@ function interaction_loop()
 		local timer = os.startTimer(0.05)
 		while true do
 			event, event_id, x, y = os.pullEvent()
-			message("Tick: " .. tick)
 			obj_args["event"] = event
 			obj_args["event_id"] = event_id
 			obj_args["mouse_x"] = x
@@ -310,7 +310,7 @@ function printarr(arr, substr)
    end
 end
 
-function getObject(name)
+function get_object(name)
 	return pages[currentPage].objects[name]
 end
 
@@ -318,15 +318,15 @@ function set_current_page(newPage)
 	currentPage = newPage
 end
 
-function getPage(name)
+function get_page(name)
 	return pages[name]
 end
 
-function setBackground(name)
+function set_background(name)
 	term.setBackgroundColor(pages[name].background)
 end
 
-function setColor(name)
+function set_color(name)
 	term.setTextColor(pages[name].color)
 end
 
@@ -341,3 +341,13 @@ function message(message)
 	io.write(message)
 	term.setCursorPos(orgx, orgy)
 end
+
+return{
+	run=run,
+	getObject=get_object,
+	setCurrentPage=set_current_page,
+	getPage=get_page,
+	setBackground=set_background,
+	setColor=set_color,
+	scrollLock=scrollLock
+}

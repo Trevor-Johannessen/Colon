@@ -1,9 +1,8 @@
-os.loadAPI("/colon/colon_apis/colon_objects/template.lua")
+colon = require("colon")
 
 function create(args)
 	
-	textbox = template.create()
-
+	textbox = {}
 	textbox.x = tonumber(args.x) or 1
 	textbox.y = tonumber(args.y) or 1
 	textbox.text = args.text or ""
@@ -31,7 +30,7 @@ function create(args)
 		y_offset = y_offset or 0
 		
 		
-		if text.sticky then 
+		if textbox.sticky then 
 			y_offset = 0 
 			x_offset = 0
 		end
@@ -41,6 +40,7 @@ function create(args)
 		term.setBackgroundColor(textbox.background)
 		
 		for i = 1, textbox.height do
+			--sharedFunctions.message("i = " .. i .. "/" .. textbox.height)
 			if textbox.y - y_offset >= 0 and textbox.y - y_offset + i - 1 < 20 then
 				
 				local string_on_line = string.sub(textbox.text, textbox.width * (i-1) + 1, textbox.width * i)
@@ -114,7 +114,9 @@ function create(args)
 	end
 	
 	
-	textbox:corrections(textbox)
+	if sharedFunctions then
+		sharedFunctions.corrections(textbox)
+	end
 	
 	return textbox
 end
@@ -122,3 +124,7 @@ end
 function monus(a, b)
 	return ((a-b)<0 and 0 or (a-b))
 end
+
+return {
+	create=create
+}

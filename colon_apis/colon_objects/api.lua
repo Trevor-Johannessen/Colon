@@ -9,3 +9,7 @@ function create(args)
 	end
 	return -1
 end
+
+return{
+	create=create
+}

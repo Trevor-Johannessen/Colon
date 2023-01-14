@@ -1,3 +1,4 @@
 args = {...}
-inMarkup = os.loadAPI("colon/colon.lua")
-colon.main(args)
+--os.loadAPI("colon/colon.lua")
+colon = require("colon")
+colon.run(args)

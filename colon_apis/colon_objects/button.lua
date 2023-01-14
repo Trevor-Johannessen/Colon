@@ -1,9 +1,9 @@
-os.loadAPI("/colon/colon_apis/colon_objects/template.lua")
+screen_width, screen_height = term.getSize() -- dimensions of screen
+sprite = require("colon_apis/colon_objects/sprite")
 
 function create(args)
 	
-	local button = template.create()
-	
+	local button = {}
 	
 	button.x = tonumber(args.x) or 0
 	button.y = tonumber(args.y) or 0
@@ -22,7 +22,7 @@ function create(args)
 	button.backgroundColor = args.background or colors.white
 	button.hoverTextColor = args.hoverColor or colors.white
 	button.hoverBackgroundColor = args.hoverBackground or colors.black
-	button.sticky = args.sticky or false
+	button.sticky = args.sticky == "true" or false
 	
 	local sprite_args = {}
 	sprite_args["x"] = button.x
@@ -42,23 +42,18 @@ function create(args)
 		end
 		
 		button.sprite:draw(x_offset, y_offset)
-		
 		local midpoint = math.floor(button.sprite.height / 2)
-		local saved_1 = term.getTextColor()
-		local saved_2 = term.getBackgroundColor()
-		term.setCursorPos(math.floor(button.x + (button.sprite.width - string.len(button.text))/2), button.y+midpoint-y_offset)
+		term.setCursorPos(math.floor(button.x + x_offset + (button.sprite.width - string.len(button.text))/2), button.y+midpoint-y_offset)
 		
 		if button.showingHover then
-			term.setTextColor(button:str_to_int(button.hoverTextColor))
-			term.setBackgroundColor(button:str_to_int(button.hoverBackgroundColor))
+			term.setTextColor(button.hoverTextColor)
+			term.setBackgroundColor(button.hoverBackgroundColor)
 		else
-			term.setTextColor(button:str_to_int(button.textColor))
-			term.setBackgroundColor(button:str_to_int(button.backgroundColor))
+			term.setTextColor(button.textColor)
+			term.setBackgroundColor(button.backgroundColor)
 		end
 		
-		io.write(button.text)
-		term.setTextColor(saved_1)
-		term.setBackgroundColor(saved_2)
+		if(x_offset + button.x + #button.text <= screen_width) then io.write(button.text) end
 	end
 	
 	-- implements functionality of button
@@ -67,11 +62,8 @@ function create(args)
 			obj_args["x_offset"] = 0
 			obj_args["y_offset"] = 0 
 		end
-		
 		obj_args["x_offset"] = obj_args["x_offset"] or 0
 		obj_args["y_offset"] = obj_args["y_offset"] or 0
-		
-		
 		
 		if not obj_args["mouse_x"] or not obj_args["mouse_y"] or button.locked then return false end -- check that given action is mouse (and button is not locked)
 		if button:check_hover(obj_args["mouse_x"], obj_args["mouse_y"], obj_args["y_offset"]) then	-- if the mouse is hovering the button
@@ -153,7 +145,10 @@ function create(args)
 		end
 	end
 	
-	button:corrections(button)
-	
 	return button
 end
+
+
+return{
+	create=create
+}

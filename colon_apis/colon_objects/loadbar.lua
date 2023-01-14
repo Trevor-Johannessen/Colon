@@ -86,10 +86,9 @@ function create(args)
 		end
 		
 	end
-	
-	
-	
-    
-    return loadbar
-    
+    return loadbar 
 end
+
+return{
+	create=create
+}

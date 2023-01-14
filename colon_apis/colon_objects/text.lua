@@ -1,8 +1,12 @@
-os.loadAPI("/colon/colon_apis/colon_objects/template.lua")
+screen_width, screen_height = term.getSize() -- dimensions of screen
+
+function monus(a, b)
+	return ((a-b)<0 and 0 or (a-b))
+end
 
 function create(args)
 	
-	local text = template.create()
+	local text = {}
 	
 	text.x = tonumber(args.x) or 1 -- x coordinate of text
 	text.y = tonumber(args.y) or 1 -- y coordinate of text
@@ -20,7 +24,7 @@ function create(args)
 	text.start = tonumber(args.start) or text.x
 	text.finish = tonumber(args.finish) or text.screen_width
 	text.full_lines = math.floor(text.length / (text.finish - text.start))
-	text.partial_lines = text:monus(1, text.length - (text.finish - text.start)*text.full_lines)
+	text.partial_lines = monus(1, text.length - (text.finish - text.start)*text.full_lines)
 	text.height = text.full_lines + text.partial_lines + 1
 	
 	function text:draw(x_offset, y_offset)
@@ -48,26 +52,36 @@ function create(args)
 				printable_str = var.replaceStr(printable_str)
 			end
 			
-			str, colorString, backgroundString = text:parseColor(printable_str)
-			local newY = text.y
-			
-			while str:len() > 0 do
-				term.setCursorPos(text.start, newY-y_offset)
-				-- need to find the amount to increment the cursor by each loop (should be the amount of characters displayed)
-				term.blit(str:sub(1,text.finish-text.start), colorString:sub(1,text.finish-text.start), backgroundString:sub(1,text.finish-text.start))
-				str=str:sub(text.finish-text.start+1)
-				colorString=colorString:sub(text.finish-text.start+1)
-				backgroundString=backgroundString:sub(text.finish-text.start+1)
-				newY = newY + 1
+			if sharedFunctions then
+				str, colorString, backgroundString = sharedFunctions.parseColor(printable_str)
+				local newY = text.y
+				
+				while str:len() > 0 do
+					term.setCursorPos(text.start+x_offset, newY-y_offset)
+					-- need to find the amount to increment the cursor by each loop (should be the amount of characters displayed)
+					term.blit(str:sub(1,text.finish-text.start), colorString:sub(1,text.finish-text.start), backgroundString:sub(1,text.finish-text.start))
+					str=str:sub(text.finish-text.start+1)
+					colorString=colorString:sub(text.finish-text.start+1)
+					backgroundString=backgroundString:sub(text.finish-text.start+1)
+					newY = newY + 1
+				end
+			else
+				io.write(text.str)
 			end
-
 			term.setCursorPos(save_cursor[1], save_cursor[2])
 			term.setTextColor(save_text)
 			term.setBackgroundColor(save_background)
 		end
 	end
 	
-	text:corrections(text)
+	-- correction to clean inputs
+	if sharedFunctions then
+		sharedFunctions.corrections(text)
+	end
 	
 	return text
 end
+
+return{
+	create=create
+	}

@@ -1,8 +1,6 @@
-os.loadAPI("/colon/colon_apis/colon_objects/template.lua")
-
 function create(args)
 	
-	local shape = template.create()
+	local shape = {}
 	
 	shape.point1 = args.point1 or 1
 	shape.point2 = args.point2 or 1
@@ -15,7 +13,12 @@ function create(args)
 		
 	end
 	
-	shape:corrections(shape)
+	function triangle:corrections()
+	end
 	
 	return shape
 end
+
+return{
+	create=create
+}

@@ -1,9 +1,8 @@
-os.loadAPI("/colon/colon_apis/colon_objects/template.lua")
+screen_width, screen_height = term.getSize() -- dimensions of screen
 
 function create(args)
 	
-	local sprite = template.create()
-
+	local sprite = {}
 	sprite.x = tonumber(args.x) or 0
 	sprite.y = tonumber(args.y) or 0
 	sprite.file = "" -- TODO: make default image and place here
@@ -18,7 +17,7 @@ function create(args)
 		sprite.src = args.src
 	end
 	
-	--print("src = ", sprite.src)
+	print("src = ", sprite.src)
 	local f = io.open(sprite.src)
 	sprite.height = tonumber(f:read())
 	sprite.width = tonumber(f:read())
@@ -38,7 +37,7 @@ function create(args)
 		
 		local firstx, firsty = term.getCursorPos()
 		local current_char = 1
-		term.setCursorPos(sprite.x-x_offset, sprite.y+0-y_offset)
+		term.setCursorPos(sprite.x+x_offset, sprite.y-y_offset)
 		
 		if sprite.sticky then 
 			y_offset = 0 
@@ -48,7 +47,7 @@ function create(args)
 		for i = 1, sprite.height do
 			term.blit(string.rep(" ", sprite.width), string.rep("1", sprite.width), string.sub(sprite.img, current_char, current_char+sprite.width-1 ) )
 			current_char = current_char + sprite.width
-			term.setCursorPos(sprite.x-x_offset, sprite.y+i-y_offset)
+			term.setCursorPos(sprite.x+x_offset, sprite.y+i-y_offset)
 		end
 		
 		term.setCursorPos(firstx, firsty)
@@ -121,8 +120,20 @@ function create(args)
 		io.close(f)
 	end
 	
-	sprite:corrections(sprite)
+	function sprite:corrections()
+		if sprite.sticky == "true" or not type(sprite.sticky) == "boolean" then
+			sprite.sticky = true
+		else
+			sprite.sticky = false
+		end
+	end
+	
+	
+	sprite:corrections()
 	
 	return sprite
 end
 
+return {
+	create=create
+	}
