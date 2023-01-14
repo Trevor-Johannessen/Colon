@@ -1,6 +1,8 @@
+template = require("colon_apis/colon_objects/template")
+
 function create(args)
 	
-	local shape = {}
+	local shape = template.create()
 	
 	shape.point1 = args.point1 or 1
 	shape.point2 = args.point2 or 1

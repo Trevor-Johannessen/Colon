@@ -1,5 +1,7 @@
+template = require("colon_apis/colon_objects/template")
+
 function create(args)
-	gif = {}
+	gif = template.create()
 	
 	gif.x = tonumber(args.x) or 1
 	gif.y = tonumber(args.y) or 1

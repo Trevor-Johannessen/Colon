@@ -1,6 +1,4 @@
-scrollModule = {}
-
-
+template = require("colon_apis/colon_objects/template")
 screen_width, screen_height = term.getSize() -- dimensions of screen
 
 function monus(a, b)
@@ -9,7 +7,7 @@ end
 
 function create(args)
 	
-	local scroll = {}
+	local scroll = template.create()
 	
 	
 	scroll.scrolls_right = 1

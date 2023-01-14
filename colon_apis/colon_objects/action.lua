@@ -1,6 +1,8 @@
+template = require("colon_apis/colon_objects/template")
+
 
 function create(args)
-	action = {}
+	action = template.create()
 	action.name = args.name
 	action.event = args.event
 	action.unplaceable = true

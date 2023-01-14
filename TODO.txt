@@ -42,7 +42,6 @@ New Objects:
 	Slider - slide bar that can have N notches. 
 
 Functions:
-	(Maybe create a seperate browser program for these)
 	NewPage - Goes to a new page by running the initalization function on a new file
 	NewTab - creates a new tab and runs colon on a file
 

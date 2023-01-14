@@ -1,6 +1,8 @@
+template = require("colon_apis/colon_objects/template")
+
 function create(args)
     
-    local menu = {}
+    local menu = template.create()
     
     
     -- draws the current rendition of menu

@@ -1,9 +1,10 @@
 screen_width, screen_height = term.getSize() -- dimensions of screen
 sprite = require("colon_apis/colon_objects/sprite")
+template = require("colon_apis/colon_objects/template")
 
 function create(args)
 	
-	local button = {}
+	local button = template.create()
 	
 	button.x = tonumber(args.x) or 0
 	button.y = tonumber(args.y) or 0

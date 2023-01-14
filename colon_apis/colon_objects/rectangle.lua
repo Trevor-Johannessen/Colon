@@ -1,6 +1,7 @@
+template = require("colon_apis/colon_objects/template")
 function create(args)
 	
-	local rectangle = {}
+	local rectangle = template.create()
 	
 	rectangle.x = args.x or 1
 	rectangle.y = args.y or 1.

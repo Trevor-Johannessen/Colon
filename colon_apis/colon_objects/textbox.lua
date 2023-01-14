@@ -1,8 +1,9 @@
 colon = require("colon")
+template = require("colon_apis/colon_objects/template")
 
 function create(args)
 	
-	textbox = {}
+	textbox = template.create()
 	textbox.x = tonumber(args.x) or 1
 	textbox.y = tonumber(args.y) or 1
 	textbox.text = args.text or ""
@@ -36,8 +37,8 @@ function create(args)
 		end
 		
 		term.setCursorPos(textbox.x-x_offset, textbox.y-y_offset)
-		term.setTextColor(textbox.color)
-		term.setBackgroundColor(textbox.background)
+		term.setTextColor(textbox:convertColor(textbox.color, "int"))
+		term.setBackgroundColor(textbox:convertColor(textbox.background, "int"))
 		
 		for i = 1, textbox.height do
 			--sharedFunctions.message("i = " .. i .. "/" .. textbox.height)

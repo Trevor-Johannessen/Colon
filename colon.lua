@@ -5,12 +5,7 @@ pages = {}
 currentPage = ""
 
 
-
-
-
-
 -- open file and lex lines into tables
-
 function run(inArgs)
 	args = inArgs
 
@@ -265,6 +260,7 @@ end
 
 
 function redraw(args)
+	term.setCursorPos(1,1)
 	local args = args or {pageName=currentPage}
 	local pageName = args.pageName or currentPage
 	local x_offset = args.x_offset or pages[pageName].x_offset
@@ -349,5 +345,6 @@ return{
 	getPage=get_page,
 	setBackground=set_background,
 	setColor=set_color,
-	scrollLock=scrollLock
+	scrollLock=scrollLock,
+	redraw=redraw
 }

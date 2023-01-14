@@ -1,8 +1,9 @@
 screen_width, screen_height = term.getSize() -- dimensions of screen
+template = require("colon_apis/colon_objects/template")
 
 function create(args)
 	
-	local sprite = {}
+	local sprite = template.create()
 	sprite.x = tonumber(args.x) or 0
 	sprite.y = tonumber(args.y) or 0
 	sprite.file = "" -- TODO: make default image and place here

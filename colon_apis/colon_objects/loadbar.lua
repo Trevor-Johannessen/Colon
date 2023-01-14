@@ -1,6 +1,8 @@
+template = require("colon_apis/colon_objects/template")
+
 function create(args)
     
-    local loadbar = {}
+    local loadbar = template.create()
     
     loadbar.x = tonumber(args.x) or 0 -- x coordinate of loadbar
     loadbar.y = tonumber(args.y) or 0 -- y coordinate of loadbar
