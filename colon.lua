@@ -258,10 +258,9 @@ end
 function redraw(args)
 	term.setCursorPos(1,1)
 	local args = args or {pageName=currentPage}
-	local pageName = args.pageName or currentPage
+	local pageName = args.pageName
 	local x_offset = args.x_offset or pages[pageName].x_offset
 	local y_offset = args.y_offset or pages[pageName].y_offset
-	
 	fill_screen(args)
 	for index, data in pairs(pages[pageName].objects) do
 		if not data.unplaceable then data:draw(x_offset, y_offset) end

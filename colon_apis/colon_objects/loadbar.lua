@@ -10,8 +10,8 @@ function create(args)
     loadbar.progress = 0 -- progress of loadbar
     loadbar.text = args.text or "default text" -- default text of loadbar
     loadbar.symbol = args.symbol or string.char(4) -- load symbol 
-    loadbar.symbol_color = args.symbol_color or "0"
-    loadbar.background = args.background or "f" -- background color of loadbar
+    loadbar.symbol_color = loadbar:convertColor(args.symbol_color, 'hex') or "0"
+    loadbar.background = loadbar:convertColor(args.background, 'hex') or "f"
     loadbar.dynamic = false
 	loadbar.interactive = false
 	loadbar.name = args.name
