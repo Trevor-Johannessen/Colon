@@ -36,7 +36,7 @@ function create(args)
 			x_offset = 0
 		end
 		
-		term.setCursorPos(textbox.x-x_offset, textbox.y-y_offset)
+		term.setCursorPos(textbox.x+x_offset, textbox.y-y_offset)
 		term.setTextColor(textbox:convertColor(textbox.color, "int"))
 		term.setBackgroundColor(textbox:convertColor(textbox.background, "int"))
 		
