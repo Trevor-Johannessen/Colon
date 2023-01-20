@@ -48,7 +48,7 @@ function create(args)
 				io.write(string_on_line .. string.rep(" ", textbox.width - string.len(string_on_line)))
 				
 			end
-			term.setCursorPos(textbox.x-x_offset, textbox.y+i-y_offset)
+			term.setCursorPos(textbox.x+x_offset, textbox.y+i-y_offset)
 			
 		end
 		
