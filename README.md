@@ -19,13 +19,13 @@ Colon is a UI markup language I am working on. It's goal is to be able to create
 
 ## Installation:
 
-Currently there is no installer, to run Colon please paste the files in its own directory and run using *directory*/colonrunner *filename*
+Currently there is no installer, to run Colon please clone the repository and run using *directory*/colonrunner *filename*
 I should really make an installer.
 
 
 ## Syntax:
 
-Colon is line seperated so each line should start with the desired object followed by a colon. After the colon parameters can be declared. Parameters are comma delimited and are marked using name=value. Text values should be wrapped in a String but singular words do not need to be. (color=blue 👍, text=llorem ipsum 👎) Parameters involving color should be insensetive to input style, colors.green, 'green', and 'd' are all valid options. Invalid parameters are ignored by objects. Invalid keys will be ignored while invalid values may cause the program to crash.
+Colon is line seperated so each line should start with the desired object followed by a colon. After the colon, parameters can be declared. Parameters are comma delimited and are marked using a key=value pair. Text values should be wrapped in a String but singular words do not need to be. (Ex. color=blue 👍, text=llorem ipsum 👎) Parameters involving color should be insensetive to input style, colors.green, 'green', and 'd' are all valid options. Invalid parameters are ignored by objects. Invalid keys will be ignored while invalid values may cause the program to crash.
 
 
 ## Objects:
