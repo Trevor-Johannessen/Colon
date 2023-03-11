@@ -75,7 +75,6 @@ function parse(text, givenPage)
 	local colon_pos = string.find(text, ":") -- position of colon used to mark a command
 	if not colon_pos then return -1 end -- if a colon is missing then ignore
 	
-	
 	-- find object_type
 	local object_type = string.sub(text, 1, colon_pos-1)
 	for tag in next, pages[givenPage].tags do
@@ -88,20 +87,13 @@ function parse(text, givenPage)
 				found_tag = tag
 				break
 			end
-			
 		end
-		
-		
 	end
-	
-	text = string.sub(text, colon_pos+1)
 	
 	-- create arguments in table
 	local args = {}
-	
+	text = string.sub(text, colon_pos+1)
 	text = trim_input(text)
-	
-
 	text = string.gmatch(text, "([^,]*),*")
 
 	-- turn arguments into parameters for the objects
@@ -113,18 +105,10 @@ function parse(text, givenPage)
 			--print("tag = ", args[string.sub(term, 0, equals_pos-1)])
 	end
 	
-	
 	-- if when command
 	if object_type == "when" then
-		--[[
-		for k, v in next, args do
-			print(k .. ": " .. v)
-		end
-		]]
-		--os.sleep(1000)
 		construct_when(args, givenPage)
 		return -1
-		
 	-- if regular object
 	elseif object_type == "tag" then
 		print("args[tag] = ", args["tag"])
@@ -152,21 +136,13 @@ function parse(text, givenPage)
 				end
 			end
 		end
-		--local obj = loadstring("return " .. object_type .. ".create")()(args)
-		--return obj
-		print(object_type)
-		print(object_types[object_type])
 		return object_types[object_type].create(args)
 	end
 end
 
-
 -- removes spaces from arguments (ignores spaces and removes commas inside quotes)
 function trim_input(text)
-	-- I want to find a way to do this with regex
-	
 	local in_quotes = false
-	
 	for i=0, string.len(text) do
 		if string.sub(text, i, i) == "\"" and string.sub(text, i-1, i-1) ~= "\\" then in_quotes = not in_quotes -- check if in quotes
 		elseif string.sub(text, i, i) == " " and not in_quotes then text = string.sub(text, 0, i-1) .. string.sub(text, i+1) -- remove spaces
@@ -174,7 +150,6 @@ function trim_input(text)
 	end
 	return text
 end
-
 
 function initalize(args)
 	if not fs.exists("/colon/colon_apis/") then error("apis folder does not exist, try reinstalling") end
@@ -189,11 +164,6 @@ function initalize(args)
 			object_types[noExtension] = require("colon_apis/colon_objects/" .. noExtension) 
 		end
 	end
-	
-	-- load apis
-	--os.loadAPI("/colon/colon_apis/var.lua")
-	--var.initalize()
-	
 	initalize_page(args[1])
 	currentPage = args[1]
 end
