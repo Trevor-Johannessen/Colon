@@ -2,7 +2,7 @@ print("Running installer v0.0.1")
 objects = {
  'action', 'api', 'button', 'gif', 'jumpcut', 'loadbar', 
  'run', 'scroll', 'sprite', 'swipeLeft', 'swipeRight', 
- 'template', 'text', 'textbox',
+ 'template', 'text', 'textbox', 'reactangle',
 }
 -- download and move object files
 for i,obj in next, objects do
@@ -34,3 +34,4 @@ file = fs.open("/colon/colonrunner.lua", 'w')
 file.write(req.readAll())
 file.close()
 print("Done.")
+print("Installation Complete!")
