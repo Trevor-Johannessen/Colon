@@ -19,7 +19,7 @@ Colon is a UI markup language I am working on. It's goal is to be able to create
 
 ## Installation:
 
-Install colon using the installer pastebin run qUbxythP
+Install colon using the installer pastebin run qUbxythP  
 Once colon is installed you can run a page using /colon/colonrunner *filepath*
 
 
