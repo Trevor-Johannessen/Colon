@@ -21,7 +21,7 @@ function create(args)
 		term.setBackgroundColor(rectangle.color)
 		for i=0, rectangle.height-1 do
 		
-			term.setCursorPos(rectangle.x-x_offset, rectangle.y-y_offset+i)
+			term.setCursorPos(rectangle.x+x_offset, rectangle.y-y_offset+i)
 			io.write(string.rep(" ", rectangle.width))
 		end	
 		term.setBackgroundColor(save_background)
