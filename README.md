@@ -19,8 +19,8 @@ Colon is a UI markup language I am working on. It's goal is to be able to create
 
 ## Installation:
 
-Currently there is no installer, to run Colon please clone the repository and run using *directory*/colonrunner *filename*
-I should really make an installer.
+Install colon using the installer pastebin run qUbxythP
+Once colon is installed you can run a page using /colon/colonrunner *filepath*
 
 
 ## Syntax:
