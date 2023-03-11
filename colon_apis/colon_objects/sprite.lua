@@ -25,8 +25,6 @@ function create(args)
 	sprite.img = f:read()
 	io.close(f)
 	
-	
-	
 	function sprite:draw(x_offset, y_offset)
 		x_offset = x_offset or 0 -- default parameter values
 		y_offset = y_offset or 0
@@ -55,7 +53,6 @@ function create(args)
 	
 	end
 	
-	
 	-- grabs each 'step' letter in string
 	function grab(str, offset)
 		-- step = width
@@ -70,31 +67,25 @@ function create(args)
 	end
 	
 	function sprite:rotate270()
-		
 		local final_str = ""
-		
 		for i = 1, sprite.width do
 			final_str = final_str .. string.reverse(grab(sprite.img, i))
 		end
-		
 		local hold = sprite.height
 		sprite.height = sprite.width
 		sprite.width = hold
 		sprite.img = final_str
 	end
 	
-	
 	function sprite:rotate180()
 		sprite.img = string.reverse(sprite.img)
 	end
-	
 	
 	function sprite:rotate90()
 		sprite:rotate270()
 		sprite:rotate180()
 	end
-	
-	
+		
 	function sprite:vmirror()
 	
 		local new_str = ""
@@ -106,12 +97,10 @@ function create(args)
 		sprite.img = new_str
 	end
 	
-	
 	function sprite:hmirror()
 		sprite:vmirror()
 		sprite:rotate180()
 	end
-	
 	
 	function sprite:setImage(newFile)
 		local f = io.open(newFile)
@@ -128,8 +117,7 @@ function create(args)
 			sprite.sticky = false
 		end
 	end
-	
-	
+
 	sprite:corrections()
 	
 	return sprite

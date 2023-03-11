@@ -1,6 +1,4 @@
 template = require("colon_apis/colon_objects/template")
-
-
 function create(args)
 	action = template.create()
 	action.name = args.name
@@ -19,4 +17,3 @@ end
 return {
 	create=create
 }
-

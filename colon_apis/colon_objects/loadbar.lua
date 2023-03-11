@@ -56,14 +56,11 @@ function create(args)
     
     
     function loadbar:setPrecentage(in_precentage)
-        precentage = in_precentage or 0
-        
+        precentage = in_precentage or 0  
         -- precentage cannot be above 100% or below 0%
         if precentage > 1 then precentage = 0
-        elseif precentage < 0 then precentage = 0 end
-                
-        loadbar.progress = math.ceil(precentage*loadbar.length)
-        
+        elseif precentage < 0 then precentage = 0 end       
+        loadbar.progress = math.ceil(precentage*loadbar.length)  
     end
 	
 	

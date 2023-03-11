@@ -1,7 +1,6 @@
 function create()
     local template = {}
     local screen_width, screen_height = term.getSize()
-
 	local colorsDict = {
 		{hex="0", string="white", int=colors.white},
 		{hex="1", string="orange", int=colors.orange},
@@ -77,7 +76,6 @@ function create()
 		end
     end
 
-
     function template:corrections(obj)
         if type(obj.color) == "string" then
             obj.color = colors[obj.color]
@@ -93,7 +91,6 @@ function create()
                 obj.sticky = false
             end
         end
-
 
         -- check for center args x
         if obj.x == "center" then obj.x = screen_width/2 end
@@ -114,7 +111,6 @@ function create()
 
     end
 
-
     function template:message(message)
         local orgx, orgy = term.getCursorPos()
         term.setCursorPos(1, 19)
@@ -122,7 +118,6 @@ function create()
         io.write(message)
         term.setCursorPos(orgx, orgy)
     end
-
 
     function template:monus(a, b)
         return ((a-b)<0 and 0 or (a-b))

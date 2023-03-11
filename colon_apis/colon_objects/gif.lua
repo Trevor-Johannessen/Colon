@@ -13,7 +13,6 @@ function create(args)
 	gif.replay = args.replay or true
 	gif.height = 1
 	gif.speed = tonumber(args.speed) or 1
-	-- height then width
 	
 	-- build a table of sprite objects for each frame of the gif
 	if fs.exists(args.src) then
@@ -28,7 +27,6 @@ function create(args)
 			if gif.height < sprite.height then gif.height = sprite.height end
 			table.insert(gif.images, sprite)
 		end
-		
 	end
 	
 	function gif:draw(x_offset, y_offset)
