@@ -11,7 +11,7 @@ function create(args)
 	
 	text.x = tonumber(args.x) or 1 -- x coordinate of text
 	text.y = tonumber(args.y) or 1 -- y coordinate of text
-	text.str = string.sub(args.text, 2, -2) or "default text"
+	text.text = string.sub(args.text, 2, -2) or "default text"
 	text.visible = args.visible or true
 	text.dynamic = false
 	text.interactive = false
@@ -21,7 +21,7 @@ function create(args)
 	text.background = args.background or term.getBackgroundColor()
 	text.sticky = args.sticky or false
 	text.screen_width, text.screen_height = term.getSize()
-	text.length = string.len(text.str)
+	text.length = string.len(text.text)
 	text.start = tonumber(args.start) or text.x
 	text.finish = tonumber(args.finish) or text.screen_width
 	text.full_lines = math.floor(text.length / (text.finish - text.start))
@@ -42,7 +42,7 @@ function create(args)
 			x_offset = 0
 		end
 		
-		local printable_str = text.str
+		local printable_str = text.text
 
 		if text.y+text.height > y_offset then
 			term.setCursorPos(text.x-x_offset, text.y-y_offset)

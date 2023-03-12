@@ -1,10 +1,12 @@
 function create(args)
-	if not args.api then return -1 end
+	args.name = args.name or args.path
+	if not args.path then return -1 end
 	if args.unload == true then
-		if string.sub(args.api, -4) == ".lua" then args.api = string.sub(args.api, 1, -5) end
-		os.unloadAPI(args.api)
+		if string.sub(args.path, -4) == ".lua" then args.path = string.sub(args.path, 1, -5) end
+		os.unloadAPI(args.path)
 	else
-		os.loadAPI(args.api)
+		_G[args.name] = require(args.path)
+		--os.loadAPI(args.path)
 	end
 	return -1
 end

@@ -1,17 +1,13 @@
 screen_width, screen_height = term.getSize() -- dimensions of screen
-object_types = {}
+object_types = object_types or {}
 
-pages = {}
-currentPage = ""
-
+pages = pages or {}
+currentPage = currentPage or ""
 
 -- open file and lex lines into tables
 function run(inArgs)
 	args = inArgs
-
-	-- initalize to load apis
-	initalize(args)
-	
+	initalize(args) -- initalize to load apis
 	process_file(args[1])
 	interaction_loop()
 end
@@ -35,14 +31,13 @@ function get_file_iterator(fileName)
 end
 
 function interpret_line(str, givenPage)
+	print()
 	local new_obj = parse(str, givenPage)
 	if new_obj ~= -1 then
 		if 	not new_obj.unplaceable and 
 			new_obj.y+new_obj.height > pages[givenPage].end_of_page then 
 				pages[givenPage].end_of_page = new_obj.y+new_obj.height 
 		end -- adjust total page height
-		
-		
 		if new_obj.name ~= nil then
 			pages[givenPage].objects[new_obj.name] = new_obj
 		else
@@ -70,7 +65,6 @@ end
 function parse(text, givenPage)
 
 	local found_tag
-	--os.sleep(1)
 	-- find what object type line is
 	local colon_pos = string.find(text, ":") -- position of colon used to mark a command
 	if not colon_pos then return -1 end -- if a colon is missing then ignore
@@ -104,7 +98,7 @@ function parse(text, givenPage)
 			--print("arg = ", string.sub(term, 0, equals_pos-1))
 			--print("tag = ", args[string.sub(term, 0, equals_pos-1)])
 	end
-	
+	print(object_type)
 	-- if when command
 	if object_type == "when" then
 		construct_when(args, givenPage)
@@ -127,6 +121,8 @@ function parse(text, givenPage)
 		process_file(args["file"])
 		return -1
 	else
+		print("in else")
+		print(pages[givenPage])
 		if found_tag then
 			for k, v in next, pages[givenPage].tags[found_tag] do 
 				-- add all tag attributes to object here
@@ -136,8 +132,15 @@ function parse(text, givenPage)
 				end
 			end
 		end
-		return object_types[object_type].create(args)
+		print("current page = " .. currentPage)
+		print(object_types)
+		print(object_types[object_type])
+		local returnValue = object_types[object_type].create(args)
+		print("current page = " .. currentPage)
+		print("returning")
+		return returnValue
 	end
+	print(pages[givenPage])
 end
 
 -- removes spaces from arguments (ignores spaces and removes commas inside quotes)
@@ -197,9 +200,12 @@ function interaction_loop()
 			obj_args["screen_height"] = screen_height
 			
 			-- give input to all objects that request it
-			--message("x = " .. tostring(x) .. "\ty = " .. tostring(y))
 			local foundWhen = false
 			for index, data in pairs(pages[currentPage].objects) do
+				if data.awaitingRedraw then 
+					data.awaitingRedraw = false
+					data:draw(obj_args.x_offset, obj_args.y_offset)
+				end
 				if data.dynamic then data:update(obj_args)
 				elseif data.interactive and data:update(obj_args) then foundWhen = foundWhen or check_when_statements(data.name) end -- the update function for interactive objects should return a boolean for true if triggered, false it not
 			end
@@ -215,7 +221,6 @@ function interaction_loop()
 					redraw() -- we call redraw twice because it messes with dynamic objects when scrolling at top or bottom of page
 				end
 				obj_args["y_offset"] = y_offset
-				--message("y_offset = " ..  y_offset .. "\t" .. "end_page = " .. end_of_page)
 			end
 			
 			if event == "timer" then break end
@@ -275,8 +280,14 @@ function get_object(name)
 	return pages[currentPage].objects[name]
 end
 
-function edit_object(page, name, property, value)
-	pages[page].objects[name][property] = value
+-- requires: name, property, value... page is optional
+function edit_object(args)
+	if(args.page == nil) then args.page = currentPage end
+	-- print(args.property)
+	-- print(pages[args.page].objects[args.name][args.property])
+	-- print(args.value)
+	pages[args.page].objects[args.name][args.property] = args.value
+	pages[args.page].objects[args.name].awaitingRedraw = true
 end
 
 function set_current_page(newPage)
@@ -321,5 +332,6 @@ return{
 	scrollLock=scrollLock,
 	redraw=redraw,
 	getCurrentPage=get_current_page,
-	editObject=edit_object
+	editObject=edit_object,
+	message=message
 }

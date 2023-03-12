@@ -93,26 +93,7 @@ function create(args)
 	function button:check_hover(inX, inY, y_offset)
 		if (button.y+button.sprite.height-y_offset) >= 0 and (button.y-y_offset) <= 19 then
 			term.setCursorPos(0,0)
-			
-			--[[
-			print("testing if:")
-			term.clearLine()
-			print("inX: " .. inX .. " > button.x: " .. button.x) 
-			term.clearLine()
-			print("inX: " .. inX .. " < button.sprite.width+button.x: " .. button.sprite.width+button.x-1)
-			term.clearLine()
-			print("inY: " .. inY .. " > button.y: " .. button.y-y_offset)
-			term.clearLine()
-			print("inY: " .. inY .. " > button.sprite.height+button.y-y_offset: " .. button.sprite.height+button.y-y_offset-1)
-			
-			term.clearLine()
-			print("button at: X=", button.x, "-", (button.x+button.sprite.width))
-			term.clearLine()
-			print("\t\tY=", (button.y-y_offset), "-", (button.y-y_offset+button.sprite.height))
-			]]--
-			
 			if button.sticky then y_offset = 0 end
-			
 			if 
 			inX >= button.x and
 			inX <= button.sprite.width+button.x-1 and
