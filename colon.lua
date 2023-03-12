@@ -198,6 +198,7 @@ function interaction_loop()
 			obj_args["x_offset"] = pages[currentPage].x_offset
 			obj_args["y_offset"] = pages[currentPage].y_offset
 			obj_args["screen_height"] = screen_height
+			obj_args["screen_width"] = screen_width
 			
 			-- give input to all objects that request it
 			local foundWhen = false
@@ -276,16 +277,19 @@ function printarr(arr, substr)
    end
 end
 
-function get_object(name)
-	return pages[currentPage].objects[name]
+function get_object(args)
+	if(args.page == nil) then args.page = currentPage end
+	return pages[args.page].objects[args.name]
+end
+
+function set_object(args)
+	if(args.page == nil) then args.page = currentPage end
+	pages[args.page].objects[args.obj.name] = args.obj
 end
 
 -- requires: name, property, value... page is optional
 function edit_object(args)
 	if(args.page == nil) then args.page = currentPage end
-	-- print(args.property)
-	-- print(pages[args.page].objects[args.name][args.property])
-	-- print(args.value)
 	pages[args.page].objects[args.name][args.property] = args.value
 	pages[args.page].objects[args.name].awaitingRedraw = true
 end
@@ -295,7 +299,7 @@ function set_current_page(newPage)
 end
 
 function get_current_page()
-	return pages[current_page]
+	return pages[currentPage]
 end
 
 function get_page(name)
@@ -325,6 +329,7 @@ end
 return{
 	run=run,
 	getObject=get_object,
+	setObject=set_object,
 	setCurrentPage=set_current_page,
 	getPage=get_page,
 	setBackground=set_background,
