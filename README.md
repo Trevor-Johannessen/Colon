@@ -102,4 +102,32 @@ Transitions, like functions return a -1 instead of an table. Transitions should 
 
 
 ## Interfacing
-Colon gives complete visibility of rendered objects. Calling `getCurrentPage()` or `getPage(pageName)` will return a table of all of the objects on the requested page. Objects can be `modified using editObject(page, name, property, value)`.
+Colon gives complete visibility of rendered objects and attempts to make editing easy and efficient. 
+
+#### Extracting Data:
+Calling `getCurrentPage()` or `getPage()` can be used to gather all of the objects on a specific page. To get a singular object use `getObject()`.  
+  
+  
+##### getObject{name="required", page="optional"}
+Returns an object with name or nil. Pulls object from the specified page, if none are specified it will default to the current page.  
+  
+  
+##### getCurrentPage()  
+Returns the current page that is being rendered. This contains all of the objects rendered on that page. To augment any of the returned objects see [`setObject()`](https://github.com/Trevor-Johannessen/markup#Interfacing)  
+  
+  
+##### getPage(pageName)  
+Returns the specified page.This contains all of the objects rendered on that page. To augment any of the returned objects see [`setObject()`](https://github.com/Trevor-Johannessen/markup#Interfacing)  
+  
+  
+#### Modifying Data:  
+Modifying data should be done using the `editObject()` function, this will augment the desired value and flag the object to be rerendered on the next tick. 
+If you wish to change the object yourself, you can use `setObject()`.
+  
+  
+##### setObject{obj="new Object", page="optional"}:
+Sets the object with the given table. The object replaced is taken from the supplied tables name attribute. This should never be changed or object duplication or side effects may occur. When using this function if you wish to have your changes rendered add `awaitingRedraw=true` to the obj table.  
+ 
+  
+##### editObject{name="required", property="required", value="required", page="optional"}
+Objects can be easily ajusted using the editObject function. This function takes in a table describing the changes to be made, applies them, and sets the object to be redrawn on the next tick. It is reccomended to use this unless multiple changes are being made. 
