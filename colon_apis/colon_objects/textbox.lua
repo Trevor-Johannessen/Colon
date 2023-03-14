@@ -2,8 +2,8 @@ colon = require("colon")
 template = require("colon_apis/colon_objects/template")
 
 function create(args)
-	
 	textbox = template.create()
+	
 	textbox.x = tonumber(args.x) or 1
 	textbox.y = tonumber(args.y) or 1
 	textbox.text = args.text or ""
@@ -14,13 +14,12 @@ function create(args)
 	textbox.sticky = args.sticky or false
 	textbox.dynamic = false
 	textbox.interactive = true
-	textbox.selected = false
+	textbox.selected = args.selected or false
 	textbox.cursor = 1
 	textbox.max_string = textbox.width * textbox.height
-	
+	textbox.name = args.name
 	
 	function textbox:draw(x_offset, y_offset)
-		
 		local save_cursor = {term.getCursorPos()}
 		local save_text = term.getTextColor()
 		local save_background = term.getBackgroundColor()
@@ -29,8 +28,6 @@ function create(args)
 		local padding = 0
 		x_offset = x_offset or 0 -- default parameter values
 		y_offset = y_offset or 0
-		
-		
 		if textbox.sticky then 
 			y_offset = 0 
 			x_offset = 0
@@ -43,20 +40,15 @@ function create(args)
 		for i = 1, textbox.height do
 			--sharedFunctions.message("i = " .. i .. "/" .. textbox.height)
 			if textbox.y - y_offset >= 0 and textbox.y - y_offset + i - 1 < 20 then
-				
 				local string_on_line = string.sub(textbox.text, textbox.width * (i-1) + 1, textbox.width * i)
 				io.write(string_on_line .. string.rep(" ", textbox.width - string.len(string_on_line)))
-				
 			end
 			term.setCursorPos(textbox.x+x_offset, textbox.y+i-y_offset)
-			
 		end
-		
 		term.setCursorPos(save_cursor[1], save_cursor[2])
 		term.setTextColor(save_text)
 		term.setBackgroundColor(save_background)
 	end
-	
 	
 	function textbox:update(obj_args)
 		-- for clicking on the textbox
@@ -66,10 +58,6 @@ function create(args)
 				  obj_args["mouse_x"] <= textbox.width+textbox.x-1 and
 				  obj_args["mouse_y"] >= textbox.y - obj_args["y_offset"] and
 				  obj_args["mouse_y"] <= textbox.height+textbox.y-obj_args["y_offset"]-1
-	
-		
-	
-	
 	
 			if hit and obj_args["event"] == "mouse_up" then
 				textbox.active = true
@@ -107,18 +95,11 @@ function create(args)
 		term.setCursorPos(xpos, ypos)
 		io.write(key)
 		
-		
-		
-		
 		term.setTextColor(saveText)
 		term.setBackgroundColor(saveBackground)
 	end
 	
-	
-	if sharedFunctions then
-		sharedFunctions.corrections(textbox)
-	end
-	
+	textbox:corrections(textbox)
 	return textbox
 end
 

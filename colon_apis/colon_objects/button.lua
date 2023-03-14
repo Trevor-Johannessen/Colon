@@ -12,7 +12,7 @@ function create(args)
 	button.locked = args.locked or false
 	button.singleClick = args.singleClick or false
 	button.spriteFile = args.sprite
-	button.hoverSpriteFile = args.hoverSprite
+	button.hoverSpriteFile = args.hoverSprite or args.sprite
 	button.showingHover = false
 	button.dynamic = false
 	button.interactive = true

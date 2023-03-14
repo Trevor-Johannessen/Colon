@@ -1,5 +1,6 @@
 screen_width, screen_height = term.getSize() -- dimensions of screen
 object_types = object_types or {}
+debugMode = false
 
 pages = pages or {}
 currentPage = currentPage or ""
@@ -20,31 +21,26 @@ function process_file(fileName)
 	for str in text do
 		interpret_line(str, fileName)
 	end
-	
 	redraw()
 end
-
 
 function get_file_iterator(fileName)
 	if not fs.exists(fileName) then error("file '" .. fileName .. "' not found") end -- if file doesn't exist, error
 	return io.lines(fileName)
 end
 
-function interpret_line(str, givenPage)
-	print()
-	local new_obj = parse(str, givenPage)
+function interpret_line(str, givenPage, whenName)
+	local new_obj = parse(str, givenPage, whenName)
 	if new_obj ~= -1 then
 		if 	not new_obj.unplaceable and 
 			new_obj.y+new_obj.height > pages[givenPage].end_of_page then 
-				pages[givenPage].end_of_page = new_obj.y+new_obj.height 
-		end -- adjust total page height
+				pages[givenPage].end_of_page = new_obj.y+new_obj.height -- adjust total page height
+		end 
 		if new_obj.name ~= nil then
 			pages[givenPage].objects[new_obj.name] = new_obj
 		else
 			table.insert(pages[givenPage].objects, new_obj)
 		end
-		
-		
 	end
 end
 
@@ -62,7 +58,7 @@ function initalize_page(pageName)
 end
 
 
-function parse(text, givenPage)
+function parse(text, givenPage, whenName)
 
 	local found_tag
 	-- find what object type line is
@@ -72,9 +68,6 @@ function parse(text, givenPage)
 	-- find object_type
 	local object_type = string.sub(text, 1, colon_pos-1)
 	for tag in next, pages[givenPage].tags do
-		--print("object_type = ", object_type)
-		--print("trimmed type", string.sub(object_type, 2))
-		--print("tag = ", string.sub(object_type, 1, 1))
 		if string.sub(object_type, 1, 1) == tag then
 			if object_types[string.sub(object_type, 2)] then
 				object_type = string.sub(object_type, 2)
@@ -92,20 +85,21 @@ function parse(text, givenPage)
 
 	-- turn arguments into parameters for the objects
 	for term in text do
-			--print("term = ", term)
-			local equals_pos = string.find(term, "=")
-			args[string.sub(term, 0, equals_pos-1)] = string.gsub(string.sub(term, equals_pos+1), string.char(9), ",") -- args[var_name] = var_value
-			--print("arg = ", string.sub(term, 0, equals_pos-1))
-			--print("tag = ", args[string.sub(term, 0, equals_pos-1)])
+		local equals_pos = string.find(term, "=")
+		local key = string.sub(term, 0, equals_pos-1)
+		args[key] = string.gsub(string.sub(term, equals_pos+1), string.char(9), ",") -- args[var_name] = var_value
+		if(args[key]:sub(1, 1) == "\"" and args[key]:sub(-1) == "\"") then 
+			args[key] = args[key]:sub(2,-2) 
+		end
 	end
-	print(object_type)
+	if debugMode then print(object_type) end
 	-- if when command
 	if object_type == "when" then
 		construct_when(args, givenPage)
 		return -1
 	-- if regular object
 	elseif object_type == "tag" then
-		print("args[tag] = ", args["tag"])
+		if debugMode then print("args[tag] = ", args["tag"]) end
 		pages[givenPage].tags[args["tag"]] = args
 		return -1
 	elseif object_type == "background" then
@@ -121,26 +115,18 @@ function parse(text, givenPage)
 		process_file(args["file"])
 		return -1
 	else
-		print("in else")
-		print(pages[givenPage])
 		if found_tag then
 			for k, v in next, pages[givenPage].tags[found_tag] do 
 				-- add all tag attributes to object here
-				print("arg[", k, "] = ", args[k])
+				if debugMode then print("arg[", k, "] = ", args[k]) end
 				if args[k] == nil then
 					args[k] = v
 				end
 			end
 		end
-		print("current page = " .. currentPage)
-		print(object_types)
-		print(object_types[object_type])
-		local returnValue = object_types[object_type].create(args)
-		print("current page = " .. currentPage)
-		print("returning")
-		return returnValue
+		args["when"] = whenName -- delivers whenName to objects created from when triggers
+		return object_types[object_type].create(args)
 	end
-	print(pages[givenPage])
 end
 
 -- removes spaces from arguments (ignores spaces and removes commas inside quotes)
@@ -161,7 +147,7 @@ function initalize(args)
 	apis = fs.list("/colon/colon_apis/colon_objects/")
 	
 	for i=1, table.getn(apis) do
-		print("apis[".. i .. "] = ", apis[i])
+		if debugMode then print("apis[".. i .. "] = ", apis[i]) end
 		if not fs.isDir(apis[i]) then
 			local noExtension = string.sub(apis[i], 1, -5)
 			object_types[noExtension] = require("colon_apis/colon_objects/" .. noExtension) 
@@ -173,8 +159,8 @@ end
 
 
 function construct_when(args, givenPage)
-	print("construct = ", string.sub(args.command, 2, -2))
-	pages[givenPage].when[args.name] = string.sub(args.command, 2, -2)
+	if debugMode then print("construct = ", args.command) end
+	pages[givenPage].when[args.name] = args.command
 end
 
  -- INTERPRETING FUNCTIONS
@@ -259,10 +245,10 @@ end
 function check_when_statements(name)
 	local matched = false
 	for k, v in next, pages[currentPage].when do
-		print(k, " ", v)
+		if debugMode then print(k, " ", v) end
 		if k == name then
 			matched = true
-			interpret_line(string.gsub(v, "\\", ""), currentPage)
+			interpret_line(string.gsub(v, "\\", ""), currentPage, name)
 			redraw()
 		end
 	end

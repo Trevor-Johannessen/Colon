@@ -8,7 +8,7 @@ function create(args)
 	
 	text.x = tonumber(args.x) or 1 -- x coordinate of text
 	text.y = tonumber(args.y) or 1 -- y coordinate of text
-	text.text = string.sub(args.text, 2, -2) or "default text"
+	text.text = args.text or "default text"
 	text.visible = args.visible or true
 	text.dynamic = false
 	text.interactive = false
@@ -19,10 +19,9 @@ function create(args)
 	text.sticky = args.sticky or false
 	text.screen_width, text.screen_height = term.getSize()
 	text.length = string.len(text.text)
-	text.start = tonumber(args.start) or text.x
 	text.finish = tonumber(args.finish) or text.screen_width
-	text.full_lines = math.floor(text.length / (text.finish - text.start))
-	text.partial_lines = monus(1, text.length - (text.finish - text.start)*text.full_lines)
+	text.full_lines = math.floor(text.length / (text.finish - text.x))
+	text.partial_lines = monus(1, text.length - (text.finish - text.x)*text.full_lines)
 	text.height = text.full_lines + text.partial_lines + 1
 	
 	function text:draw(x_offset, y_offset)
@@ -44,11 +43,11 @@ function create(args)
 			while str:len() > 0 do
 				term.setCursorPos(text.x+x_offset, newY-y_offset)
 				-- need to find the amount to increment the cursor by each loop (should be the amount of characters displayed)
-				term.blit(str:sub(1,text.finish-text.start), colorString:sub(1,text.finish-text.start), backgroundString:sub(1,text.finish-text.start))
-				str=str:sub(text.finish-text.start+1)
-				colorString=colorString:sub(text.finish-text.start+1)
-				backgroundString=backgroundString:sub(text.finish-text.start+1)
-				newY = newY - 1
+				term.blit(str:sub(1,text.finish-text.x), colorString:sub(1,text.finish-text.x), backgroundString:sub(1,text.finish-text.x))
+				str=str:sub(text.finish-text.x+1)
+				colorString=colorString:sub(text.finish-text.x+1)
+				backgroundString=backgroundString:sub(text.finish-text.x+1)
+				newY = newY + 1
 			end
 			
 			term.setCursorPos(save_cursor[1], save_cursor[2])

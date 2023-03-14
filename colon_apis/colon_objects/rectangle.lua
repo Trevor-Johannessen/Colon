@@ -10,6 +10,7 @@ function create(args)
 	rectangle.color = args.color or colors.red
 	rectangle.sticky = args.sticky or false
 	rectangle.type = "rectangle"
+	rectangle.name = args.name
 	
 	function rectangle:draw(x_offset, y_offset)
 		local oldx, oldy = term.getCursorPos()
@@ -26,18 +27,8 @@ function create(args)
 		end	
 		term.setBackgroundColor(save_background)
 	end
-	
-	function rectangle:corrections()
-		if type(rectangle.color) == "string" then
-			rectangle.color = colors[rectangle.color]
-		end 
-		if rectangle.sticky == "true" or not type(rectangle.sticky) == "boolean" then
-			rectangle.sticky = true
-		else
-			rectangle.sticky = false
-		end
-	end
-	rectangle:corrections()
+
+	rectangle:corrections(rectangle)
 	
 	return rectangle
 end
