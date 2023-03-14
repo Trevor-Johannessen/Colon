@@ -43,10 +43,18 @@ function create(args)
 			while str:len() > 0 do
 				term.setCursorPos(text.x+x_offset, newY-y_offset)
 				-- need to find the amount to increment the cursor by each loop (should be the amount of characters displayed)
-				term.blit(str:sub(1,text.finish-text.x), colorString:sub(1,text.finish-text.x), backgroundString:sub(1,text.finish-text.x))
-				str=str:sub(text.finish-text.x+1)
-				colorString=colorString:sub(text.finish-text.x+1)
-				backgroundString=backgroundString:sub(text.finish-text.x+1)
+				local endPointer = text.finish
+				local offset = 1
+				local line = str:sub(1, endPointer-text.x)
+				if str:len() > text.finish - text.x and line:find(' ') then
+					endPointer = line:find('[^ ]*$')+1
+				end
+				if(str:sub(endPointer-text.x+1,endPointer-text.x+1) == " ") then offset = 2 end
+				--print("Last char = " .. str:sub(endPointer-text.x, endPointer - text.x) .. "     ")
+				term.blit(str:sub(1,endPointer-text.x), colorString:sub(1,endPointer-text.x), backgroundString:sub(1,endPointer-text.x))
+				str=str:sub(endPointer-text.x+offset)
+				colorString=colorString:sub(endPointer-text.x+offset)
+				backgroundString=backgroundString:sub(endPointer-text.x+offset)
 				newY = newY + 1
 			end
 			
