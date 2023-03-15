@@ -20,7 +20,6 @@ function create(args)
 	text.autoHeight = false -- flag if the text has had its height automatically set
 	text.scrollPos = 0
 	text.scrollable = args.scrollable or true
-	text.lineCount = 0	
 	text.strTable = {}
 	text.clrTable = {}
 	text.bgdTable = {}
@@ -63,9 +62,6 @@ function create(args)
 	end
 	
 	function text:update(args)
-		if(text.name == "Anchor") then
-		text:message("Recieved event: " .. args.event .. "\tid: " .. args["event_id"] .. "\tpos: " .. text.scrollPos .. " " .. tostring(text.interactive))
-		end
 		if args.event == "mouse_scroll" and text:inBounds(args) then
 			text.scrollPos = text:monus(text.scrollPos, -args["event_id"])
 			if text.scrollPos > #text.strTable - text.height then text.scrollPos = #text.strTable - text.height end
@@ -74,13 +70,27 @@ function create(args)
 		end
 	end
 	
-	function text:initalize() -- dry render to populate text tables
+	function text:parseString(input, addition)
+		local save_cursor = {term.getCursorPos()}
+		local save_text = term.getTextColor()
+		local save_background = term.getBackgroundColor()
+		local length, saveClr, saveBgd
 		term.setTextColor(text:convertColor(text.color, "int"))
 		term.setBackgroundColor(text:convertColor(text.background, "int"))
-		local str, colorString, backgroundString = text:parseColor(text.text)
-		text.strTable = {}
-		text.clrTable = {}
-		text.bgdTable = {}
+		if addition and #text.strTable > 0 then
+			length = text.strTable[#text.strTable]:len() -- first half of incomplete line
+			saveClr = text.clrTable[#text.strTable]
+			saveBgd = text.bgdTable[#text.strTable]
+			input = text.strTable[#text.strTable] .. input
+			table.remove(text.strTable)
+			table.remove(text.clrTable)
+			table.remove(text.bgdTable)
+		end	
+		local str, colorString, backgroundString = text:parseColor(input)
+		if addition and #text.strTable > 0 then
+			colorString = saveClr .. colorString:sub(length+1)
+			backgroundString = saveBgd .. backgroundString:sub(length+1)
+		end
 		while str:len() > 0 do
 			-- need to find the amount to increment the cursor by each loop (should be the amount of characters displayed)
 			local endPointer = text.width
@@ -96,13 +106,52 @@ function create(args)
 			str=str:sub(endPointer+offset)
 			colorString=colorString:sub(endPointer+offset)
 			backgroundString=backgroundString:sub(endPointer+offset)
-			text.lineCount = text.lineCount + 1
 		end
+		term.setCursorPos(save_cursor[1], save_cursor[2])
+		term.setTextColor(save_text)
+		term.setBackgroundColor(save_background)
+	end
+	
+	function text:initalize() -- dry render to populate text tables
+		text.strTable = {}
+		text.clrTable = {}
+		text.bgdTable = {}
+		text:parseString(text.text)
 		if text.height == nil or text.autoHeight then
-			text.height = text.lineCount
+			text.height = #text.strTable
 			text.autoHeight = true
 		end
-		if text.lineCount > text.height and text.scrollable then text.interactive = true end
+		if #text.strTable > text.height and text.scrollable then text.interactive = true end
+	end
+	
+	function text:add(addition)
+		text.text = text.text .. addition
+		local beforeSize = #text.strTable
+		text:parseString(addition, true)
+		if text.height == nil or text.autoHeight then
+			text.height = #text.strTable
+			text.autoHeight = true
+		end
+		if #text.strTable > text.height and text.scrollable then text.interactive = true end
+		if #text.strTable > beforeSize and #text.strTable > text.height then text.scrollPos = text.scrollPos + 1 end
+	end
+
+	function text:backspace()
+		text.text = text.text:sub(1, text.text:len()-1)
+		if #text.strTable > 0 then
+			local beforeSize = #text.strTable
+			if text.strTable[#text.strTable]:len() == 0 then
+				table.remove(text.strTable)
+				table.remove(text.clrTable)
+				table.remove(text.bgdTable)
+			else
+				local length = text.strTable[#text.strTable]:len()
+				text.strTable[#text.strTable] = text.strTable[#text.strTable]:sub(1, length-1)
+				text.clrTable[#text.clrTable] = text.clrTable[#text.clrTable]:sub(1, length-1)
+				text.bgdTable[#text.bgdTable] = text.bgdTable[#text.bgdTable]:sub(1, length-1)
+			end
+			if beforeSize > #text.strTable and #text.strTable >= text.height then text.scrollPos = text:monus(text.scrollPos, 1) end
+		end
 	end
 
 	-- correction to clean inputs

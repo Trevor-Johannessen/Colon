@@ -42,6 +42,11 @@ function gpt()
 			convo.add(response[#response]["message"])
 			return response[#response]["message"]["content"]
 		end
+		
+		function convo.reset()
+			convo.logs = {}
+		end
+		
 		return convo
 	end
 	return gpt
