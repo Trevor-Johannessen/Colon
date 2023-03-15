@@ -7,8 +7,8 @@ function create(args)
 	action.interactive = true
 
 	function action:update(obj_args)
-		if obj_args["event"] == action.event then return true end
-		return false
+		if obj_args["event"] == action.event then return {"when"} end
+		return
 	end
 	
 	return action

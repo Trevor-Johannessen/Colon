@@ -1,6 +1,6 @@
 function create()
     local template = {}
-    local screen_width, screen_height = term.getSize()
+    template.screen_width, template.screen_height = term.getSize()
 	local colorsDict = {
 		{hex="0", string="white", int=colors.white},
 		{hex="1", string="orange", int=colors.orange},
@@ -38,11 +38,9 @@ function create()
             f = c:sub(e+1,-2) -- the middle of the string = the end of the color substring to the end of the c substring-1
             g = str:sub(a+1,a+1)
             -- I just want to point out that I was doing b-a-1 instead of -2 and I feel bad about that
-
             if g=="c" then
                 colorString = colorString:sub(1, a-1) .. string.rep(template:str_to_hex(c:sub(d+1,e-1)), f:len()) .. colorString:sub(b+1) -- build the color string
                 backgroundString = backgroundString:sub(1,a-1) .. backgroundString:sub(a+e+1,b-1) .. backgroundString:sub(b)
-
             elseif g=="b" then
                 backgroundString = backgroundString:sub(1, a-1) .. string.rep(template:str_to_hex(c:sub(d+1,e-1)), f:len()) .. backgroundString:sub(b+1) -- build the background
                 colorString = colorString:sub(1,a-1) .. colorString:sub(a+e+1,b-1) .. colorString:sub(b)
@@ -93,19 +91,19 @@ function create()
         end
 
         -- check for center args x
-        if obj.x == "center" then obj.x = screen_width/2 end
+        if obj.x == "center" then obj.x = template.screen_width/2 end
         local first, last, middle = string.find(obj.x, "center[+-]()%d*")
         if middle ~= nil then
             local number = string.sub(obj.x, middle-1)
-            obj.x = math.ceil(screen_width/2) + tonumber(number)
+            obj.x = math.ceil(template.screen_width/2) + tonumber(number)
         end
 
         -- check for center args y
-        if obj.y == "center" then obj.y = screen_height/2 end
+        if obj.y == "center" then obj.y = template.screen_height/2 end
         local first, last, middle = string.find(obj.y, "center[+-]()%d*")
         if middle ~= nil then
             local number = string.sub(obj.y, middle-1)
-            obj.y = math.ceil(screen_height/2) + tonumber(number)
+            obj.y = math.ceil(template.screen_height/2) + tonumber(number)
         end	
 
 

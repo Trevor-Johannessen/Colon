@@ -59,7 +59,6 @@ end
 
 
 function parse(text, givenPage, whenName)
-
 	local found_tag
 	-- find what object type line is
 	local colon_pos = string.find(text, ":") -- position of colon used to mark a command
@@ -188,18 +187,32 @@ function interaction_loop()
 			
 			-- give input to all objects that request it
 			local foundWhen = false
+			local blockScroll = false
 			for index, data in pairs(pages[currentPage].objects) do
 				if data.awaitingRedraw then 
 					data.awaitingRedraw = false
 					data:draw(obj_args.x_offset, obj_args.y_offset)
 				end
 				if data.dynamic then data:update(obj_args)
-				elseif data.interactive and data:update(obj_args) then foundWhen = foundWhen or check_when_statements(data.name) end -- the update function for interactive objects should return a boolean for true if triggered, false it not
+				elseif data.interactive then 
+					local val = data:update(obj_args) or {}
+					local bubble = false
+					for k, v in next, val do
+						if v == "when" then -- activate when statements
+							foundWhen = foundWhen or check_when_statements(data.name) 
+						elseif v == "scroll" then -- take scroll control away from colon enviornemnt
+							blockScroll = true
+						elseif v == "nobubble" then -- do not propagate input to any more elements
+							bubble = true
+						end
+					end
+					if bubble then break end
+				end -- the update function for interactive objects should return a boolean for true if triggered, false it not
 			end
 			if foundWhen then os.cancelTimer(timer) break end -- time taken to run when statement may cause timer desync
 			
 			-- handels scrolling of page
-			if event == "mouse_scroll" and not pages[currentPage].scroll_lock then
+			if event == "mouse_scroll" and not pages[currentPage].scroll_lock and not blockScroll then
 				if event_id == -1 and pages[currentPage].y_offset+screen_height < pages[currentPage].end_of_page-1 then -- scroll up
 					pages[currentPage].y_offset = pages[currentPage].y_offset + 1
 					redraw()

@@ -66,28 +66,26 @@ function create(args)
 		obj_args["x_offset"] = obj_args["x_offset"] or 0
 		obj_args["y_offset"] = obj_args["y_offset"] or 0
 		
-		if not obj_args["mouse_x"] or not obj_args["mouse_y"] or button.locked then return false end -- check that given action is mouse (and button is not locked)
+		if not obj_args["mouse_x"] or not obj_args["mouse_y"] or button.locked then return end -- check that given action is mouse (and button is not locked)
 		if button:check_hover(obj_args["mouse_x"], obj_args["mouse_y"], obj_args["y_offset"]) then	-- if the mouse is hovering the button
 			if obj_args["event"] == "mouse_up" and button.showingHover then -- if the mouse is clicking the button	
 				button.sprite:setImage(button.spriteFile)
 				button.showingHover = false
 				button:draw(obj_args["x_offset"], obj_args["y_offset"])
-				return button:click() -- button has been clicked
+				if button:click() then return {"when"} end
+				return  -- button has been clicked
 			elseif not button.showingHover and obj_args["event"] == "mouse_click" then -- if the mouse is hovering the button
 				button.sprite:setImage(button.hoverSpriteFile)
 				button.showingHover = true
 				button:draw(obj_args["x_offset"], obj_args["y_offset"])
-				return false -- button is being hovered
+				return -- button is being hovered
 			end
 		elseif button.showingHover then
 			button.sprite:setImage(button.spriteFile)
 			button:draw(obj_args["x_offset"], obj_args["y_offset"])
 			button.showingHover = false
 		end
-		return false -- not interacted with
 	end
-	
-	
 	
 	-- checks if a set of coordinates overlaps the buttons sprite
 	function button:check_hover(inX, inY, y_offset)
@@ -106,7 +104,6 @@ function create(args)
 			end	
 		end
 	end
-	
 	
 	-- applies the buttons function if not locked
 	function button:click()

@@ -103,10 +103,6 @@ function create(args)
 	return textbox
 end
 
-function monus(a, b)
-	return ((a-b)<0 and 0 or (a-b))
-end
-
 return {
 	create=create
 }

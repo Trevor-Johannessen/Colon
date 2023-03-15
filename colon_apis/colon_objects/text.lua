@@ -2,7 +2,6 @@ template = require("colon_apis/colon_objects/template")
 
 function create(args)
 	local text = template.create()
-	
 	text.x = tonumber(args.x) or 1 -- x coordinate of text
 	text.y = tonumber(args.y) or 1 -- y coordinate of text
 	text.text = args.text or "default text"
@@ -14,9 +13,9 @@ function create(args)
 	text.color = args.color or term.getTextColor()
 	text.background = args.background or term.getBackgroundColor()
 	text.sticky = args.sticky or false
-	text.screen_width, text.screen_height = term.getSize()
 	text.length = string.len(text.text)
-	text.width = tonumber(args.width) or text.screen_width
+	text.width = tonumber(args.width) or text.text:len()
+	if text.width > text.screen_width then text.width = text.screen_width end
 	text.height = tonumber(args.height) or nil
 	text.autoHeight = false -- flag if the text has had its height automatically set
 	text.scrollPos = 0
@@ -30,6 +29,7 @@ function create(args)
 		local save_cursor = {term.getCursorPos()}
 		local save_text = term.getTextColor()
 		local save_background = term.getBackgroundColor()
+		local clearString = string.rep(text:convertColor(text.background, "hex"), text.width)
 		x_offset = x_offset or 0 -- default parameter values
 		y_offset = y_offset or 0
 		
@@ -38,12 +38,11 @@ function create(args)
 			x_offset = 0
 		end
 		if text.y+text.height > y_offset then
-			term.setTextColor(text:convertColor(text.color, "int"))
-			term.setBackgroundColor(text:convertColor(text.background, "int"))
-			str, colorString, backgroundString = text:parseColor(text.text)
-			local newY = 1
-			while text.height >= newY and #text.strTable >= newY do
-				term.setCursorPos(text.x+x_offset, text.y+newY-y_offset-1)
+			local newY = text.scrollPos+1
+			while text.height >= newY-text.scrollPos and #text.strTable >= newY do
+				term.setCursorPos(text.x+x_offset, text.y+newY-y_offset-1-text.scrollPos)
+				term.blit(clearString, clearString, clearString)
+				term.setCursorPos(text.x+x_offset, text.y+newY-y_offset-1-text.scrollPos)
 				term.blit(text.strTable[newY], text.clrTable[newY], text.bgdTable[newY])
 				newY = newY + 1
 			end
@@ -53,13 +52,31 @@ function create(args)
 		end
 	end
 	
+	function text:inBounds(args)
+		if args["mouse_x"]+args["x_offset"] >= text.x and 
+		text.x + text.width > args["mouse_x"]+args["x_offset"] and
+		args["mouse_y"]+args["y_offset"] >= text.y and
+		text.y + text.height > args["mouse_y"]+args["y_offset"] then
+			return true
+		end
+		return false
+	end
+	
 	function text:update(args)
-		if args.event == "mouse_scroll" then
-			text.scrollPos = text.scrollPos + args["event_id"]
+		if(text.name == "Anchor") then
+		text:message("Recieved event: " .. args.event .. "\tid: " .. args["event_id"] .. "\tpos: " .. text.scrollPos .. " " .. tostring(text.interactive))
+		end
+		if args.event == "mouse_scroll" and text:inBounds(args) then
+			text.scrollPos = text:monus(text.scrollPos, -args["event_id"])
+			if text.scrollPos > #text.strTable - text.height then text.scrollPos = #text.strTable - text.height end
+			text:draw(args["x_offset"], args["y_offset"])
+			return {"when", "scroll"}
 		end
 	end
 	
 	function text:initalize() -- dry render to populate text tables
+		term.setTextColor(text:convertColor(text.color, "int"))
+		term.setBackgroundColor(text:convertColor(text.background, "int"))
 		local str, colorString, backgroundString = text:parseColor(text.text)
 		text.strTable = {}
 		text.clrTable = {}
@@ -93,7 +110,7 @@ function create(args)
 		sharedFunctions.corrections(text)
 	end
 	text:initalize()
-	
+
 	return text
 end
 
