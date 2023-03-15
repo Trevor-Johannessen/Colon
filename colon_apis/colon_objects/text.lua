@@ -1,8 +1,5 @@
 template = require("colon_apis/colon_objects/template")
 
-function monus(a, b)
-	return ((a-b)<0 and 0 or (a-b))
-end
 function create(args)
 	local text = template.create()
 	
@@ -21,6 +18,7 @@ function create(args)
 	text.length = string.len(text.text)
 	text.width = tonumber(args.width) or text.screen_width
 	text.height = tonumber(args.height) or nil
+	text.autoHeight = false -- flag if the text has had its height automatically set
 	text.scrollPos = 0
 	text.scrollable = args.scrollable or true
 	text.lineCount = 0	
@@ -56,29 +54,38 @@ function create(args)
 	end
 	
 	function text:update(args)
-		scroll:draw(obj_args["x_offset"], obj_args["y_offset"])
+		if args.event == "mouse_scroll" then
+			text.scrollPos = text.scrollPos + args["event_id"]
+		end
 	end
 	
 	function text:initalize() -- dry render to populate text tables
 		local str, colorString, backgroundString = text:parseColor(text.text)
+		text.strTable = {}
+		text.clrTable = {}
+		text.bgdTable = {}
 		while str:len() > 0 do
 			-- need to find the amount to increment the cursor by each loop (should be the amount of characters displayed)
-			local endPointer = text.width+text.x
+			local endPointer = text.width
 			local offset = 1
-			local line = str:sub(1, endPointer-text.x)
-			if str:len() > text.width - text.x and line:find(' ') then
-				endPointer = line:find('[^ ]*$')+1
+			local line = str:sub(1, endPointer)
+			if str:len() > text.width and line:find(' ') then
+				endPointer = line:find('[^ ]*$')-1
 			end
-			if(str:sub(endPointer-text.x+1,endPointer-text.x+1) == " ") then offset = 2 end
-			table.insert(text.strTable, str:sub(1,endPointer-text.x))
-			table.insert(text.clrTable, colorString:sub(1,endPointer-text.x))
-			table.insert(text.bgdTable, backgroundString:sub(1, endPointer-text.x))
-			str=str:sub(endPointer-text.x+offset)
-			colorString=colorString:sub(endPointer-text.x+offset)
-			backgroundString=backgroundString:sub(endPointer-text.x+offset)
+			if(str:sub(endPointer+1,endPointer+1) == " ") then offset = 2 end
+			table.insert(text.strTable, str:sub(1,endPointer))
+			table.insert(text.clrTable, colorString:sub(1,endPointer))
+			table.insert(text.bgdTable, backgroundString:sub(1, endPointer))
+			str=str:sub(endPointer+offset)
+			colorString=colorString:sub(endPointer+offset)
+			backgroundString=backgroundString:sub(endPointer+offset)
 			text.lineCount = text.lineCount + 1
 		end
-		text.height = text.hegiht or text.lineCount
+		if text.height == nil or text.autoHeight then
+			text.height = text.lineCount
+			text.autoHeight = true
+		end
+		if text.lineCount > text.height and text.scrollable then text.interactive = true end
 	end
 
 	-- correction to clean inputs
