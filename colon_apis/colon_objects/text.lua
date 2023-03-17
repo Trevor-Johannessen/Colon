@@ -158,6 +158,10 @@ function create(args)
 	if sharedFunctions then
 		sharedFunctions.corrections(text)
 	end
+	for k, v in next, args["augments"] do
+		text=v(text, args)
+	end
+	
 	text:initalize()
 
 	return text

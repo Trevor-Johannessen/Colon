@@ -3,6 +3,7 @@ object_types = object_types or {}
 debugMode = false
 
 pages = pages or {}
+augments = augments or {} -- augments are global
 currentPage = currentPage or ""
 
 -- open file and lex lines into tables
@@ -25,8 +26,32 @@ function process_file(fileName)
 end
 
 function get_file_iterator(fileName)
-	if not fs.exists(fileName) then error("file '" .. fileName .. "' not found") end -- if file doesn't exist, error
+	if not fs.exists(fileName) then error("file '" .. fileName .. "' not found") end
 	return io.lines(fileName)
+end
+
+--[[
+	Augments Pipeline:
+		User adds augment to augment file
+		Augment is loaded and parsed in colon
+		On object creation the object is given an arg with all the augment functions
+		Object can choose whether to apply augments or not
+		To apply augments objects can either do it by hand or use the obj:applyAugments(args) function in template.lua
+		After this call all objects will be able to use their associated augmentations
+]]
+function parse_augment(filePath)
+	if not fs.exists(filePath) then error("file '" .. fileName .. "' not found") end
+	local file = io.open(filePath, "r")
+	local text = file:read("a")
+	local contents = textutils.unserializeJSON(text)
+	io.close(file)
+	for name, augment in next, contents do
+		local func = require(augment[1])-- augments should follow convention and include all of their code in an function called create
+		for i, obj in next, augment[2] do
+			print("inserting func into " .. obj)
+			table.insert(augments[obj], func.create)
+		end
+	end
 end
 
 function interpret_line(str, givenPage, whenName)
@@ -59,6 +84,8 @@ end
 
 
 function parse(text, givenPage, whenName)
+	
+		
 	local found_tag
 	-- find what object type line is
 	local colon_pos = string.find(text, ":") -- position of colon used to mark a command
@@ -113,6 +140,9 @@ function parse(text, givenPage, whenName)
 		initalize_page(args["file"])
 		process_file(args["file"])
 		return -1
+	elseif object_type == "augment" then
+		parse_augment(args["src"])
+		return -1
 	else
 		if found_tag then
 			for k, v in next, pages[givenPage].tags[found_tag] do 
@@ -124,6 +154,8 @@ function parse(text, givenPage, whenName)
 			end
 		end
 		args["when"] = whenName -- delivers whenName to objects created from when triggers
+		args["augments"] = augments[object_type]
+		
 		return object_types[object_type].create(args)
 	end
 end
@@ -150,12 +182,12 @@ function initalize(args)
 		if not fs.isDir(apis[i]) then
 			local noExtension = string.sub(apis[i], 1, -5)
 			object_types[noExtension] = require("colon_apis/colon_objects/" .. noExtension) 
+			augments[noExtension] = {}
 		end
 	end
 	initalize_page(args[1])
 	currentPage = args[1]
 end
-
 
 function construct_when(args, givenPage)
 	if debugMode then print("construct = ", args.command) end
@@ -228,7 +260,6 @@ function interaction_loop()
 		tick = tick + 1
 	end
 end
-
 
 function redraw(args)
 	term.setCursorPos(1,1)
