@@ -1,6 +1,35 @@
 screen_width, screen_height = term.getSize() -- dimensions of screen
 template = require("colon_apis/colon_objects/template")
 
+function parsePGI(sprite, f)
+	sprite.height = tonumber(f:read())
+	sprite.width = tonumber(f:read())
+	sprite.img = f:read()
+	io.close(f)
+end
+
+function parseNFP(sprite, f)
+	local content = f:read("a")
+	io.close(f)
+	local itr= content:gmatch("[^\n^\r]*\r?\n")
+	local row = itr()
+	local imgTbl = {}
+	sprite.width = 0
+	sprite.height = 0
+	while row ~= nil do
+		row = row:gsub("\r?\n", "")
+		if sprite.width < row:len() then sprite.width = row:len() end
+		sprite.height = sprite.height + 1
+		table.insert(imgTbl,row)
+		row = itr()
+	end
+	sprite.img = ""
+	for _, row in next, imgTbl do
+		padding = string.rep("-", sprite.width - row:len())
+		sprite.img = sprite.img .. row .. padding
+	end
+end
+
 function create(args)
 	
 	local sprite = template.create()
@@ -18,12 +47,12 @@ function create(args)
 		sprite.src = args.src
 	end
 	
-	print("src = ", sprite.src)
 	local f = io.open(sprite.src)
-	sprite.height = tonumber(f:read())
-	sprite.width = tonumber(f:read())
-	sprite.img = f:read()
-	io.close(f)
+	if sprite.src:sub(-4) == ".pgi" then
+		parsePGI(sprite, f)
+	else -- default is nfp
+		parseNFP(sprite, f)
+	end
 	
 	function sprite:draw(x_offset, y_offset)
 		x_offset = x_offset or 0 -- default parameter values
@@ -43,8 +72,23 @@ function create(args)
 			x_offset = 0
 		end
 		
+		
 		for i = 1, sprite.height do
-			term.blit(string.rep(" ", sprite.width), string.rep("1", sprite.width), string.sub(sprite.img, current_char, current_char+sprite.width-1 ) )
+			local bgdSeg = string.sub(sprite.img, current_char, current_char+sprite.width-1)
+			local spaceCount, charCount = 0, 0
+			local spaceStrings = bgdSeg:gmatch("%s+")
+			local charStrings = bgdSeg:gmatch("[^%s]+")
+			if bgdSeg:sub(1,1) == " " then
+				spaceCount = spaceStrings():len()
+			end
+			local curChars = charStrings()
+			while curChars ~= nil do
+				term.setCursorPos(sprite.x+x_offset+spaceCount+charCount, sprite.y+i-y_offset-1)
+				term.blit(string.rep(" ", curChars:len()), string.rep("1", curChars:len()), curChars)
+				charCount = charCount + curChars:len()
+				spaceCount = spaceCount + (spaceStrings() or ""):len()
+				curChars = charStrings()
+			end
 			current_char = current_char + sprite.width
 			term.setCursorPos(sprite.x+x_offset, sprite.y+i-y_offset)
 		end
