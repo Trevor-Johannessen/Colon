@@ -60,12 +60,8 @@ function interpret_line(str, givenPage, whenName)
 		if 	not new_obj.unplaceable and 
 			new_obj.y+new_obj.height > pages[givenPage].end_of_page then 
 				pages[givenPage].end_of_page = new_obj.y+new_obj.height -- adjust total page height
-		end 
-		if new_obj.name ~= nil then
-			pages[givenPage].objects[new_obj.name] = new_obj
-		else
-			table.insert(pages[givenPage].objects, new_obj)
 		end
+		table.insert(pages[givenPage].objects, new_obj)
 	end
 end
 
@@ -81,7 +77,6 @@ function initalize_page(pageName)
 	pages[pageName].color = colors.white
 	pages[pageName].scroll_lock = false
 end
-
 
 function parse(text, givenPage, whenName)
 	
@@ -195,7 +190,6 @@ function construct_when(args, givenPage)
 end
 
  -- INTERPRETING FUNCTIONS
- 
 function interaction_loop()
 	local tick = 1
 	local event, event_id, x, y
@@ -225,10 +219,10 @@ function interaction_loop()
 					data.awaitingRedraw = false
 					data:draw(obj_args.x_offset, obj_args.y_offset)
 				end
-				if data.dynamic then data:update(obj_args)
-				elseif data.interactive then 
+				if data.interactive or data.dynamic then 
 					local val = data:update(obj_args) or {}
 					local bubble = false
+					local redrawList = {}
 					for k, v in next, val do
 						if v == "when" then -- activate when statements
 							foundWhen = foundWhen or check_when_statements(data.name) 
@@ -236,9 +230,12 @@ function interaction_loop()
 							blockScroll = true
 						elseif v == "nobubble" then -- do not propagate input to any more elements
 							bubble = true
+						elseif v == "redraw" then
+							table.insert(redrawList, 1, k)
 						end
 					end
 					if bubble then break end
+					bubble_redraw(redrawList)
 				end -- the update function for interactive objects should return a boolean for true if triggered, false it not
 			end
 			if foundWhen then os.cancelTimer(timer) break end -- time taken to run when statement may cause timer desync
@@ -270,6 +267,30 @@ function redraw(args)
 	fill_screen(args)
 	for index, data in pairs(pages[pageName].objects) do
 		if not data.unplaceable then data:draw(x_offset, y_offset) end
+	end
+end
+
+-- redraw all updated objects that wish to be redrawn, as well as all objects that cover the redrawn object
+function bubble_redraw(redrawList) -- redrawList should already be sorted
+	if #redrawList == 0 then return end
+	objList = pages[currentPage].objects
+	local index = redrawList[1]
+	local redrawIndex = 2
+	term.setCursorPos(1,1)
+	for k, v in next, objList do
+		if redrawList[redrawIndex] and redrawList[redrawIndex] == k then 
+			index = k
+			redrawIndex = redrawIndex + 1
+		end
+		if  k > index and
+			objList[k].width and
+			objList[k].height and
+			not (objList[index].x > objList[k].x-objList[k].width  	and -- Al > Br
+				objList[index].x+objList[index].width < objList[k].x  	and -- Ar < Bl
+				objList[index].y > objList[k].y+objList[k].height 	and -- At > Bb
+				objList[index].y+objList[index].height < objList[k].y) 	then
+			objList[k]:draw(pages[currentPage].x_offset, pages[currentPage].y_offset)
+		end
 	end
 end
 
@@ -307,21 +328,49 @@ function printarr(arr, substr)
    end
 end
 
+function subarray(arr, start, stop)
+	local arr = {}
+	for k in next, arr do
+		if type(k) == "number" and k >= start and k <= stop then
+			table.insert(arr, k)
+		end
+	end
+	return arr
+end
+
+function get_object_by_name(page, name)
+	for key, obj in next, pages[page].objects do
+		if obj.name == name then
+			return obj
+		end
+	end
+end
+
+function set_object_by_name(page, name, newObject)
+	for key, obj in next, pages[page].objects do
+		if obj.name == name then
+			pages[page].objects[key] = newObject
+		end
+	end
+end
+
+-- ACCESS FUNCTIONS
 function get_object(args)
 	if(args.page == nil) then args.page = currentPage end
-	return pages[args.page].objects[args.name]
+	return get_object_by_name(args.page, args.name)
 end
 
 function set_object(args)
 	if(args.page == nil) then args.page = currentPage end
-	pages[args.page].objects[args.obj.name] = args.obj
+	set_object_by_name(args.page, args.name, args.obj)
 end
 
 -- requires: name, property, value... page is optional
 function edit_object(args)
 	if(args.page == nil) then args.page = currentPage end
-	pages[args.page].objects[args.name][args.property] = args.value
-	pages[args.page].objects[args.name].awaitingRedraw = true
+	local obj = get_object_by_name(args.page, args.name)
+	obj[args.property] = args.value
+	obj.awaitingRedraw = true
 end
 
 function set_current_page(newPage)

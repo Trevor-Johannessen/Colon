@@ -6,7 +6,7 @@ function create(args)
 	text.y = tonumber(args.y) or 1 -- y coordinate of text
 	text.text = args.text or "default text"
 	text.visible = args.visible or true
-	text.dynamic = false
+	text.dynamic = args.dynamic or false
 	text.interactive = false
 	text.name = args.name
 	text.type = "text"
@@ -154,13 +154,7 @@ function create(args)
 		end
 	end
 
-	-- correction to clean inputs
-	if sharedFunctions then
-		sharedFunctions.corrections(text)
-	end
-	for k, v in next, args["augments"] do
-		text=v(text, args)
-	end
+
 	
 	text:initalize()
 

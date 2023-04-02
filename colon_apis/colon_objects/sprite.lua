@@ -36,7 +36,7 @@ function create(args)
 	sprite.x = tonumber(args.x) or 0
 	sprite.y = tonumber(args.y) or 0
 	sprite.file = "" -- TODO: make default image and place here
-	sprite.dynamic = false
+	sprite.dynamic = args.dynamic or false
 	sprite.interative = false
 	sprite.name = args.name
 	sprite.type = "sprite"

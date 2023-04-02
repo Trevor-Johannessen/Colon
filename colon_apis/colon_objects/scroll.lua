@@ -11,19 +11,20 @@ function create(args)
 	
 	
 	scroll.scrolls_right = 1
-	scroll.text = string.sub(args.text, 2, -2) or "default text "
+	scroll.text = args.text or "default text "
 	scroll.speed = tonumber(args.speed) or 3	
 	scroll.x = tonumber(args.x) or 1
 	scroll.y = tonumber(args.y) or 1
 	scroll.pointer = 1
-	scroll.direction = 1
+	if args.direction == "left" then scroll.direction = -1 else scroll.direction = 1 end
 	scroll.dynamic = true
 	scroll.interactive = false
 	scroll.height = 1
+	scroll.width = tonumber(args.width) or string.len(scroll.text)
 	scroll.name = args.name
 	scroll.type = "scroll"
 	scroll.color = args.color or term.getTextColor()
-	scroll.background = args.background or term.getBackgroundColor()
+	scroll.background = tonumber(args.background) or term.getBackgroundColor()
 	scroll.sticky = args.sticky or false
 	
 	if args.direction ~= nil then 
@@ -32,16 +33,16 @@ function create(args)
 			scroll.pointer = string.len(scroll.text)
 		end
 	end
+	if string.len(scroll.text) < scroll.width then
+		scroll.text = scroll.text .. string.rep(" ", scroll.width - string.len(scroll.text))
+	end
 	
-	
-	
-	function scroll:draw(x_offset, y_offset, tick)
-		tick = tick or scroll.speed
+	function scroll:draw(x_offset, y_offset)
 		if scroll.sticky then 
 			y_offset = 0 
 			x_offset = 0
 		end
-		if tick % scroll.speed == 0 and scroll.y >= y_offset and scroll.y <= screen_height+y_offset then
+		if scroll.y >= y_offset and scroll.y <= screen_height+y_offset then
 			x_offset = x_offset or 0 -- default parameter x = 0
 			y_offset = y_offset or 0 -- default parameter y = 0
 			local pointer = scroll.pointer
@@ -57,18 +58,20 @@ function create(args)
 	
 	
 	function scroll:update(obj_args)
-		scroll:draw(obj_args["x_offset"], obj_args["y_offset"], obj_args["tick"])
-		
-		scroll.pointer = scroll.pointer + scroll.direction
-		if scroll.pointer == string.len(scroll.text) and scroll.direction == 1 then scroll.pointer = 1
-		elseif scroll.pointer == 1 and scroll.direction == -1 then scroll.pointer = string.len(scroll.text) end
+		if obj_args["tick"] % scroll.speed == 0 then
+			scroll:draw(obj_args["x_offset"], obj_args["y_offset"])
+			
+			scroll.pointer = scroll.pointer + scroll.direction
+			if scroll.pointer == string.len(scroll.text) and scroll.direction == 1 then scroll.pointer = 1
+			elseif scroll.pointer == -string.len(scroll.text) and scroll.direction == -1 then scroll.pointer = string.len(scroll.text) end
+		end
+		return {"redraw"}
 	end
 	
 	
 	function scroll:swap_direction()
 		scroll.direction = scroll.direction * -1
 	end
-	
 	return scroll
 end
 

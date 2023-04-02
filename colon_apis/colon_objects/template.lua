@@ -120,6 +120,12 @@ function create()
     function template:monus(a, b)
         return ((a-b)<0 and 0 or (a-b))
     end
+	
+	function template:augment(obj, args)
+		for k, v in next, args["augments"] do
+			obj=v(obj, args)
+		end
+	end
 
     return template
 end
