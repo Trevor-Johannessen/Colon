@@ -30,6 +30,7 @@ function create(args)
 	sprite_args["y"] = button.y
 	sprite_args["src"] = button.spriteFile
 	button.sprite = sprite.create(sprite_args)
+	button.width = button.sprite.width
 	button.height = button.sprite.height
 	
 	-- draws the button

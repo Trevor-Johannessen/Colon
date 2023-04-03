@@ -1,10 +1,8 @@
 template = require("colon_apis/colon_objects/template")
 
 function create(args)
-    
     local menu = template.create()
-    
-    
+
     -- draws the current rendition of menu
     function menu:draw(x_offset, y_offset)
         local old_pos = {term.getCursorPos()} -- save current cursor pos
@@ -28,10 +26,7 @@ function create(args)
 			if i == menu.pos then -- if we are printing the selected line
 				term.setTextColor(menu.selected_text_color)
 				term.setBackgroundColor(menu.selected_background_color)
-				
-				
 				io.write(menu.list[i] .. string.rep(" ", menu.width-string.len(menu.list[i]))) -- write selected menu item
-				
 				-- reset colors to original menu color
 				term.setBackgroundColor(menu.background_color)
 				term.setTextColor(menu.text_color)
@@ -39,14 +34,12 @@ function create(args)
 				io.write(menu.list[i] .. string.rep(" ", menu.width-string.len(menu.list[i]))) -- write non-selected menu item
 			end
 		end
-        
 		-- restore old values
         term.setCursorPos(old_pos[1], old_pos[2]) -- reset cursor to original pos
 		term.setTextColor(old_text_color)
 		term.setBackgroundColor(old_background_color)
     end
 	
-    
     -- given input from program, executes what the menu should do
     function menu:update(obj_args)
     
@@ -55,8 +48,7 @@ function create(args)
         -- this value would change here is action = mouse_up
         -- allow selectable to be on by default
         -- allow menu to be mouse independent by automatically selecting
-    
-    
+
         -- if arrow up call moveUp()
         -- if arrow down call moveDown()
 		if obj_args["event"] == "key" and obj_args["event_id"] == 265 then menu:moveUp() menu:draw() 
@@ -64,13 +56,11 @@ function create(args)
 		elseif obj_args["event"] == "key_up" and obj_args["event_id"] == 257 then menu:select() return 1 end -- select and return true
     end
     
-    
     -- decrements the position of the menu down 1
     function menu:moveUp()
         if menu.pos > 1 then menu.pos = menu.pos - 1 end
 		if menu.pos < menu.top_visible then menu.top_visible = menu.pos end    
     end
-    
     
     -- increments the position of the menu up 1
     function menu:moveDown()
@@ -85,12 +75,10 @@ function create(args)
 		end
     end
     
-    
     -- selects an option from the menu
     function menu:select()
         loadstring(menu.func)()
     end
-    
     
     function longest(list)
 		local long = 0
@@ -99,11 +87,6 @@ function create(args)
 		end
 		return long
 	end
-    
-	function menu:corrections()
-	end
-	
-	
 	
 	menu.list = args.list or {}
 	menu.width = longest(menu.list)

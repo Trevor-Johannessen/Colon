@@ -11,6 +11,7 @@ function create(args)
 	gif.images = {}
 	gif.frame = tonumber(args.frame) or 1
 	gif.replay = args.replay or true
+	gif.width = 1
 	gif.height = 1
 	gif.speed = tonumber(args.speed) or 1
 	
@@ -25,6 +26,7 @@ function create(args)
 			imageArgs["src"] = gif.gifLocation .. "/" .. path
 			local sprite = sprite.create(imageArgs)
 			if gif.height < sprite.height then gif.height = sprite.height end
+			if gif.width < sprite.width then gif.width = sprite.width end
 			table.insert(gif.images, sprite)
 		end
 	end

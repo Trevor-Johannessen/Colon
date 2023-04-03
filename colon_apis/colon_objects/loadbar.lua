@@ -18,7 +18,8 @@ function create(args)
 	loadbar.type = "loadbar"
 	loadbar.sticky = args.sticky or false
 	
-	if text == "" then loadbar.height = 1 else loadbar.height = 2 end
+    -- ?
+	--if text == "" then loadbar.height = 1 else loadbar.height = 2 end
     
     function loadbar:draw(x_offset, y_offset)
         x_offset = x_offset or 0 -- default parameter values
