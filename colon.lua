@@ -17,7 +17,7 @@ end
 function process_file(fileName)
 	-- open file and get line iterator
 	local text = get_file_iterator(fileName)
-
+	pages[fileName]["path"] = "/" .. fs.getDir(fileName)
 	-- parse lines to create objects and insert them into the objects list
 	for str in text do
 		interpret_line(str, fileName)
@@ -112,6 +112,9 @@ function parse(text, givenPage, whenName)
 		if(args[key]:sub(1, 1) == "\"" and args[key]:sub(-1) == "\"") then 
 			args[key] = args[key]:sub(2,-2) 
 		end
+		print(givenPage)
+		print(givenPage.path)
+		if args[key]:sub(1,2) == "./" then args[key] = pages[givenPage]["path"] .. args[key]:sub(2) end
 	end
 	if debugMode then print(object_type) end
 	-- if when command
@@ -174,7 +177,7 @@ function initalize(args)
 	
 	for i=1, table.getn(apis) do
 		if debugMode then print("apis[".. i .. "] = ", apis[i]) end
-		if not fs.isDir('/colon/colon_apis/colon_objects/' .. apis[i]) then
+		if not fs.isDir(apis[i]) then
 			local noExtension = string.sub(apis[i], 1, -5)
 			object_types[noExtension] = require("colon_apis/colon_objects/" .. noExtension) 
 			augments[noExtension] = {}
@@ -282,18 +285,14 @@ function bubble_redraw(redrawList) -- redrawList should already be sorted
 			index = k
 			redrawIndex = redrawIndex + 1
 		end
-		for checking_object in next, subarray(redrawList, 1, redrawIndex-1) do
-			if  k > index and
-				objList[checking_object].width and
-				objList[checking_object].height and
-				objList[index].width and
-				objList[index].height and
-				not (objList[index].x > objList[checking_object].x-objList[checking_object].width  	and -- Al > Br
-					objList[index].x+objList[index].width < objList[checking_object].x  	and -- Ar < Bl
-					objList[index].y > objList[checking_object].y+objList[checking_object].height 	and -- At > Bb
-					objList[index].y+objList[index].height < objList[checking_object].y) 	then
-				objList[k]:draw(pages[currentPage].x_offset, pages[currentPage].y_offset)
-			end
+		if  k > index and
+			objList[k].width and
+			objList[k].height and
+			not (objList[index].x > objList[k].x-objList[k].width  	and -- Al > Br
+				objList[index].x+objList[index].width < objList[k].x  	and -- Ar < Bl
+				objList[index].y > objList[k].y+objList[k].height 	and -- At > Bb
+				objList[index].y+objList[index].height < objList[k].y) 	then
+			objList[k]:draw(pages[currentPage].x_offset, pages[currentPage].y_offset)
 		end
 	end
 end
