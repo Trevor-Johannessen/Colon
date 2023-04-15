@@ -5,13 +5,34 @@ debugMode = false
 pages = pages or {}
 augments = augments or {} -- augments are global
 currentPage = currentPage or ""
+logs = {}
 
 -- open file and lex lines into tables
 function run(inArgs)
 	args = inArgs
 	initalize(args) -- initalize to load apis
+	logs = console.create()
 	process_file(args[1])
 	interaction_loop()
+end
+
+function initalize(args)
+	if not fs.exists("/colon/colon_apis/") then error("apis folder does not exist, try reinstalling") end
+	if not fs.exists("/colon/colon_apis/colon_objects/") then error("objects folder does not exist, try reinstalling") end
+	
+	apis = fs.list("/colon/colon_apis/colon_objects/")
+	
+	for i=1, table.getn(apis) do
+		if debugMode then print("apis[".. i .. "] = ", apis[i]) end
+		if not fs.isDir(apis[i]) then
+			local noExtension = string.sub(apis[i], 1, -5)
+			object_types[noExtension] = require("colon_apis/colon_objects/" .. noExtension) 
+			augments[noExtension] = {}
+		end
+	end
+	console = require("colon_apis/ext/console")
+	initalize_page(args[1])
+	currentPage = args[1]
 end
 
 function process_file(fileName)
@@ -169,24 +190,6 @@ function trim_input(text)
 	return text
 end
 
-function initalize(args)
-	if not fs.exists("/colon/colon_apis/") then error("apis folder does not exist, try reinstalling") end
-	if not fs.exists("/colon/colon_apis/colon_objects/") then error("objects folder does not exist, try reinstalling") end
-	
-	apis = fs.list("/colon/colon_apis/colon_objects/")
-	
-	for i=1, table.getn(apis) do
-		if debugMode then print("apis[".. i .. "] = ", apis[i]) end
-		if not fs.isDir(apis[i]) then
-			local noExtension = string.sub(apis[i], 1, -5)
-			object_types[noExtension] = require("colon_apis/colon_objects/" .. noExtension) 
-			augments[noExtension] = {}
-		end
-	end
-	initalize_page(args[1])
-	currentPage = args[1]
-end
-
 function construct_when(args, givenPage)
 	if debugMode then print("construct = ", args.command) end
 	pages[givenPage].when[args.name] = args.command
@@ -243,6 +246,9 @@ function interaction_loop()
 			end
 			if foundWhen then os.cancelTimer(timer) break end -- time taken to run when statement may cause timer desync
 			
+			-- systems functions
+			logs:update(obj_args)
+			
 			-- handels scrolling of page
 			if event == "mouse_scroll" and not pages[currentPage].scroll_lock and not blockScroll then
 				if event_id == -1 and pages[currentPage].y_offset+screen_height < pages[currentPage].end_of_page-1 then -- scroll up
@@ -254,7 +260,6 @@ function interaction_loop()
 				end
 				obj_args["y_offset"] = y_offset
 			end
-			
 			if event == "timer" then break end
 		end
 		tick = tick + 1
@@ -388,6 +393,14 @@ function get_page(name)
 	return pages[name]
 end
 
+function get_logs()
+	return logs
+end
+
+function add_log(msg)
+	if type(msg) == "string" then table.insert(logs, 1, msg) end
+end
+
 function set_background(name)
 	term.setBackgroundColor(pages[name].background)
 end
@@ -420,5 +433,7 @@ return{
 	redraw=redraw,
 	getCurrentPage=get_current_page,
 	editObject=edit_object,
-	message=message
+	message=message,
+	addLog=add_log,
+	getLogs=get_logs,
 }
