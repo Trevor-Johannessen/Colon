@@ -3,10 +3,10 @@ function create(args)
 	
 	local rectangle = template.create()
 	
-	rectangle.x = args.x or 1
-	rectangle.y = args.y or 1.
-	rectangle.width = args.width or 10
-	rectangle.height = args.height or 15
+	rectangle.x = tonumber(args.x) or 1
+	rectangle.y = tonumber(args.y) or 1.
+	rectangle.width = tonumber(args.width) or 10
+	rectangle.height = tonumber(args.height) or 15
 	rectangle.color = args.color or colors.red
 	rectangle.sticky = args.sticky or false
 	rectangle.type = "rectangle"

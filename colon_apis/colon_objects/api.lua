@@ -5,7 +5,7 @@ function create(args)
 		if string.sub(args.path, -4) == ".lua" then args.path = string.sub(args.path, 1, -5) end
 		os.unloadAPI(args.path)
 	else
-		_G[args.name] = require(args.path)
+		_G[args.name] = require("/" .. args.path)
 		--os.loadAPI(args.path)
 	end
 	return -1

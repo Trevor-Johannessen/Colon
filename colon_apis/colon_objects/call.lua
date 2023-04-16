@@ -8,8 +8,7 @@ function create(args)
 	call.interactive = false
 	call.unplaceable = true
 	call.type = "call"
-
-	_G[call.name][call.func](obj_args)
+	_G[call.name][call.func](args)
 	return -1
 end
 

@@ -24,38 +24,58 @@ function create(args)
 	button.hoverTextColor = button:correctColor(args.hoverColor) or colors.white
 	button.hoverBackgroundColor = button:correctColor(args.hoverBackground) or colors.black
 	button.sticky = args.sticky == "true" or false
+	button.transparent = args.transparent == "true" or false
+	button.hoverVisible = args.hoverVisible == "true" or false
+	button.propagate = not args.propagate == "false" or true
 	
-	local sprite_args = {}
-	sprite_args["x"] = button.x
-	sprite_args["y"] = button.y
-	sprite_args["src"] = button.spriteFile
-	button.sprite = sprite.create(sprite_args)
-	button.width = button.sprite.width
-	button.height = button.sprite.height
+	
+	if button.transparent then
+		button.width =  args.width or 0
+		button.height = args.height or 0
+		if button.hoverVisible and button.hoverSpriteFile == nil then
+			error("Must provide a hover sprite file when using transparent with hoverSpriteFile set to false.")
+		end
+	else
+		if not button.spriteFile then
+			error("Must provide sprite a sprite file.")
+		end
+	end
+	
+	if button.spriteFile or button.transparent and button.hoverVisible then
+		local sprite_args = {}
+		sprite_args["x"] = button.x
+		sprite_args["y"] = button.y
+		sprite_args["src"] = button.spriteFile
+		if button.transparent and button.hoverVisible then sprite_args["src"] = button.hoverSpriteFile end
+		button.sprite = sprite.create(sprite_args)
+		button.width = button.sprite.width 
+		button.height = button.sprite.height
+	end
 	
 	-- draws the button
 	function button:draw(x_offset, y_offset)
-		x_offset = x_offset or 0
-		y_offset = y_offset or 0
-		
-		if button.sticky then 
-			x_offset = 0
-			y_offset = 0 
+		if not button.transparent or button.transparent and button.hoverVisible and button.showingHover then
+			x_offset = x_offset or 0
+			y_offset = y_offset or 0
+			
+			if button.sticky then 
+				x_offset = 0
+				y_offset = 0 
+			end
+			
+			button.sprite:draw(x_offset, y_offset)
+			local midpoint = math.floor(button.height / 2)
+			term.setCursorPos(math.floor(button.x + x_offset + (button.width - string.len(button.text))/2), button.y+midpoint-y_offset)
+			
+			if button.showingHover then
+				term.setTextColor(button.hoverTextColor)
+				term.setBackgroundColor(button.hoverBackgroundColor)
+			else
+				term.setTextColor(button.textColor)
+				term.setBackgroundColor(button.backgroundColor)
+			end
+			if(x_offset + button.x + #button.text <= screen_width) then io.write(button.text) end
 		end
-		
-		button.sprite:draw(x_offset, y_offset)
-		local midpoint = math.floor(button.sprite.height / 2)
-		term.setCursorPos(math.floor(button.x + x_offset + (button.sprite.width - string.len(button.text))/2), button.y+midpoint-y_offset)
-		
-		if button.showingHover then
-			term.setTextColor(button.hoverTextColor)
-			term.setBackgroundColor(button.hoverBackgroundColor)
-		else
-			term.setTextColor(button.textColor)
-			term.setBackgroundColor(button.backgroundColor)
-		end
-		
-		if(x_offset + button.x + #button.text <= screen_width) then io.write(button.text) end
 	end
 	
 	-- implements functionality of button
@@ -70,19 +90,29 @@ function create(args)
 		if not obj_args["mouse_x"] or not obj_args["mouse_y"] or button.locked then return end -- check that given action is mouse (and button is not locked)
 		if button:check_hover(obj_args["mouse_x"], obj_args["mouse_y"], obj_args["y_offset"]) then	-- if the mouse is hovering the button
 			if obj_args["event"] == "mouse_up" and button.showingHover then -- if the mouse is clicking the button	
-				button.sprite:setImage(button.spriteFile)
+				local returnArgs = {}
+				if not button.propagate then table.insert(returnArgs, "nobubble") end 
 				button.showingHover = false
-				button:draw(obj_args["x_offset"], obj_args["y_offset"])
-				if button:click() then return {"when"} end
-				return  -- button has been clicked
+				if not button.transparent or button.transparent and button.hoverVisible then 
+					if not button.hoverVisible then button.sprite:setImage(button.spriteFile) end -- dont need to mess with images for hoverOnly buttons
+					button:draw(obj_args["x_offset"], obj_args["y_offset"])
+				end
+				if button.hoverVisible then -- when redrawing a hoverVisible button, we need to replace the background by bubbling up any redraw changes
+					button:redraw_background(obj_args)
+					table.insert(returnArgs, "redraw")
+				end
+				if button:click() then table.insert(returnArgs, "when") end
+				return returnArgs -- button has been clicked
 			elseif not button.showingHover and obj_args["event"] == "mouse_click" then -- if the mouse is hovering the button
-				button.sprite:setImage(button.hoverSpriteFile)
 				button.showingHover = true
+				if button.transparent and button.hoverVisible or not button.transparent then
+						button.sprite:setImage(button.hoverSpriteFile) -- dont need to mess with images for hoverOnly buttons
+				end
 				button:draw(obj_args["x_offset"], obj_args["y_offset"])
 				return -- button is being hovered
 			end
-		elseif button.showingHover then
-			button.sprite:setImage(button.spriteFile)
+		elseif button.showingHover and button.hoverVisible then
+			if not button.hoverVisible then button.sprite:setImage(button.spriteFile) end -- dont need to mess with images for hoverOnly buttons
 			button:draw(obj_args["x_offset"], obj_args["y_offset"])
 			button.showingHover = false
 		end
@@ -90,14 +120,13 @@ function create(args)
 	
 	-- checks if a set of coordinates overlaps the buttons sprite
 	function button:check_hover(inX, inY, y_offset)
-		if (button.y+button.sprite.height-y_offset) >= 0 and (button.y-y_offset) <= 19 then
-			term.setCursorPos(0,0)
+		if (button.y+button.height-y_offset) >= 0 and (button.y-y_offset) <= 19 then
 			if button.sticky then y_offset = 0 end
 			if 
 			inX >= button.x and
-			inX <= button.sprite.width+button.x-1 and
+			inX <= button.width+button.x-1 and
 			inY >= button.y - y_offset and
-			inY <= button.sprite.height+button.y-y_offset-1
+			inY <= button.height+button.y-y_offset-1
 			then
 				return true
 			else
@@ -114,6 +143,14 @@ function create(args)
 			return true
 		end
 		return false
+	end
+	
+	function button:redraw_background(args)
+		term.setBackgroundColor(args.background)
+		for i=0, button.height-1 do
+			term.setCursorPos(button.x-args.x_offset, button.y-args.y_offset+i)
+			io.write(string.rep(" ", button.width))
+		end
 	end
 	
 	button:corrections(button)

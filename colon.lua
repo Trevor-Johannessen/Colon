@@ -30,17 +30,22 @@ function initalize(args)
 			augments[noExtension] = {}
 		end
 	end
-	console = require("colon_apis/ext/console")
-	if args[1]:sub(1,1) ~= "/" then args[1] = "/" .. args[1] end
-	initalize_page(args[1])
-	currentPage = args[1]
+	console = require("colon_apis/ext/console")	
 end
 
 function process_file(fileName)
+	if fs.getDir(fileName) ~= "" then
+		fileName = fs.getDir(fileName) .. "/" .. fileName:match("[^/]*$")
+	else
+		fileName = fileName:match("[^/]*$")
+	end
+	if currentPage == "" then currentPage = fileName end
+	initalize_page(fileName)	
 	-- open file and get line iterator
 	local text = get_file_iterator(fileName)
-	pages[fileName]["path"] = "/" .. fs.getDir(fileName) -- removed due to making releative paths harder
+	pages[fileName]["path"] = fs.getDir(fileName) .. "/" -- removed due to making releative paths harder
 	-- parse lines to create objects and insert them into the objects list
+	term.setCursorPos(1,1)
 	for str in text do
 		interpret_line(str, fileName)
 	end
@@ -79,7 +84,6 @@ end
 function interpret_line(str, givenPage, whenName)
 	-- format string to allow for escape character
 	str = str:gsub("\\(%d+)", function (m) return string.char(m) end) -- match escape sequences into ascii characters \30 -> V but cool character
-
 	local new_obj = parse(str, givenPage, whenName)
 	if new_obj ~= -1 then
 		if 	not new_obj.unplaceable and 
@@ -87,7 +91,20 @@ function interpret_line(str, givenPage, whenName)
 				pages[givenPage].end_of_page = new_obj.y+new_obj.height -- adjust total page height
 		end
 		table.insert(pages[givenPage].objects, new_obj)
+		
+		-- add to groups table
+		term.setCursorPos(1,1)
+		for k, group in next, new_obj.groups do
+			print("Adding " .. group .. " to group")
+			add_to_group(new_obj, group, givenPage)
+		end
 	end
+end
+
+function add_to_group(obj, group, givenPage)
+	if not givenPage then givenPage = currentPage end
+	pages[givenPage].groups[group] = pages[givenPage].groups[group] or {}
+	table.insert(pages[givenPage].groups[group], obj)
 end
 
 function initalize_page(pageName)
@@ -101,11 +118,10 @@ function initalize_page(pageName)
 	pages[pageName].background = colors.black
 	pages[pageName].color = colors.white
 	pages[pageName].scroll_lock = false
+	pages[pageName].groups = {}
 end
 
 function parse(text, givenPage, whenName)
-	
-		
 	local found_tag
 	-- find what object type line is
 	local colon_pos = string.find(text, ":") -- position of colon used to mark a command
@@ -130,14 +146,26 @@ function parse(text, givenPage, whenName)
 	text = string.gmatch(text, "([^,]*),*")
 
 	-- turn arguments into parameters for the objects
-	for term in text do
-		local equals_pos = string.find(term, "=")
-		local key = string.sub(term, 0, equals_pos-1)
-		args[key] = string.gsub(string.sub(term, equals_pos+1), string.char(9), ",") -- args[var_name] = var_value
-		if(args[key]:sub(1, 1) == "\"" and args[key]:sub(-1) == "\"") then 
-			args[key] = args[key]:sub(2,-2) 
+	for param in text do
+		local equals_pos = string.find(param, "=")
+		if equals_pos == nil then error("Could not find equals sign in parameter of " .. object_type) end
+		local key = string.sub(param, 0, equals_pos-1)
+		local value = string.gsub(string.sub(param, equals_pos+1), string.char(9), ",") -- args[var_name] = var_value
+		if(value:sub(1, 1) == "\"" and value:sub(-1) == "\"") then 
+			value = value:sub(2,-2) 
 		end
-		if args[key]:sub(1,2) == "./" then args[key] = pages[givenPage]["path"] .. args[key]:sub(2) end
+		args[key] = value
+		args.groups = {}
+		if key == "groups" then
+			term.setCursorPos(1,1)
+			term.setTextColor(colors.white)
+			for group in value:gmatch("[^ ]+") do
+				table.insert(args.groups, group)
+			end
+		else
+			if args[key]:sub(1,2) == "./" then args[key] = pages[givenPage]["path"] .. args[key]:sub(3) end
+			if args[key]:sub(1,1) == "/" then args[key] = args[key]:sub(1) end -- file paths should NOT start with a slash!
+		end
 	end
 	if debugMode then print(object_type) end
 	-- if when command
@@ -177,7 +205,11 @@ function parse(text, givenPage, whenName)
 		args["when"] = whenName -- delivers whenName to objects created from when triggers
 		args["augments"] = augments[object_type]
 		
-		return object_types[object_type].create(args)
+		local obj = object_types[object_type].create(args)
+		if (type(obj) == "table") then -- mandatory attributes for objects.
+			obj.groups = obj.groups or args.groups
+		end
+		return obj
 	end
 end
 
@@ -218,7 +250,8 @@ function interaction_loop()
 			obj_args["y_offset"] = pages[currentPage].y_offset
 			obj_args["screen_height"] = screen_height
 			obj_args["screen_width"] = screen_width
-			
+			obj_args["color"] = pages[currentPage].color
+			obj_args["background"] = pages[currentPage].background
 			-- give input to all objects that request it
 			local foundWhen = false
 			local blockScroll = false
@@ -269,8 +302,8 @@ function interaction_loop()
 end
 
 function redraw(args)
-	term.setCursorPos(1,1)
-	local args = args or {pageName=currentPage}
+	local args = args or {}
+	args.pageName = args.pageName or currentPage
 	local pageName = args.pageName
 	local x_offset = args.x_offset or pages[pageName].x_offset
 	local y_offset = args.y_offset or pages[pageName].y_offset
@@ -286,7 +319,6 @@ function bubble_redraw(redrawList) -- redrawList should already be sorted
 	objList = pages[currentPage].objects
 	local index = redrawList[1]
 	local redrawIndex = 2
-	term.setCursorPos(1,1)
 	for k, v in next, objList do
 		if redrawList[redrawIndex] and redrawList[redrawIndex] == k then 
 			index = k
@@ -332,10 +364,11 @@ end
 
 -- HELPER FUNCTIONS
 function printarr(arr, substr)
-   for i in pairs(arr) do
-      print("arr[" .. i .. "] = ", arr[i])
-	  if substr then printarr(arr[i]) end
-   end
+	if type(arr) == "nil" then print("arr[] = nil") return end
+	for i in next, arr do
+		print("arr[" .. i .. "] = ", arr[i])
+		if substr then printarr(arr[i]) end
+	end
 end
 
 function subarray(arr, start, stop)
@@ -395,6 +428,18 @@ function get_page(name)
 	return pages[name]
 end
 
+function get_group(name, page)
+	if not page then page = currentPage end
+	return pages[page].groups[name]
+end
+
+function map_group(name, func, page)
+	if not page then page = currentPage end
+	for k, obj in next, pages[page].groups[name] do
+		func(obj)
+	end
+end
+
 function get_logs()
 	return logs
 end
@@ -438,4 +483,7 @@ return{
 	message=message,
 	addLog=add_log,
 	getLogs=get_logs,
+	getGroup=get_group,
+	mapGroup=map_group,
+	bubbleRedraw=bubble_redraw,
 }
