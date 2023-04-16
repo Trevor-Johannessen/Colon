@@ -31,6 +31,7 @@ function initalize(args)
 		end
 	end
 	console = require("colon_apis/ext/console")
+	if args[1]:sub(1,1) ~= "/" then args[1] = "/" .. args[1] end
 	initalize_page(args[1])
 	currentPage = args[1]
 end
@@ -38,7 +39,7 @@ end
 function process_file(fileName)
 	-- open file and get line iterator
 	local text = get_file_iterator(fileName)
-	pages[fileName]["path"] = "/" .. fs.getDir(fileName)
+	pages[fileName]["path"] = "/" .. fs.getDir(fileName) -- removed due to making releative paths harder
 	-- parse lines to create objects and insert them into the objects list
 	for str in text do
 		interpret_line(str, fileName)
@@ -76,6 +77,9 @@ function parse_augment(filePath)
 end
 
 function interpret_line(str, givenPage, whenName)
+	-- format string to allow for escape character
+	str = str:gsub("\\(%d+)", function (m) return string.char(m) end) -- match escape sequences into ascii characters \30 -> V but cool character
+
 	local new_obj = parse(str, givenPage, whenName)
 	if new_obj ~= -1 then
 		if 	not new_obj.unplaceable and 
@@ -133,8 +137,6 @@ function parse(text, givenPage, whenName)
 		if(args[key]:sub(1, 1) == "\"" and args[key]:sub(-1) == "\"") then 
 			args[key] = args[key]:sub(2,-2) 
 		end
-		print(givenPage)
-		print(givenPage.path)
 		if args[key]:sub(1,2) == "./" then args[key] = pages[givenPage]["path"] .. args[key]:sub(2) end
 	end
 	if debugMode then print(object_type) end

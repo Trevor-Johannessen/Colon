@@ -11,6 +11,7 @@ function create(args)
 	rectangle.sticky = args.sticky or false
 	rectangle.type = "rectangle"
 	rectangle.name = args.name
+	rectangle.hollow = args.hollow or false
 	
 	function rectangle:draw(x_offset, y_offset)
 		local oldx, oldy = term.getCursorPos()
@@ -23,7 +24,13 @@ function create(args)
 		for i=0, rectangle.height-1 do
 		
 			term.setCursorPos(rectangle.x+x_offset, rectangle.y-y_offset+i)
-			io.write(string.rep(" ", rectangle.width))
+			if rectangle.hollow and i ~= 0 and i ~= rectangle.height-1 then
+				io.write(" ")
+				term.setCursorPos(rectangle.x+x_offset+rectangle.width-1, rectangle.y-y_offset+i)
+				io.write(" ")
+			else
+				io.write(string.rep(" ", rectangle.width))
+			end
 		end	
 		term.setBackgroundColor(save_background)
 	end

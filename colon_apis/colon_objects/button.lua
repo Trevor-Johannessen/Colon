@@ -19,10 +19,10 @@ function create(args)
 	button.name = args.name
 	button.type = "button"
 	button.text = args.text or ""
-	button.textColor = args.color or colors.black
-	button.backgroundColor = args.background or colors.white
-	button.hoverTextColor = args.hoverColor or colors.white
-	button.hoverBackgroundColor = args.hoverBackground or colors.black
+	button.textColor = button:correctColor(args.color) or colors.black
+	button.backgroundColor = button:correctColor(args.background) or colors.white
+	button.hoverTextColor = button:correctColor(args.hoverColor) or colors.white
+	button.hoverBackgroundColor = button:correctColor(args.hoverBackground) or colors.black
 	button.sticky = args.sticky == "true" or false
 	
 	local sprite_args = {}
@@ -116,13 +116,7 @@ function create(args)
 		return false
 	end
 	
-	function button:corrections()
-		if button.sticky == "true" or not type(button.sticky) == "boolean" then
-			button.sticky = true
-		else
-			button.sticky = false
-		end
-	end
+	button:corrections(button)
 	
 	return button
 end

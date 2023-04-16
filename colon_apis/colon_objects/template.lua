@@ -73,12 +73,18 @@ function create()
 			end
 		end
     end
+	
+	function template:correctColor(color)
+		if tonumber(color) == nil then
+            return colors[color]
+        end 
+	end
 
     function template:corrections(obj)
-        if type(obj.color) == "string" then
+        if not tonumber(obj.color) then
             obj.color = colors[obj.color]
         end 
-        if type(obj.background) == "string" then
+        if not tonumber(obj.background) then
             obj.background = colors[obj.background]
         end 
 

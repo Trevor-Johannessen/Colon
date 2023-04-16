@@ -1,34 +1,7 @@
 screen_width, screen_height = term.getSize() -- dimensions of screen
 template = require("colon_apis/colon_objects/template")
 
-function parsePGI(sprite, f)
-	sprite.height = tonumber(f:read())
-	sprite.width = tonumber(f:read())
-	sprite.img = f:read()
-	io.close(f)
-end
 
-function parseNFP(sprite, f)
-	local content = f:read("a")
-	io.close(f)
-	local itr= content:gmatch("[^\n^\r]*\r?\n")
-	local row = itr()
-	local imgTbl = {}
-	sprite.width = 0
-	sprite.height = 0
-	while row ~= nil do
-		row = row:gsub("\r?\n", "")
-		if sprite.width < row:len() then sprite.width = row:len() end
-		sprite.height = sprite.height + 1
-		table.insert(imgTbl,row)
-		row = itr()
-	end
-	sprite.img = ""
-	for _, row in next, imgTbl do
-		padding = string.rep("-", sprite.width - row:len())
-		sprite.img = sprite.img .. row .. padding
-	end
-end
 
 function create(args)
 	
@@ -45,13 +18,6 @@ function create(args)
 	
 	if args.src ~= nil then
 		sprite.src = args.src
-	end
-	
-	local f = io.open(sprite.src)
-	if sprite.src:sub(-4) == ".pgi" then
-		parsePGI(sprite, f)
-	else -- default is nfp
-		parseNFP(sprite, f)
 	end
 	
 	function sprite:draw(x_offset, y_offset)
@@ -71,7 +37,6 @@ function create(args)
 			y_offset = 0 
 			x_offset = 0
 		end
-		
 		
 		for i = 1, sprite.height do
 			local bgdSeg = string.sub(sprite.img, current_char, current_char+sprite.width-1)
@@ -147,11 +112,8 @@ function create(args)
 	end
 	
 	function sprite:setImage(newFile)
-		local f = io.open(newFile)
-		sprite.height = tonumber(f:read())
-		sprite.width = tonumber(f:read())
-		sprite.img = f:read()
-		io.close(f)
+		sprite.src = newFile
+		sprite:loadImage()
 	end
 	
 	function sprite:corrections()
@@ -161,7 +123,46 @@ function create(args)
 			sprite.sticky = false
 		end
 	end
+	
+	
+	function sprite:parsePGI(f)
+		sprite.height = tonumber(f:read())
+		sprite.width = tonumber(f:read())
+		sprite.img = f:read()
+	end
 
+	function sprite:parseNFP(f)
+		local content = f:read("a")
+		local itr= content:gmatch("[^\n^\r]*\r?\n")
+		local row = itr()
+		local imgTbl = {}
+		sprite.width = 0
+		sprite.height = 0
+		while row ~= nil do
+			row = row:gsub("\r?\n", "")
+			if sprite.width < row:len() then sprite.width = row:len() end
+			sprite.height = sprite.height + 1
+			table.insert(imgTbl,row)
+			row = itr()
+		end
+		sprite.img = ""
+		for _, row in next, imgTbl do
+			padding = string.rep("-", sprite.width - row:len())
+			sprite.img = sprite.img .. row .. padding
+		end
+	end
+
+	function sprite:loadImage()
+		local f = io.open(sprite.src)
+		if sprite.src:sub(-4) == ".pgi" then
+			sprite:parsePGI(f)
+		else -- default is nfp
+			sprite:parseNFP(f)
+		end
+		io.close(f)
+	end
+	
+	sprite:loadImage()
 	sprite:corrections()
 	
 	return sprite

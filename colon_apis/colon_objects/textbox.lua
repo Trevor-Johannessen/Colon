@@ -3,7 +3,7 @@ template = require("colon_apis/colon_objects/template")
 text = require("colon_apis/colon_objects/text")
 
 function create(args)
-	textbox = template.create()
+	local textbox = template.create()
 	
 	textbox.x = tonumber(args.x) or 1
 	textbox.y = tonumber(args.y) or 1
