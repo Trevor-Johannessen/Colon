@@ -8,6 +8,8 @@ function create(args)
 	call.interactive = false
 	call.unplaceable = true
 	call.type = "call"
+	if(not _G[call.name]) then error("Call Error: Name: '" .. call.name .. "' not found.") end
+	if(not _G[call.name][call.func]) then error("Call Error: Func: '" .. call.func .. "' not found.") end
 	_G[call.name][call.func](args)
 	return -1
 end

@@ -481,7 +481,7 @@ return{
 	getCurrentPage=get_current_page,
 	editObject=edit_object,
 	message=message,
-	addLog=add_log,
+	log=add_log,
 	getLogs=get_logs,
 	getGroup=get_group,
 	mapGroup=map_group,
