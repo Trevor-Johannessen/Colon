@@ -81,10 +81,10 @@ function parse_augment(filePath)
 	end
 end
 
-function interpret_line(str, givenPage, whenName)
+function interpret_line(str, givenPage, whenArgs)
 	-- format string to allow for escape character
 	str = str:gsub("\\(%d+)", function (m) return string.char(m) end) -- match escape sequences into ascii characters \30 -> V but cool character
-	local new_obj = parse(str, givenPage, whenName)
+	local new_obj = parse(str, givenPage, whenArgs)
 	if new_obj ~= -1 then
 		if 	not new_obj.unplaceable and 
 			new_obj.y+new_obj.height > pages[givenPage].end_of_page then 
@@ -121,7 +121,7 @@ function initalize_page(pageName)
 	pages[pageName].groups = {}
 end
 
-function parse(text, givenPage, whenName)
+function parse(text, givenPage, whenArgs)
 	local found_tag
 	-- find what object type line is
 	local colon_pos = string.find(text, ":") -- position of colon used to mark a command
@@ -202,7 +202,7 @@ function parse(text, givenPage, whenName)
 				end
 			end
 		end
-		args["when"] = whenName -- delivers whenName to objects created from when triggers
+		args["when"] = whenArgs -- delivers whenArgs to objects created from when triggers
 		args["augments"] = augments[object_type]
 		
 		local obj = object_types[object_type].create(args)
@@ -229,72 +229,84 @@ function construct_when(args, givenPage)
 	pages[givenPage].when[args.name] = args.command
 end
 
+function redrawIfAwaiting(obj, args)
+	if obj.awaitingRedraw then 
+		obj.awaitingRedraw = false
+		obj:draw(args.x_offset, args.y_offset)
+	end
+end
+
+function formObjArgs(event)
+	args["event"] = event[1]
+	args["event_id"] = event[2]
+	args["mouse_x"] = event[3]
+	args["mouse_y"] = event[4]
+	args["tick"] = event[5]
+	args["x_offset"] = pages[currentPage].x_offset
+	args["y_offset"] = pages[currentPage].y_offset
+	args["screen_height"] = screen_height
+	args["screen_width"] = screen_width
+	args["color"] = pages[currentPage].color
+	args["background"] = pages[currentPage].background
+end
+
+function handleScrollEvent(block_scroll)
+	if not pages[currentPage].scroll_lock and not block_scroll then
+		if event_id == -1 and pages[currentPage].y_offset+screen_height < pages[currentPage].end_of_page-1 then -- scroll up
+			pages[currentPage].y_offset = pages[currentPage].y_offset + 1
+			redraw()
+		elseif event_id == 1 and pages[currentPage].y_offset >= 1 then -- scroll down
+			pages[currentPage].y_offset = pages[currentPage].y_offset - 1
+			redraw() -- we call redraw twice because it messes with dynamic objects when scrolling at top or bottom of page
+		end
+		--obj_args["y_offset"] = y_offset
+	end
+end
+
+function checkReturnConditions(val, prev_conditions)
+	for k, v in next, val do
+		if type(v) =0= "string" then
+			if v == "when" then -- activate when statements
+				prev_conditions.found_when = prev_conditions.found_when or check_when_statements(data.name, val) 
+			elseif v == "scroll" then -- take scroll control away from colon enviornemnt
+				prev_conditions.block_scroll = true
+			elseif v == "nobubble" then -- do not propagate input to any more elements
+				prev_conditions.nobubble = true
+			elseif v == "redraw" then
+				table.insert(prev_conditions.redraw_list, 1, k)
+			end
+		end
+	end
+end
+
  -- INTERPRETING FUNCTIONS
 function interaction_loop()
 	local tick = 1
-	local event, event_id, x, y
 	local obj_args = {}
 	
 	while true do
-		obj_args["tick"] = tick
-		
 		-- update interactive elements
 		local timer = os.startTimer(0.05)
 		while true do
-			event, event_id, x, y = os.pullEvent()
-			obj_args["event"] = event
-			obj_args["event_id"] = event_id
-			obj_args["mouse_x"] = x
-			obj_args["mouse_y"] = y
-			obj_args["x_offset"] = pages[currentPage].x_offset
-			obj_args["y_offset"] = pages[currentPage].y_offset
-			obj_args["screen_height"] = screen_height
-			obj_args["screen_width"] = screen_width
-			obj_args["color"] = pages[currentPage].color
-			obj_args["background"] = pages[currentPage].background
+			event = {os.pullEvent(), tick}
+			obj_args = formObjArgs(event)
 			-- give input to all objects that request it
-			local foundWhen = false
-			local blockScroll = false
+			local return_condtions = {redraw_list={}}
 			for index, data in pairs(pages[currentPage].objects) do
-				if data.awaitingRedraw then 
-					data.awaitingRedraw = false
-					data:draw(obj_args.x_offset, obj_args.y_offset)
-				end
+				redrawIfAwaiting(data, obj_args)
 				if data.interactive or data.dynamic then 
 					local val = data:update(obj_args) or {}
-					local bubble = false
-					local redrawList = {}
-					for k, v in next, val do
-						if v == "when" then -- activate when statements
-							foundWhen = foundWhen or check_when_statements(data.name) 
-						elseif v == "scroll" then -- take scroll control away from colon enviornemnt
-							blockScroll = true
-						elseif v == "nobubble" then -- do not propagate input to any more elements
-							bubble = true
-						elseif v == "redraw" then
-							table.insert(redrawList, 1, k)
-						end
-					end
-					if bubble then break end
-					bubble_redraw(redrawList)
+					checkReturnConditions(val, return_conditions)
+					if return_conditions.nobubble then break end
+					bubble_redraw(return_conditions.redraw_list)
 				end -- the update function for interactive objects should return a boolean for true if triggered, false it not
 			end
-			if foundWhen then os.cancelTimer(timer) break end -- time taken to run when statement may cause timer desync
+			if return_conditions.found_when then os.cancelTimer(timer) break end -- time taken to run when statement may cause timer desync
 			
 			-- systems functions
 			logs:update(obj_args)
 			
-			-- handels scrolling of page
-			if event == "mouse_scroll" and not pages[currentPage].scroll_lock and not blockScroll then
-				if event_id == -1 and pages[currentPage].y_offset+screen_height < pages[currentPage].end_of_page-1 then -- scroll up
-					pages[currentPage].y_offset = pages[currentPage].y_offset + 1
-					redraw()
-				elseif event_id == 1 and pages[currentPage].y_offset >= 1 then -- scroll down
-					pages[currentPage].y_offset = pages[currentPage].y_offset - 1
-					redraw() -- we call redraw twice because it messes with dynamic objects when scrolling at top or bottom of page
-				end
-				obj_args["y_offset"] = y_offset
-			end
+			if event == "mouse_scroll" then handleScrollEvent(return_conditions.block_scroll) end
 			if event == "timer" then break end
 		end
 		tick = tick + 1
@@ -349,13 +361,13 @@ function fill_screen(args)
 	end
 end
 
-function check_when_statements(name)
+function check_when_statements(name, args)
 	local matched = false
 	for k, v in next, pages[currentPage].when do
 		if debugMode then print(k, " ", v) end
 		if k == name then
 			matched = true
-			interpret_line(string.gsub(v, "\\", ""), currentPage, name)
+			interpret_line(string.gsub(v, "\\", ""), currentPage, args)
 			redraw()
 		end
 	end
