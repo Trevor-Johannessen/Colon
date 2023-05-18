@@ -1,7 +1,8 @@
 function create()
     local template = {}
     template.screen_width, template.screen_height = term.getSize()
-	local colorsDict = {
+    template.colon = require("colon")
+	template.colorsDict = {
 		{hex="0", string="white", int=colors.white},
 		{hex="1", string="orange", int=colors.orange},
 		{hex="2", string="magenta", int=colors.magenta},
@@ -66,12 +67,13 @@ function create()
     end	
 
 	-- convert color into "hex", "string", "int"
-    function template:convertColor(color, abcdefg)
-		for i=1, #colorsDict do
-			for k, v in next, colorsDict[i] do
-				if color == v then return colorsDict[i][abcdefg] end
+    function template:convertColor(color, type)
+		for i=1, #template.colorsDict do
+			for k, v in next, template.colorsDict[i] do
+				if color == v then return template.colorsDict[i][type] end
 			end
 		end
+        template:error("Color " .. color .. " is not supported.")
     end
 	
 	function template:correctColor(color)
@@ -132,6 +134,12 @@ function create()
 			obj=v(obj, args)
 		end
 	end
+
+    function template:error(str)
+        if not template.page then template.page = "nopage" end
+        if not template.name then template.name = "noname" end
+        error(template.page .. "-" .. template.name .. ": " .. str)
+    end
 
     return template
 end

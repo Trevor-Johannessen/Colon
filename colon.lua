@@ -204,7 +204,7 @@ function parse(text, givenPage, whenArgs)
 		end
 		args["when"] = whenArgs -- delivers whenArgs to objects created from when triggers
 		args["augments"] = augments[object_type]
-		
+		args.page = givenPage
 		local obj = object_types[object_type].create(args)
 		if (type(obj) == "table") then -- mandatory attributes for objects.
 			obj.groups = obj.groups or args.groups
@@ -236,12 +236,8 @@ function redrawIfAwaiting(obj, args)
 	end
 end
 
-function formObjArgs(event)
-	args["event"] = event[1]
-	args["event_id"] = event[2]
-	args["mouse_x"] = event[3]
-	args["mouse_y"] = event[4]
-	args["tick"] = event[5]
+function formObjArgs(args, tick)
+	args["tick"] = tick
 	args["x_offset"] = pages[currentPage].x_offset
 	args["y_offset"] = pages[currentPage].y_offset
 	args["screen_height"] = screen_height
@@ -250,24 +246,36 @@ function formObjArgs(event)
 	args["background"] = pages[currentPage].background
 end
 
-function handleScrollEvent(block_scroll)
+function addEventArgs(args, event)
+	args["event"] = event[1]
+	args["event_id"] = event[2]
+	args["mouse_x"] = event[3]
+	args["mouse_y"] = event[4]
+end
+
+function handleScrollEvent(event, block_scroll)
 	if not pages[currentPage].scroll_lock and not block_scroll then
-		if event_id == -1 and pages[currentPage].y_offset+screen_height < pages[currentPage].end_of_page-1 then -- scroll up
+		if event[2] == -1 and pages[currentPage].y_offset+screen_height < pages[currentPage].end_of_page-1 then -- scroll up
 			pages[currentPage].y_offset = pages[currentPage].y_offset + 1
 			redraw()
-		elseif event_id == 1 and pages[currentPage].y_offset >= 1 then -- scroll down
+		elseif event[2] == 1 and pages[currentPage].y_offset >= 1 then -- scroll down
 			pages[currentPage].y_offset = pages[currentPage].y_offset - 1
 			redraw() -- we call redraw twice because it messes with dynamic objects when scrolling at top or bottom of page
 		end
-		--obj_args["y_offset"] = y_offset
 	end
 end
 
-function checkReturnConditions(val, prev_conditions)
-	for k, v in next, val do
-		if type(v) =0= "string" then
+--[[
+	Checks the returned conditions by an objects update function
+	@param conditions: An array of strings that describe what functions should be executed after updating.
+	@param data: Information on the object that has just returned from update
+	@prev_conditions: A table of previous conditions used for conditions that only need to be set once in an update cycle.
+]]
+function checkReturnConditions(conditions, data, prev_conditions)
+	for k, v in next, conditions do
+		if type(v) == "string" then
 			if v == "when" then -- activate when statements
-				prev_conditions.found_when = prev_conditions.found_when or check_when_statements(data.name, val) 
+				prev_conditions.found_when = prev_conditions.found_when or check_when_statements(data.name, conditions.whenArgs) 
 			elseif v == "scroll" then -- take scroll control away from colon enviornemnt
 				prev_conditions.block_scroll = true
 			elseif v == "nobubble" then -- do not propagate input to any more elements
@@ -282,32 +290,32 @@ end
  -- INTERPRETING FUNCTIONS
 function interaction_loop()
 	local tick = 1
-	local obj_args = {}
-	
 	while true do
 		-- update interactive elements
 		local timer = os.startTimer(0.05)
+		local obj_args = {}
+		formObjArgs(obj_args, tick)
 		while true do
-			event = {os.pullEvent(), tick}
-			obj_args = formObjArgs(event)
+			event = {os.pullEvent()}
+			addEventArgs(obj_args, event)
 			-- give input to all objects that request it
-			local return_condtions = {redraw_list={}}
+			local return_conditions = {redraw_list={}}
 			for index, data in pairs(pages[currentPage].objects) do
 				redrawIfAwaiting(data, obj_args)
-				if data.interactive or data.dynamic then 
+				if data.interactive or data.dynamic then
 					local val = data:update(obj_args) or {}
-					checkReturnConditions(val, return_conditions)
+					checkReturnConditions(val, data, return_conditions)
 					if return_conditions.nobubble then break end
-					bubble_redraw(return_conditions.redraw_list)
 				end -- the update function for interactive objects should return a boolean for true if triggered, false it not
 			end
+			bubble_redraw(return_conditions.redraw_list)
 			if return_conditions.found_when then os.cancelTimer(timer) break end -- time taken to run when statement may cause timer desync
 			
 			-- systems functions
 			logs:update(obj_args)
 			
-			if event == "mouse_scroll" then handleScrollEvent(return_conditions.block_scroll) end
-			if event == "timer" then break end
+			if event[1] == "mouse_scroll" then handleScrollEvent(event,return_conditions.block_scroll) end
+			if event[1] == "timer" then break end
 		end
 		tick = tick + 1
 	end

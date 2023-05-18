@@ -14,11 +14,13 @@ function create(args)
 	sprite.name = args.name
 	sprite.type = "sprite"
 	sprite.sticky = args.sticky or false
-	
-	
-	if args.src ~= nil then
-		sprite.src = args.src
-	end
+	sprite.src = args.src
+	sprite.template = args.template
+	sprite.height = tonumber(args.height)
+	sprite.width = tonumber(args.width)
+
+	if args.src == nil and sprite.template == nil then 
+		sprite:error("An image or template must be provided to sprite.") end
 	
 	function sprite:draw(x_offset, y_offset)
 		x_offset = x_offset or 0 -- default parameter values
@@ -111,8 +113,18 @@ function create(args)
 		sprite:rotate180()
 	end
 	
-	function sprite:setImage(newFile)
-		sprite.src = newFile
+	function sprite:clearTemplate()
+		sprite.template = nil
+		if sprite.src == nil then
+			sprite:error("A sprite's src file must be set before clearing a template.") end
+		sprite:loadImage()
+	end
+
+	function sprite:setImage(newFile, isTemplate)
+		term.setCursorPos(1,9)
+		if isTemplate then isTemplate = "true" else isTemplate = "false" end
+		if isTemplate then sprite.template = newFile
+		else sprite.src = newFile end
 		sprite:loadImage()
 	end
 	
@@ -152,7 +164,11 @@ function create(args)
 		end
 	end
 
-	function sprite:loadImage()
+	function sprite:loadImageFromTemplate()
+		sprite.img = string.rep(sprite:convertColor(sprite.template, "hex"), sprite.width*sprite.height)
+	end
+
+	function sprite:loadImageFromFile()
 		local f = io.open(sprite.src)
 		if sprite.src:sub(-4) == ".pgi" then
 			sprite:parsePGI(f)
@@ -160,6 +176,14 @@ function create(args)
 			sprite:parseNFP(f)
 		end
 		io.close(f)
+	end
+
+	function sprite:loadImage()
+		if sprite.template == nil then
+			sprite:loadImageFromFile()
+		else
+			sprite:loadImageFromTemplate()
+		end
 	end
 	
 	sprite:loadImage()
