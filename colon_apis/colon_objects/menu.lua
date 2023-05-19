@@ -85,7 +85,6 @@ function create(args)
 
     function menu:setSelected(newSelector, context)
         if menu.selected ~= 0 then -- restoration policy
-            menu.colon.log("Restoring " .. menu.selected)
             menu.buttons[menu.selected].sprite:setImage(menu.selectedSaveState.color, true)
             menu.buttons[menu.selected].textColor = menu.selectedSaveState.textColor
             menu.buttons[menu.selected]:draw(context.x_offset, context.y_offset)
@@ -103,6 +102,7 @@ function create(args)
 
 	function menu:update(obj_args)
 		-- for clicking on the menu
+        local return_args = {}
 		if obj_args["mouse_x"] and obj_args["mouse_y"] then 
 			if menu.sticky then y_offset = 0 end
 			local hit = menu:isClickInMenu(obj_args)
@@ -116,9 +116,10 @@ function create(args)
                 elseif menu.active then -- menu is already selected
                     for k, button in next, menu.buttons do
                         local x = button:update(obj_args)
-                        if x then menu:setSelected(k, obj_args) end
+                        if x then menu:setSelected(k, obj_args) table.insert(return_args, "when"); return_args["whenArgs"] = {menu.selected} end
                     end
                 end
+                table.insert(return_args, "scroll")
 			elseif obj_args.event == "mouse_up" then
                 menu.colon.log("Untoggled menu")
 				menu.active = false
@@ -126,20 +127,22 @@ function create(args)
 			end
 		-- for navigating the menu
 		elseif menu.active then
-			if obj_args["event"] == "key" and obj_args["event_id"] == 265 then -- up arrow
+            if obj_args["event"] == "key" and obj_args["event_id"] == 265 then -- up arrow
 				if menu.selected > 1 then
                     menu:setSelected(menu.selected-1, obj_args)
+                    menu.colon.log("Selected = " .. menu.selected)
                 end
 			elseif obj_args["event"] == "key" and obj_args["event_id"] == 264 then -- down arrow
                 if menu.selected ~= menu.optCount then
                     menu:setSelected(menu.selected+1, obj_args)
+                    menu.colon.log("Selected = " .. menu.selected)
                 end
             elseif obj_args["event"] == "key" and obj_args["event_id"] == 257 then -- enter key
-                
+                table.insert(return_args, "when")
+                return_args["whenArgs"] = {menu.selected}
             end
-            menu.colon.log("Selected = " .. menu.selected)
-            return {"when", "scroll","whenArgs"}
 		end
+        return return_args
 	end
 
     menu:parseOptString()
