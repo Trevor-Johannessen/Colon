@@ -375,6 +375,7 @@ function check_when_statements(name, args)
 		if debugMode then print(k, " ", v) end
 		if k == name then
 			matched = true
+			add_log("matched when " .. name)
 			interpret_line(string.gsub(v, "\\", ""), currentPage, args)
 			redraw()
 		end
@@ -384,9 +385,16 @@ end
 
 -- HELPER FUNCTIONS
 function printarr(arr, substr)
+	local x,y = term.getCursorPos()
 	if type(arr) == "nil" then print("arr[] = nil") return end
 	for i in next, arr do
-		print("arr[" .. i .. "] = ", arr[i])
+		term.setCursorPos(x,y)
+		if type(arr[i]) == "number" or type(arr[i]) == "string" then
+			io.write("arr[" .. i .. "] = ", arr[i])
+		else
+			io.write("arr[" .. i .. "] = type(", type(arr[i]) .. ")")
+		end
+		y=y+1
 		if substr then printarr(arr[i]) end
 	end
 end
