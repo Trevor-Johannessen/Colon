@@ -38,7 +38,7 @@ function create(args)
 		end
 		if text.y+text.height > y_offset then
 			local newY = text.scrollPos+1
-			while text.height >= newY-text.scrollPos and #text.strTable >= newY do
+			while text.height >= newY-text.scrollPos and #text.strTable >= newY and text.strTable[newY] do
 				local write_len = text.strTable[newY]:len()
 				if text.strTable[newY]:sub(-2) == "\\n" then write_len = write_len - 2 end
 				term.setCursorPos(text.x+x_offset, text.y+newY-y_offset-1-text.scrollPos)
@@ -131,6 +131,11 @@ function create(args)
 		if #text.strTable > text.height and text.scrollable then text.interactive = true end
 	end
 	
+	function text:set(new_text)
+		text.text=new_text
+		text:initalize()
+	end
+
 	function text:add(addition)
 		text.text = text.text .. addition
 		local beforeSize = #text.strTable

@@ -66,6 +66,13 @@ function create()
             return t
     end	
 
+    function template:boolArgument(arg)
+        if type(arg) == "boolean" then
+            return arg
+        end
+        return arg == "true"
+    end
+
 	-- convert color into "hex", "string", "int"
     function template:convertColor(color, type)
 		for i=1, #template.colorsDict do

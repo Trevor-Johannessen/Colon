@@ -8,13 +8,13 @@ function create(args)
 	menu.y = tonumber(args.y) or 1
 	menu.dynamic = false
 	menu.interactive = true
-    menu.sticky = args.sticky
+    menu.sticky = args.sticky or false
 	menu.width = args.width or 10
 	menu.height = args.height or 10
     menu.optString = args.options -- semicolon delimited string containing all menu item texts
     menu.options = {}
     menu.buttons = {}
-    menu.active = false
+    menu.focused = args.focused or false
 	menu.selected = 0
     menu.optCount = 0
     menu.name = args.name or ""
@@ -85,6 +85,10 @@ function create(args)
         end
     end
 
+    function menu:focus()
+        menu.focused=true
+    end
+
     function menu:setSelected(newSelector, context)
         if menu.selected ~= 0 then -- restoration policy
             menu.buttons[menu.selected].sprite:setImage(menu.selectedSaveState.color, true)
@@ -112,26 +116,26 @@ function create(args)
 			if menu.sticky then y_offset = 0 end
 			local hit = menu:isClickInMenu(obj_args)
 			if hit then
-                if menu.active == false and obj_args["event"] == "mouse_up" then -- clicking menu for the first time
+                if menu.focused == false and obj_args["event"] == "mouse_up" then -- clicking menu for the first time
                     menu.colon.log("Toggled Menu")
-                    menu.active = true
+                    menu.focused = true
                     if inColon then
                         colon.scrollLock(true)
                     end
-                elseif menu.active then -- menu is already selected
+                elseif menu.focused then -- menu is already selected
                     for k, button in next, menu.buttons do
                         local x = button:update(obj_args)
-                        if x then menu:setSelected(k, obj_args) table.insert(return_args, "when"); return_args["whenArgs"] = {menu.selected} end
+                        if x then menu:setSelected(k, obj_args) table.insert(return_args, "when"); return_args["whenArgs"] = {menu.options[menu.selected]} end
                     end
                 end
                 table.insert(return_args, "scroll")
 			elseif obj_args.event == "mouse_up" then
                 menu.colon.log("Untoggled menu")
-				menu.active = false
+				menu.focused = false
 				colon.scrollLock(false)
 			end
 		-- for navigating the menu
-		elseif menu.active then
+		elseif menu.focused then
             if obj_args["event"] == "key" and obj_args["event_id"] == 265 then -- up arrow
 				if menu.selected > 1 then
                     menu:setSelected(menu.selected-1, obj_args)
@@ -144,7 +148,7 @@ function create(args)
                 end
             elseif obj_args["event"] == "key" and obj_args["event_id"] == 257 then -- enter key
                 table.insert(return_args, "when")
-                return_args["whenArgs"] = {menu.selected}
+                return_args["whenArgs"] = {menu.options[menu.selected]}
             end
 		end
         return return_args
