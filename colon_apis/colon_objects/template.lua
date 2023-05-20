@@ -77,9 +77,15 @@ function create()
     end
 	
 	function template:correctColor(color)
-		if tonumber(color) == nil then
+		if type(color) == "string" then
+            if colors[color] == nil then template:error("correctColor - " .. color .. " is not a valid color.") end
             return colors[color]
-        end 
+        elseif type(color) == "number" then
+            return color
+        elseif type(color) == "nil" then
+            return nil
+        end
+        template:error("correctColor - A non-(number or string) was provided. (provided " .. type(color) .. ")")
 	end
 
     function template:corrections(obj)

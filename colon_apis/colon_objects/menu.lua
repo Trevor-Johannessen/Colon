@@ -19,11 +19,11 @@ function create(args)
     menu.optCount = 0
     menu.name = args.name or ""
     menu.color = menu:correctColor(args.color) or "lightGray"
-    menu.textColor = menu:correctColor(args.textColor) or colors.lightGray
+    menu.textColor = menu:correctColor(args.textColor) or colors.black
     menu.secondaryColor = menu:correctColor(args.secondaryColor) or menu:correctColor(args.selectedColor) or "gray"
     menu.secondaryTextColor = menu:correctColor(args.secondaryTextColor) or menu:correctColor(args.textColor) or colors.black
-    menu.selectedColor = menu:correctColor(args.selectedColor) or colors.black
-    menu.selectedTextColor = menu:correctColor(args.selectedTextColor) or colors.white
+    menu.selectedColor = menu:correctColor(args.selectedColor) or colors.red
+    menu.selectedTextColor = menu:correctColor(args.selectedTextColor) or colors.blue
     menu.page = args.page or "Unknown"
     menu.selectedSaveState={}
     
@@ -51,7 +51,7 @@ function create(args)
             color=colors.txt,
             hoverColor=menu.selectedTextColor,
             background=colors.bg,
-            hoverbackground=menu.selectedColor,
+            hoverBackground=menu.selectedColor,
             sticky=menu.sticky,
             page=menu.page,
             name=menu.name .. "-" .. name,
