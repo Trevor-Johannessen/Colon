@@ -18,12 +18,12 @@ function create(args)
 	menu.selected = 0
     menu.optCount = 0
     menu.name = args.name or ""
-    menu.color = menu:correctColor(args.color) or colors.lightGray
+    menu.color = menu:correctColor(args.color) or "lightGray"
+    menu.textColor = menu:correctColor(args.textColor) or colors.lightGray
     menu.secondaryColor = menu:correctColor(args.secondaryColor) or menu:correctColor(args.selectedColor) or "gray"
-    menu.selectedColor = menu:correctColor(args.selectedColor) or "white"
-    menu.textColor = menu:correctColor(args.textColor) or colors["lightGray"]
-    menu.secondaryTextColor = menu:correctColor(args.secondaryTextColor) or menu:correctColor(args.textColor) or colors["black"]
-    menu.selectedTextColor = menu:correctColor(args.selectedTextColor) or colors["black"]
+    menu.secondaryTextColor = menu:correctColor(args.secondaryTextColor) or menu:correctColor(args.textColor) or colors.black
+    menu.selectedColor = menu:correctColor(args.selectedColor) or colors.black
+    menu.selectedTextColor = menu:correctColor(args.selectedTextColor) or colors.white
     menu.page = args.page or "Unknown"
     menu.selectedSaveState={}
     
@@ -48,8 +48,10 @@ function create(args)
             useTemplate="true",
             sprite=colors.bg,
             hoverSprite=menu.selectedColor,
-            textColor=colors.txt,
-            hoverTextColor=menu.selectedTextColor,
+            color=colors.txt,
+            hoverColor=menu.selectedTextColor,
+            background=colors.bg,
+            hoverbackground=menu.selectedColor,
             sticky=menu.sticky,
             page=menu.page,
             name=menu.name .. "-" .. name,
@@ -86,17 +88,20 @@ function create(args)
     function menu:setSelected(newSelector, context)
         if menu.selected ~= 0 then -- restoration policy
             menu.buttons[menu.selected].sprite:setImage(menu.selectedSaveState.color, true)
+            menu.buttons[menu.selected].backgroundColor = menu.selectedSaveState.textColorBackground
             menu.buttons[menu.selected].textColor = menu.selectedSaveState.textColor
             menu.buttons[menu.selected]:draw(context.x_offset, context.y_offset)
         end
         -- select new button
         menu.selectedSaveState = {
             color=menu.buttons[newSelector].spriteFile,
-            textColor=menu.buttons[newSelector].textColor
+            textColor=menu.buttons[newSelector].textColor,
+            textColorBackground=menu.buttons[newSelector].backgroundColor
         }
         menu.selected = newSelector
         menu.buttons[menu.selected].sprite:setImage(menu.selectedColor, true)
         menu.buttons[menu.selected].textColor = menu.selectedTextColor
+        menu.buttons[menu.selected].backgroundColor = menu.selectedColor
         menu.buttons[menu.selected]:draw(context.x_offset, context.y_offset)
     end
 
