@@ -22,8 +22,8 @@ function create(args)
     menu.textColor = menu:correctColor(args.textColor) or colors.black
     menu.secondaryColor = menu:correctColor(args.secondaryColor) or menu:correctColor(args.selectedColor) or "gray"
     menu.secondaryTextColor = menu:correctColor(args.secondaryTextColor) or menu:correctColor(args.textColor) or colors.black
-    menu.selectedColor = menu:correctColor(args.selectedColor) or colors.red
-    menu.selectedTextColor = menu:correctColor(args.selectedTextColor) or colors.blue
+    menu.selectedColor = menu:correctColor(args.selectedColor) or colors.white
+    menu.selectedTextColor = menu:correctColor(args.selectedTextColor) or colors.black
     menu.page = args.page or "Unknown"
     menu.selectedSaveState={}
     

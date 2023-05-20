@@ -1,4 +1,5 @@
-colon = require("/colon/colon")
+colon = require("colon")
+text = require("colon_apis/colon_objects/text")
 screen_width, screen_height = term.getSize()
 function create(args)
 	
@@ -6,10 +7,30 @@ function create(args)
 	
 	
 	console.consolePosition = 0
-	console.logs = {}
 	console.updateTimer = 10
 	console.show = false
+	local height = 7
+	if screen_height > 20 then
+		height = screen_height * 0.33
+	end
+	console.logs = text.create{
+		x=1,
+		y=screen_height-height+1,
+		text="",
+		dynamic=true,
+		scrollable=true,
+		width=screen_width,
+		height=height,
+		sticky=true
+	}
 	
+	function console:draw(x_offset, y_offset)
+		if console.show then
+			console.logs:draw(x_offset,y_offset)
+		end
+	end
+
+	--[[
 	function console:draw(x_offset, y_offset)
 		if console.show then
 			local saveColor = term.getTextColor()
@@ -21,7 +42,7 @@ function create(args)
 				height = screen_height * 0.33
 			end
 			for i=1, height do
-				term.setCursorPos(1, screen_height - height + i) -- move top to bottom
+				term.setCursorPos(1, screen_height-i+1) -- move bottom to top
 				if logs[i] then
 					if type(logs[i]) ~= "string" then logs[i] = "error: Log not string." end
 					local width = string.len(logs[i])
@@ -34,19 +55,24 @@ function create(args)
 			term.setBackgroundColor(saveBackground)
 		end
 	end
-	
+	]]
+
 	function console:update(args)
 		if args["event"] == "key" and args["event_id"] == 301 then 
 			console.show = not console.show 
-			colon.redraw()
+			--colon.redraw()
+			console:draw(args.x_offset, args.y_offset)
+		else
+			console.logs:update(args)
 		end
-	
-		if args["tick"] % console.updateTimer == 0 then
-			console.logs = colon.getLogs()
-		end
+		
+	end
+
+	function console:add(args)
+		console.logs:add(args.msg .. "\\n")
 		console:draw(args.x_offset, args.y_offset)
 	end
-	
+
 	return console
 	
 end

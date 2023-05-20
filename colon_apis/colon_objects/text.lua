@@ -39,10 +39,12 @@ function create(args)
 		if text.y+text.height > y_offset then
 			local newY = text.scrollPos+1
 			while text.height >= newY-text.scrollPos and #text.strTable >= newY do
+				local write_len = text.strTable[newY]:len()
+				if text.strTable[newY]:sub(-2) == "\\n" then write_len = write_len - 2 end
 				term.setCursorPos(text.x+x_offset, text.y+newY-y_offset-1-text.scrollPos)
 				term.blit(clearString, clearString, clearString)
 				term.setCursorPos(text.x+x_offset, text.y+newY-y_offset-1-text.scrollPos)
-				term.blit(text.strTable[newY], text.clrTable[newY], text.bgdTable[newY])
+				term.blit(text.strTable[newY]:sub(1,write_len), text.clrTable[newY]:sub(1,write_len), text.bgdTable[newY]:sub(1, write_len))
 				newY = newY + 1
 			end
 			term.setCursorPos(save_cursor[1], save_cursor[2])
@@ -96,13 +98,18 @@ function create(args)
 			local endPointer = text.width
 			local offset = 1
 			local line = str:sub(1, endPointer)
-			if str:len() > text.width and line:find(' ') then
+			if line:sub(2):find('\\n') then
+				endPointer = line:sub(2):find('\\n')+1
+				offset = 2
+			elseif str:len() > text.width and line:find(' ') then
 				endPointer = line:find('[^ ]*$')-1
 			end
-			if(str:sub(endPointer+1,endPointer+1) == " ") then offset = 2 end
-			table.insert(text.strTable, str:sub(1,endPointer))
-			table.insert(text.clrTable, colorString:sub(1,endPointer))
-			table.insert(text.bgdTable, backgroundString:sub(1, endPointer))
+			if(str:sub(endPointer+1,endPointer+1) == " ") then offset = offset + 1 end
+			-- I'm just so done with this, maybe rewrite this code at some point.
+			-- There has to be a better way. 
+			table.insert(text.strTable, str:sub(1,endPointer+offset-1))
+			table.insert(text.clrTable, colorString:sub(1,endPointer+offset-1))
+			table.insert(text.bgdTable, backgroundString:sub(1, endPointer+offset-1))
 			str=str:sub(endPointer+offset)
 			colorString=colorString:sub(endPointer+offset)
 			backgroundString=backgroundString:sub(endPointer+offset)

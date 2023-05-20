@@ -1,16 +1,15 @@
 screen_width, screen_height = term.getSize() -- dimensions of screen
 object_types = object_types or {}
 debugMode = false
-
+console={}
 pages = pages or {}
 currentPage = currentPage or ""
-logs = {}
 
 -- open file and lex lines into tables
 function run(inArgs)
 	args = inArgs
 	initalize(args) -- initalize to load apis
-	logs = console.create()
+	console = console.create()
 	process_file(args[1])
 	interaction_loop()
 end
@@ -41,7 +40,7 @@ function process_file(fileName)
 	initalize_page(fileName)	
 	-- open file and get line iterator
 	local text = get_file_iterator(fileName)
-	pages[fileName]["path"] = fs.getDir(fileName) .. "/" -- removed due to making releative paths harder
+	pages[fileName]["path"] = fs.getDir(fileName) .. "/"
 	-- parse lines to create objects and insert them into the objects list
 	term.setCursorPos(1,1)
 	for str in text do
@@ -282,7 +281,7 @@ function interaction_loop()
 			if return_conditions.found_when then os.cancelTimer(timer) break end -- time taken to run when statement may cause timer desync
 			
 			-- systems functions
-			logs:update(obj_args)
+			console:update(obj_args)
 			
 			if event[1] == "mouse_scroll" then handleScrollEvent(event,return_conditions.block_scroll) end
 			if event[1] == "timer" then break end
@@ -438,12 +437,8 @@ function map_group(name, func, page)
 	end
 end
 
-function get_logs()
-	return logs
-end
-
 function add_log(msg)
-	if type(msg) == "string" then table.insert(logs, 1, msg) end
+	if type(msg) == "string" then console:add{msg=msg,x_offset=currentPage.x_offset,y_offset=currentPage.y_offset} end
 end
 
 function set_background(name)

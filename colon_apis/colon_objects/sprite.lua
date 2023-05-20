@@ -122,7 +122,7 @@ function create(args)
 
 	function sprite:setImage(newFile, isTemplate)
 		term.setCursorPos(1,9)
-		if isTemplate then isTemplate = "true" else isTemplate = "false" end
+		--if isTemplate then isTemplate = "true" else isTemplate = "false" end
 		if isTemplate then sprite.template = newFile
 		else sprite.src = newFile end
 		sprite:loadImage()
