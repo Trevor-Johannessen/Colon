@@ -10,6 +10,7 @@ function create(args)
 	text.interactive = false
 	text.name = args.name
 	text.type = "text"
+	text.fillBackground = args.fillBackground ~= "false"
 	text.color = args.color or term.getTextColor()
 	text.background = args.background or term.getBackgroundColor()
 	text.sticky = args.sticky or false
@@ -24,6 +25,14 @@ function create(args)
 	text.clrTable = {}
 	text.bgdTable = {}
 	
+	function text:drawBackground(x_offset,y_offset)
+		term.setBackgroundColor(text:convertColor(text.background, "int"))
+		for i=0, text.height-1 do
+			term.setCursorPos(text.x+x_offset, text.y-y_offset+i)
+			io.write(string.rep(" ", text.width))
+		end	
+	end
+
 	function text:draw(x_offset, y_offset)
 		local save_cursor = {term.getCursorPos()}
 		local save_text = term.getTextColor()
@@ -35,6 +44,9 @@ function create(args)
 		if text.sticky then 
 			y_offset = 0 
 			x_offset = 0
+		end
+		if text.fillBackground then
+			text:drawBackground(x_offset,y_offset)
 		end
 		if text.y+text.height > y_offset then
 			local newY = text.scrollPos+1
