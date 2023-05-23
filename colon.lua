@@ -1,7 +1,6 @@
 screen_width, screen_height = term.getSize() -- dimensions of screen
 object_types = object_types or {}
 debugMode = false
-console={}
 pages = pages or {}
 currentPage = currentPage or ""
 
@@ -282,7 +281,6 @@ function interaction_loop()
 			
 			-- systems functions
 			console:update(obj_args)
-			
 			if event[1] == "mouse_scroll" then handleScrollEvent(event,return_conditions.block_scroll) end
 			if event[1] == "timer" then break end
 		end

@@ -19,7 +19,7 @@ function create(args)
 	text.height = tonumber(args.height) or nil
 	text.autoHeight = false -- flag if the text has had its height automatically set
 	text.scrollPos = 0
-	text.scrollable = args.scrollable or true
+	text.scrollable = type(args.scrollable) == "string" and args.scrollable ~= "false"
 	text.strTable = {}
 	text.clrTable = {}
 	text.bgdTable = {}

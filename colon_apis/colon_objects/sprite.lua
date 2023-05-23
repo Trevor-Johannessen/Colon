@@ -170,6 +170,7 @@ function create(args)
 
 	function sprite:loadImageFromFile()
 		local f = io.open(sprite.src)
+		if f == nil then sprite:error("File " .. sprite.src .. " not found.") end
 		if sprite.src:sub(-4) == ".pgi" then
 			sprite:parsePGI(f)
 		else -- default is nfp
