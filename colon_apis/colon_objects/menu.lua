@@ -9,9 +9,9 @@ function create(args)
 	menu.dynamic = false
 	menu.interactive = true
     menu.sticky = args.sticky or false
-	menu.width = args.width or 10
-	menu.height = args.height or 10
-    menu.optString = args.options -- semicolon delimited string containing all menu item texts
+	menu.width = tonumber(args.width) or 10
+	menu.height = tonumber(args.height) or 10
+    menu.optString = args.options or "EMPTY"-- semicolon delimited string containing all menu item texts
     menu.options = {}
     menu.buttons = {}
     menu.focused = args.focused or false
@@ -26,7 +26,8 @@ function create(args)
     menu.selectedTextColor = menu:correctColor(args.selectedTextColor) or colors.black
     menu.page = args.page or "Unknown"
     menu.selectedSaveState={}
-    
+    menu.offset=0
+
     menu.hardcodeHeight = 1
 
     function menu:generateButtons()
@@ -76,12 +77,14 @@ function create(args)
     end
 
     function calculateYOffset(y_offset)
-        return y_offset
+        return y_offset+menu.offset
     end
 
     function menu:draw(x_offset, y_offset)
         for k, v in next, menu.buttons do
-            v:draw(x_offset, calculateYOffset(y_offset))
+            if k > menu.offset and k <= menu.height+menu.offset then
+                v:draw(x_offset, calculateYOffset(y_offset))
+            end
         end
     end
 
@@ -94,7 +97,6 @@ function create(args)
             menu.buttons[menu.selected].sprite:setImage(menu.selectedSaveState.color, true)
             menu.buttons[menu.selected].backgroundColor = menu.selectedSaveState.textColorBackground
             menu.buttons[menu.selected].textColor = menu.selectedSaveState.textColor
-            menu.buttons[menu.selected]:draw(context.x_offset, context.y_offset)
         end
         -- select new button
         menu.selectedSaveState = {
@@ -106,7 +108,8 @@ function create(args)
         menu.buttons[menu.selected].sprite:setImage(menu.selectedColor, true)
         menu.buttons[menu.selected].textColor = menu.selectedTextColor
         menu.buttons[menu.selected].backgroundColor = menu.selectedColor
-        menu.buttons[menu.selected]:draw(context.x_offset, context.y_offset)
+        
+        menu:draw(context.x_offset, context.y_offset)
     end
 
 	function menu:update(obj_args)
@@ -138,11 +141,13 @@ function create(args)
 		elseif menu.focused then
             if obj_args["event"] == "key" and obj_args["event_id"] == 265 then -- up arrow
 				if menu.selected > 1 then
+                    if menu.selected - menu.offset == 0 then menu.offset = menu.offset-1 end
                     menu:setSelected(menu.selected-1, obj_args)
                     menu.colon.log("Selected = " .. menu.selected)
                 end
 			elseif obj_args["event"] == "key" and obj_args["event_id"] == 264 then -- down arrow
                 if menu.selected ~= menu.optCount then
+                    if menu.selected >= menu.height+menu.offset then menu.offset = menu.offset+1 end
                     menu:setSelected(menu.selected+1, obj_args)
                     menu.colon.log("Selected = " .. menu.selected)
                 end
