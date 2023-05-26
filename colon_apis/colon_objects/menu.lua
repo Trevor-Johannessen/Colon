@@ -2,7 +2,7 @@ template = require("colon_apis/colon_objects/template")
 button = require("colon_apis/colon_objects/button")
 
 function create(args)
-	menu = template.create()
+	local menu = template.create()
 	
 	menu.x = tonumber(args.x) or 1
 	menu.y = tonumber(args.y) or 1
@@ -76,14 +76,14 @@ function create(args)
         menu.optCount = #menu.options
     end
 
-    function calculateYOffset(y_offset)
+    function menu:calculateYOffset(y_offset)
         return y_offset+menu.offset
     end
 
     function menu:draw(x_offset, y_offset)
         for k, v in next, menu.buttons do
             if k > menu.offset and k <= menu.height+menu.offset then
-                v:draw(x_offset, calculateYOffset(y_offset))
+                v:draw(x_offset, menu:calculateYOffset(y_offset))
             end
         end
     end
