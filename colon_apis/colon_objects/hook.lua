@@ -7,18 +7,33 @@ function create(args)
 	hook.y=0
 	hook.height=0
 	hook.width=0
-	hook.func = args.func
+	hook.func = _G[hook.name][args.func]
 	hook.dynamic = true
 	hook.interactive = false
 	hook.unplaceable = not args.draw == "true"
+	hook.staged = args.staged == "true" or false
 	hook.type = "hook"
 	
-	function hook:draw(x_offset, y_offset)
-		hook:update{x_offset, y_offset}
+	if not hook.unplaceable or hook.staged then
+		hook.updated = args.updated == "true"
+	else
+		hook.updated = args.updated ~= "false"
+	end
+
+	if not hook.unplaceable then
+		function hook:draw(x_offset, y_offset)
+			hook:func{x_offset, y_offset}
+		end
 	end
 	
-	function hook:update(obj_args)
-		_G[hook.name][hook.func](obj_args)
+	if hook.updated then
+		function hook:update(obj_args)
+			hook:func(obj_args)
+		end
+	end
+
+	function hook:staged()
+		hook:func()
 	end
 	
 	return hook
