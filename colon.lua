@@ -35,13 +35,13 @@ function process_file(fileName)
 	else
 		fileName = fileName:match("[^/]*$")
 	end
+	if fileName:sub(1,1) ~= "/" then fileName = "/" .. fileName end
 	if currentPage == "" then currentPage = fileName end
 	initalize_page(fileName)	
 	-- open file and get line iterator
 	local text = get_file_iterator(fileName)
-	pages[fileName]["path"] = fs.getDir(fileName) .. "/"
+	pages[fileName]["path"] = "/" .. fs.getDir(fileName) .. "/"
 	-- parse lines to create objects and insert them into the objects list
-	term.setCursorPos(1,1)
 	for str in text do
 		interpret_line(str, fileName)
 	end
@@ -91,6 +91,7 @@ function initalize_page(pageName)
 	pages[pageName].color = colors.white
 	pages[pageName].scroll_lock = false
 	pages[pageName].groups = {}
+	pages[pageName].name = pageName
 end
 
 function parse(text, givenPage, whenArgs)
@@ -173,6 +174,7 @@ function parse(text, givenPage, whenArgs)
 		end
 		args["when"] = whenArgs -- delivers whenArgs to objects created from when triggers
 		args.page = givenPage
+		if object_types[object_type] == nil then error("Object type " .. object_type .. " not found.") end
 		local obj = object_types[object_type].create(args)
 		if (type(obj) == "table") then -- mandatory attributes for objects.
 			obj.groups = obj.groups or args.groups
@@ -270,11 +272,11 @@ function interaction_loop()
 			local return_conditions = {redraw_list={}}
 			for index, data in pairs(pages[currentPage].objects) do
 				redrawIfAwaiting(data, obj_args)
-				if data.interactive or data.dynamic then
+				if data.update then
 					local val = data:update(obj_args) or {}
 					checkReturnConditions(val, data, return_conditions)
 					if return_conditions.nobubble then break end
-				end -- the update function for interactive objects should return a boolean for true if triggered, false it not
+				end 
 			end
 			bubble_redraw(return_conditions.redraw_list)
 			if return_conditions.found_when then os.cancelTimer(timer) break end -- time taken to run when statement may cause timer desync
@@ -413,9 +415,15 @@ end
 
 function set_current_page(newPage)
 	currentPage = newPage
+	for i, obj in next, pages[currentPage].objects do
+		if obj.staged then
+			obj:staged()
+		end
+	end
 end
 
 function get_current_page()
+	print("Current page = " .. currentPage)
 	return pages[currentPage]
 end
 
