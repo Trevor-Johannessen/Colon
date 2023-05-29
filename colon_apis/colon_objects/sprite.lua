@@ -5,7 +5,7 @@ template = require("colon_apis/colon_objects/template")
 
 function create(args)
 	
-	local sprite = template.create()
+	local sprite = template.create(args)
 	sprite.x = tonumber(args.x) or 0
 	sprite.y = tonumber(args.y) or 0
 	sprite.file = "" -- TODO: make default image and place here
@@ -23,6 +23,7 @@ function create(args)
 		sprite:error("An image or template must be provided to sprite.") end
 	
 	function sprite:draw(x_offset, y_offset)
+		if sprite.hidden then return end
 		x_offset = x_offset or 0 -- default parameter values
 		y_offset = y_offset or 0
 		

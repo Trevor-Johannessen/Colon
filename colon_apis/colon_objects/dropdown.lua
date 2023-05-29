@@ -8,7 +8,7 @@ function formatSelectedText(str, width)
 end
 
 function create(args)
-	local dropdown = template.create()
+	local dropdown = template.create(args)
 	dropdown.name = args.name or ""
     dropdown.x = tonumber(args.x)
     dropdown.y = tonumber(args.y)
@@ -47,6 +47,7 @@ function create(args)
     }
 
     function dropdown:draw(x_offset, y_offset)
+        if dropdown.hidden then return end
         dropdown.selected_string:draw(x_offset, y_offset)
         if dropdown.selected then
             dropdown.menu:draw(x_offset, y_offset)
@@ -67,6 +68,7 @@ function create(args)
     end
 
     function dropdown:update(args)
+        if dropdown.hidden then return end
         local clicked = dropdown.button:update(args)
         if clicked ~= nil then
             dropdown.colon.log("Clicked dropdown " .. dropdown.name)
@@ -89,8 +91,7 @@ function create(args)
             return menuOutput
         end
     end
-
-
+    
 	return dropdown
 end
 

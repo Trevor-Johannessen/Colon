@@ -7,8 +7,7 @@ end
 
 function create(args)
 	
-	local scroll = template.create()
-	
+	local scroll = template.create(args)
 	
 	scroll.scrolls_right = 1
 	scroll.text = args.text or "default text "
@@ -38,6 +37,7 @@ function create(args)
 	end
 	
 	function scroll:draw(x_offset, y_offset)
+		if scroll.hidden then return end
 		if scroll.sticky then 
 			y_offset = 0 
 			x_offset = 0
@@ -58,6 +58,7 @@ function create(args)
 	
 	
 	function scroll:update(obj_args)
+		if scroll.hidden then return end
 		if obj_args["tick"] % scroll.speed == 0 then
 			scroll:draw(obj_args["x_offset"], obj_args["y_offset"])
 			

@@ -3,7 +3,7 @@ template = require("colon_apis/colon_objects/template")
 text = require("colon_apis/colon_objects/text")
 
 function create(args)
-	local textbox = template.create()
+	local textbox = template.create(args)
 	
 	textbox.x = tonumber(args.x) or 1
 	textbox.y = tonumber(args.y) or 1
@@ -37,6 +37,7 @@ function create(args)
 	end
 	
 	function textbox:draw(x_offset, y_offset)
+		if textbox.hidden then return end
 		local save_cursor = {term.getCursorPos()}
 		local save_text = term.getTextColor()
 		local save_background = term.getBackgroundColor()
@@ -54,6 +55,7 @@ function create(args)
 	end
 	
 	function textbox:update(obj_args)
+		if textbox.hidden then return end
 		-- for clicking on the textbox
 		if obj_args["mouse_x"] and obj_args["mouse_y"] then 
 			if textbox.sticky then y_offset = 0 end

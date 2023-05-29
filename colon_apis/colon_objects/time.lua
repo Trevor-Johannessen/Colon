@@ -7,7 +7,7 @@ end
 
 function create(args)
 	
-	local timer = template.create()
+	local timer = template.create(args)
 	args.zone = args.zone or "utc"
 	args.text = os.time(args.zone)
 	timer.text = text.create(args)
@@ -17,7 +17,15 @@ function create(args)
 	timer.height = text.height
 	timer.width = text.width
 	timer.name = args.name
-	
+
+	function timer:draw(x_offset, y_offset)
+		if timer.hidden then return end
+	end
+
+	function timer:update(args)
+		if timer.hidden then return end
+	end
+
 	return timer
 end
 

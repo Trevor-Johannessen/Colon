@@ -1,7 +1,7 @@
 template = require("colon_apis/colon_objects/template")
 
 function create(args)
-	gif = template.create()
+	gif = template.create(args)
 	
 	gif.x = tonumber(args.x) or 1
 	gif.y = tonumber(args.y) or 1
@@ -32,10 +32,12 @@ function create(args)
 	end
 	
 	function gif:draw(x_offset, y_offset)
+		if gif.hidden then return end
 		gif.images[gif.frame]:draw(x_offset, y_offset)
 	end
 	
 	function gif:update(objArgs)
+		if gif.hidden then return end
 		if objArgs["tick"] % gif.speed == 0 and gif.y+gif.height >= objArgs["y_offset"] and gif.y <= objArgs["screen_height"]+objArgs["y_offset"] then
 			gif:draw(objArgs["x_offset"], objArgs["y_offset"]) -- draw current frame
 			gif.frame = gif.frame + 1 -- increment to next frame

@@ -1,5 +1,10 @@
-function create()
+function create(args)
     local template = {}
+
+    if args then
+        template.hidden = args.hidden == "true"
+    end
+
     template.screen_width, template.screen_height = term.getSize()
     template.colon = require("colon")
 	template.colorsDict = {

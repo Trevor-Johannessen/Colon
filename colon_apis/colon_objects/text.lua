@@ -1,7 +1,7 @@
 template = require("colon_apis/colon_objects/template")
 
 function create(args)
-	local text = template.create()
+	local text = template.create(args)
 	text.x = tonumber(args.x) or 1 -- x coordinate of text
 	text.y = tonumber(args.y) or 1 -- y coordinate of text
 	text.text = args.text or "default text"
@@ -34,6 +34,7 @@ function create(args)
 	end
 
 	function text:draw(x_offset, y_offset)
+		if text.hidden then return end
 		local save_cursor = {term.getCursorPos()}
 		local save_text = term.getTextColor()
 		local save_background = term.getBackgroundColor()
@@ -76,6 +77,7 @@ function create(args)
 	end
 	
 	function text:update(args)
+		if text.hidden then return end
 		if args.event == "mouse_scroll" and text:inBounds(args) then
 			text.scrollPos = text:monus(text.scrollPos, -args["event_id"])
 			if text.scrollPos > #text.strTable - text.height then text.scrollPos = #text.strTable - text.height end

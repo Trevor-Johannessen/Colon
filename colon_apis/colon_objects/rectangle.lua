@@ -1,7 +1,7 @@
 template = require("colon_apis/colon_objects/template")
 function create(args)
 	
-	local rectangle = template.create()
+	local rectangle = template.create(args)
 	
 	rectangle.x = tonumber(args.x) or 1
 	rectangle.y = tonumber(args.y) or 1.
@@ -19,6 +19,7 @@ function create(args)
 	if rectangle.character:len() > 1 then rectangle:error("Character must be a single character long.") end
 
 	function rectangle:draw(x_offset, y_offset)
+		if rectangle.hidden then return end
 		local oldx, oldy = term.getCursorPos()
 		local save_background = term.getBackgroundColor()	
 		if rectangle.sticky then 

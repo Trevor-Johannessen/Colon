@@ -4,7 +4,7 @@ template = require("colon_apis/colon_objects/template")
 
 function create(args)
 	
-	local button = template.create()
+	local button = template.create(args)
 	
 	button.x = tonumber(args.x) or 0
 	button.y = tonumber(args.y) or 0
@@ -73,6 +73,7 @@ function create(args)
 	
 	-- draws the button
 	function button:draw(x_offset, y_offset)
+		if button.hidden then return end
 		if not button.transparent or button.transparent and button.hoverVisible and button.showingHover then
 			x_offset = x_offset or 0
 			y_offset = y_offset or 0
@@ -126,6 +127,7 @@ function create(args)
 
 	-- implements functionality of button
 	function button:update(obj_args)
+		if button.hidden then return end
 		if button.sticky then 
 			obj_args["x_offset"] = 0
 			obj_args["y_offset"] = 0 

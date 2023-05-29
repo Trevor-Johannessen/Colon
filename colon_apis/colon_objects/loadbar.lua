@@ -2,7 +2,7 @@ template = require("colon_apis/colon_objects/template")
 
 function create(args)
     
-    local loadbar = template.create()
+    local loadbar = template.create(args)
     
     loadbar.x = tonumber(args.x) or 0 -- x coordinate of loadbar
     loadbar.y = tonumber(args.y) or 0 -- y coordinate of loadbar
@@ -22,6 +22,7 @@ function create(args)
 	--if text == "" then loadbar.height = 1 else loadbar.height = 2 end
     
     function loadbar:draw(x_offset, y_offset)
+        if loadbar.hidden then return end
         x_offset = x_offset or 0 -- default parameter values
         y_offset = y_offset or 0
     
