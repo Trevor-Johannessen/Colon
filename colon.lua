@@ -195,8 +195,8 @@ function trim_input(text)
 end
 
 function construct_when(args, givenPage)
-	if debugMode then print("construct = ", args.command) end
-	pages[givenPage].when[args.name] = args.command
+	pages[givenPage].when[args.name] = pages[givenPage].when[args.name] or {}
+	table.insert(pages[givenPage].when[args.name], args.command)
 end
 
 function redrawIfAwaiting(obj, args)
@@ -242,6 +242,7 @@ end
 	@prev_conditions: A table of previous conditions used for conditions that only need to be set once in an update cycle.
 ]]
 function checkReturnConditions(conditions, data, prev_conditions)
+	if not conditions then return end
 	for k, v in next, conditions do
 		if type(v) == "string" then
 			if v == "when" then -- activate when statements
@@ -270,9 +271,12 @@ function interaction_loop()
 			addEventArgs(obj_args, event)
 			-- give input to all objects that request it
 			local return_conditions = {redraw_list={}}
+			-- systems functions
+			checkReturnConditions(console:update(obj_args), console, return_conditions)
+			-- object functions
 			for index, data in pairs(pages[currentPage].objects) do
 				redrawIfAwaiting(data, obj_args)
-				if data.update then
+				if type(data.update)=="function" then
 					local val = data:update(obj_args) or {}
 					checkReturnConditions(val, data, return_conditions)
 					if return_conditions.nobubble then break end
@@ -281,8 +285,6 @@ function interaction_loop()
 			bubble_redraw(return_conditions.redraw_list)
 			if return_conditions.found_when then os.cancelTimer(timer) break end -- time taken to run when statement may cause timer desync
 			
-			-- systems functions
-			console:update(obj_args)
 			if event[1] == "mouse_scroll" then handleScrollEvent(event,return_conditions.block_scroll) end
 			if event[1] == "timer" then break end
 		end
@@ -295,6 +297,7 @@ function redraw(args)
 	args.pageName = args.pageName or currentPage
 	local pageName = args.pageName
 	local x_offset = args.x_offset or pages[pageName].x_offset
+	if not args.y_offset and not pages[pageName] then error("Both args y_offset and page y_offset are nil. (" .. pageName .. ")" ) end
 	local y_offset = args.y_offset or pages[pageName].y_offset
 	fill_screen(args)
 	for index, data in pairs(pages[pageName].objects) do
@@ -341,11 +344,13 @@ end
 function check_when_statements(name, args)
 	local matched = false
 	for k, v in next, pages[currentPage].when do
-		if debugMode then print(k, " ", v) end
 		if k == name then
-			matched = true
-			add_log("matched when " .. name)
-			interpret_line(string.gsub(v, "\\", ""), currentPage, args)
+			for k2,v2 in next, pages[currentPage].when[k] do
+				matched = true
+				if args == nil then args = {} end
+				args.name = name
+				interpret_line(string.gsub(v2, "\\", ""), currentPage, args)
+			end
 			redraw()
 		end
 	end
@@ -415,6 +420,7 @@ end
 
 function set_current_page(newPage)
 	currentPage = newPage
+	if pages[currentPage] == nil then error("Error setting page: " .. tostring(currentPage) .. " does not exist.") end
 	for i, obj in next, pages[currentPage].objects do
 		if obj.staged then
 			obj:staged()
@@ -425,6 +431,16 @@ end
 function get_current_page()
 	print("Current page = " .. currentPage)
 	return pages[currentPage]
+end
+
+function create_page(name, obj_list)
+	initalize_page(name)
+	pages[name].objects = obj_list
+	return pages[name]
+end
+
+function destroy_page(name)
+	pages[name] = nil
 end
 
 function get_page(name)
@@ -468,10 +484,13 @@ function message(message)
 end
 
 return{
+	object_types=object_types,
 	run=run,
 	getObject=get_object,
 	setObject=set_object,
 	setCurrentPage=set_current_page,
+	createPage=create_page,
+	destroyPage=destroy_page,
 	getPage=get_page,
 	setBackground=set_background,
 	setColor=set_color,
@@ -485,4 +504,5 @@ return{
 	getGroup=get_group,
 	mapGroup=map_group,
 	bubbleRedraw=bubble_redraw,
+	printarr=printarr
 }

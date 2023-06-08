@@ -149,7 +149,6 @@ function create(args)
 			elseif not button.showingHover and obj_args["event"] == "mouse_click" then -- if the mouse is hovering the button
 				button.showingHover = true
 				button:setHoverImage()
-				button.colon.log("Mouse down on " .. button.name)
 				button:draw(obj_args["x_offset"], obj_args["y_offset"])
 				return -- button is being hovered
 			end
