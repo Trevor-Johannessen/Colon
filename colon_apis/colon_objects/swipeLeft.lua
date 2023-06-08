@@ -12,7 +12,7 @@ end
 function create(args)
 	local to = args.to
 	local from = args.from
-	local speed = args.speed or 0.05
+	local speed = tonumber(args.speed) or 0.05
 	for i=0, screen_width, 3 do
 		term.clear()
 		colon.redraw{pageName=from, x_offset=-i, x_inital=0, x_final=screen_width-i}
