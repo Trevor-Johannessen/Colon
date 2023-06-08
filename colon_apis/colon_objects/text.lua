@@ -78,7 +78,7 @@ function create(args)
 	
 	function text:update(args)
 		if text.hidden then return end
-		if args.event == "mouse_scroll" and text:inBounds(args) then
+		if args.event == "mouse_scroll" and text:inBounds(args) and #text.strTable > text.height then
 			text.scrollPos = text:monus(text.scrollPos, -args["event_id"])
 			if text.scrollPos > #text.strTable - text.height then text.scrollPos = #text.strTable - text.height end
 			text:draw(args["x_offset"], args["y_offset"])
