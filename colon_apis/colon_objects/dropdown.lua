@@ -62,8 +62,8 @@ function create(args)
     end
 
     function dropdown:close(args)
-        dropdown.colon.log("Cloisng dropdown " .. dropdown.name)
         dropdown.selected=false
+        dropdown.menu:unfocus()
         dropdown.colon.redraw(args)
     end
 
@@ -71,21 +71,21 @@ function create(args)
         if dropdown.hidden then return end
         local clicked = dropdown.button:update(args)
         if clicked ~= nil then
-            dropdown.colon.log("Clicked dropdown " .. dropdown.name)
             if dropdown.selected then
                 dropdown.close(args)
             else
                 dropdown.selected = true
+                dropdown.menu:focus()
                 dropdown:draw(args.x_offset, args.y_offset)
             end
         elseif dropdown.selected then
-            if args.event == "mouse_up" and not dropdown:checkBounds(args) then
+            if args.event == "mouse_up"and not dropdown:checkBounds(args) then
                 dropdown:close(args)
                 return
             end
             local menuOutput = dropdown.menu:update(args)
-            if menuOutput and menuOutput.whenArgs then
-                dropdown.selected_string:set(formatSelectedText(menuOutput.whenArgs[1], dropdown.width))
+            if menuOutput.whenArgs and menuOutput.whenArgs[1] == "pressed" then
+                dropdown.selected_string:set(formatSelectedText(menuOutput.whenArgs[2], dropdown.width))
                 dropdown:close(args)
             end
             return menuOutput
