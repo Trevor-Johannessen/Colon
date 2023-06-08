@@ -41,8 +41,8 @@ function create(args)
 				io.write(string.rep(" ", screen_width))
 			end
 			console:draw(args.x_offset, args.y_offset)
-		else
-			console.logs:update(args)
+		elseif console.show then
+			return console.logs:update(args)
 		end
 	end
 
