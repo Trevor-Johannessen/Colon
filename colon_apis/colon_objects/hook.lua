@@ -1,7 +1,7 @@
 template = require("colon_apis/colon_objects/template")
 
 function create(args)
-	local hook = template.create()
+	local hook = template.create(args)
 	hook.name = args.name
 	hook.x=0
 	hook.y=0
@@ -10,10 +10,10 @@ function create(args)
 	hook.func = _G[hook.name][args.func]
 	hook.dynamic = true
 	hook.interactive = false
-	hook.unplaceable = not args.draw == "true"
-	hook.staged = args.staged == "true" or false
+	hook.unplaceable = not (args.draw == "true")
+	hook.staged = args.staged == "true"
 	hook.type = "hook"
-	
+
 	if not hook.unplaceable or hook.staged then
 		hook.updated = args.updated == "true"
 	else
@@ -22,20 +22,22 @@ function create(args)
 
 	if not hook.unplaceable then
 		function hook:draw(x_offset, y_offset)
-			hook:func{x_offset, y_offset}
+			hook.func{x_offset, y_offset}
 		end
 	end
 	
 	if hook.updated then
 		function hook:update(obj_args)
-			hook:func(obj_args)
+			hook.func(obj_args)
+		end
+	end
+	
+	if hook.staged then
+		function hook:staged()
+			hook.func()
 		end
 	end
 
-	function hook:staged()
-		hook:func()
-	end
-	
 	return hook
 end
 

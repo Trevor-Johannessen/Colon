@@ -1,10 +1,7 @@
 screen_width, screen_height = term.getSize() -- dimensions of screen
 template = require("colon_apis/colon_objects/template")
 
-
-
 function create(args)
-	
 	local sprite = template.create(args)
 	sprite.x = tonumber(args.x) or 0
 	sprite.y = tonumber(args.y) or 0
@@ -20,7 +17,7 @@ function create(args)
 	sprite.width = tonumber(args.width)
 
 	if args.src == nil and sprite.template == nil then 
-		sprite:error("An image or template must be provided to sprite.") end
+		sprite:error("An image or template must be provided an sprite.") end
 	
 	function sprite:draw(x_offset, y_offset)
 		if sprite.hidden then return end
@@ -60,9 +57,7 @@ function create(args)
 			current_char = current_char + sprite.width
 			term.setCursorPos(sprite.x+x_offset, sprite.y+i-y_offset)
 		end
-		
 		term.setCursorPos(firstx, firsty)
-	
 	end
 	
 	-- grabs each 'step' letter in string
