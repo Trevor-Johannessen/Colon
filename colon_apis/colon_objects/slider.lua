@@ -11,16 +11,22 @@ function create(args)
     slider.name = args.name
     slider.position = 0
     slider.color = slider:correctColor(args.color) or colors.yellow
-    slider.background = slider:correctColor(args.background) or colors.white
+    slider.background = slider:correctColor(args.background) or colors.red
     slider.knob_color = slider:correctColor(args.knobColor) or colors.orange
     slider.hidden = args.hidden == "true" or false
     slider.drag_only = args.dragOnly == "true" or false
     slider.configuration = "left"
     slider.dragging = false
     slider.grab_position = 0
+    slider.character = args.char or " "
+    if slider.character:len() > 1 then slider.character = slider.character:sub(1,1) end
+    slider.char_color = slider:correctColor(args.charColor) or colors.white
+    slider.spacing = tonumber(args.spacing) or 1
+    if slider.spacing < 1 then slider.spacing = 1 end
     slider.knob_width = tonumber(args.knobWidth) or 1
     if slider.knob_width < 1 or slider.knob_width >= slider.width-2 then slider.knob_width = 1 end
     slider.colon.log("DragOnly="..tostring(slider.drag_only))
+
     function slider:draw(x_offset, y_offset)
         --[[
              OOOOOOOOO
@@ -31,11 +37,20 @@ function create(args)
         local inner_width = slider.width-2
         local x, y = slider.x+x_offset, slider.y-y_offset
         slider:drawBoarder(x,y,inner_width)
+        term.setCursorPos(1,14)
+        term.setTextColor(colors.white)
+        term.setBackgroundColor(colors.black)
+        local char_string = string.rep(string.rep(" ", slider.spacing) .. slider.character, math.floor((slider.width-2) / (slider.spacing+1))) .. string.rep(" ", (slider.width-2) % (slider.spacing+1))
+        char_string = char_string:sub(1, slider.position) .. string.rep(" ", slider.knob_width) .. char_string:sub(slider.position + slider.knob_width+1)
+        --local bg_string = bg_string:sub(1,slider.position) .. string.rep(slider:convertColor(slider.knob_color, 'hex'), slider.knob_width) .. bg_string:sub(inner_width-slider.position-slider.knob_width)
+        local bg_string = string.rep(slider:convertColor(slider.background, 'hex'), slider.position) .. string.rep(slider:convertColor(slider.knob_color, 'hex'), slider.knob_width) .. string.rep(slider:convertColor(slider.background, 'hex'), inner_width-slider.position-slider.knob_width)
+        print(bg_string)
+        print(bg_string:len())
+        print(slider.width-2)
         term.setBackgroundColor(slider.background)
-        local printstring = string.rep(slider:convertColor(slider.background, 'hex'), slider.position) .. string.rep(slider:convertColor(slider.knob_color, 'hex'), slider.knob_width) .. string.rep(slider:convertColor(slider.background, 'hex'), inner_width-slider.position-slider.knob_width)
         for i=1, slider.height-1 do
             term.setCursorPos(x+1,y+i)
-            term.blit(string.rep(" ", inner_width), string.rep("a", inner_width), printstring)
+            term.blit(char_string, string.rep(slider:convertColor(slider.char_color, 'hex'), inner_width), bg_string)
         end
     end
 
@@ -64,7 +79,6 @@ function create(args)
         if slider.drag_only and not slider.dragging then return end
         local mx = args["mouse_x"]-slider.x-1-slider.grab_position
         if args.mouse_y < slider.y or args.mouse_y > slider.y+slider.height-1 then return end
-        slider.colon.log("0 < " .. "(Mx = " .. mx .. ") < " .. slider.width-1 .. "   Pos: " .. slider.position)
         if mx < 0 then return end
         if mx > slider.width-2 then return end
         if mx > slider.width-2-slider.knob_width then mx = slider.width-2-slider.knob_width end
