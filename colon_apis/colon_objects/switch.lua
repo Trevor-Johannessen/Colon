@@ -7,6 +7,7 @@ function create(args)
     switch.width = tonumber(args.width) or 4 -- total width = 0+width, minimum 4
     if switch.width < 4 then switch.width = 4 end
     switch.height = tonumber(args.height) or 2 -- total height = 2+height (height > 0), minimum 3
+    switch.height = switch.height+1
     if switch.height < 2 then switch.height = 2 end
     switch.name = args.name
     switch.position = 0
