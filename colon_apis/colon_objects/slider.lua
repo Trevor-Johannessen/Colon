@@ -6,8 +6,8 @@ function create(args)
     slider.y = tonumber(args.y) or 0
     slider.width = tonumber(args.width) or 4 -- total width = 0+width, minimum 4
     if slider.width < 4 then slider.width = 4 end
-    slider.height = tonumber(args.height) or 3 -- total height = 2+height (height > 0), minimum 3
-    if slider.height < 3 then slider.height = 3 end
+    slider.height = tonumber(args.height) or 2 -- total height = 2+height (height > 0), minimum 3
+    if slider.height < 2 then slider.height = 2 end
     slider.name = args.name
     slider.position = 0
     slider.color = slider:correctColor(args.color) or colors.yellow

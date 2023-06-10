@@ -6,8 +6,8 @@ function create(args)
     switch.y = tonumber(args.y) or 0
     switch.width = tonumber(args.width) or 4 -- total width = 0+width, minimum 4
     if switch.width < 4 then switch.width = 4 end
-    switch.height = tonumber(args.height) or 3 -- total height = 2+height (height > 0), minimum 3
-    if switch.height < 3 then switch.height = 3 end
+    switch.height = tonumber(args.height) or 2 -- total height = 2+height (height > 0), minimum 3
+    if switch.height < 2 then switch.height = 2 end
     switch.name = args.name
     switch.position = 0
     switch.color = switch:correctColor(args.color) or colors.yellow
