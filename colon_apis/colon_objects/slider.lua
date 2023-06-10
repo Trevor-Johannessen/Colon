@@ -18,6 +18,7 @@ function create(args)
     slider.configuration = "left"
     slider.dragging = false
     slider.grab_position = 0
+    slider.borderless = args.borderless == "true" or false
     slider.character = args.char or " "
     if slider.character:len() > 1 then slider.character = slider.character:sub(1,1) end
     slider.char_color = slider:correctColor(args.charColor) or colors.white
@@ -36,17 +37,11 @@ function create(args)
         if slider.hidden then return end
         local inner_width = slider.width-2
         local x, y = slider.x+x_offset, slider.y-y_offset
-        slider:drawBoarder(x,y,inner_width)
-        term.setCursorPos(1,14)
-        term.setTextColor(colors.white)
-        term.setBackgroundColor(colors.black)
+        if not slider.borderless then slider:drawBoarder(x,y,inner_width) end
         local char_string = string.rep(string.rep(" ", slider.spacing) .. slider.character, math.floor((slider.width-2) / (slider.spacing+1))) .. string.rep(" ", (slider.width-2) % (slider.spacing+1))
         char_string = char_string:sub(1, slider.position) .. string.rep(" ", slider.knob_width) .. char_string:sub(slider.position + slider.knob_width+1)
         --local bg_string = bg_string:sub(1,slider.position) .. string.rep(slider:convertColor(slider.knob_color, 'hex'), slider.knob_width) .. bg_string:sub(inner_width-slider.position-slider.knob_width)
         local bg_string = string.rep(slider:convertColor(slider.background, 'hex'), slider.position) .. string.rep(slider:convertColor(slider.knob_color, 'hex'), slider.knob_width) .. string.rep(slider:convertColor(slider.background, 'hex'), inner_width-slider.position-slider.knob_width)
-        print(bg_string)
-        print(bg_string:len())
-        print(slider.width-2)
         term.setBackgroundColor(slider.background)
         for i=1, slider.height-1 do
             term.setCursorPos(x+1,y+i)
