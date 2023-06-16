@@ -159,6 +159,65 @@ function create(args)
         error(template.page .. "-" .. template.name .. ": " .. str)
     end
 
+    function template:colors(args)
+        for k, v in next, args do
+            if  k:match("colors?[0-9]*") == k or
+                k:match("textColors?[0-9]*") == k or
+                k:match("backgrounds?[0-9]*") == k
+            then
+                template[k] = v
+            end
+        end
+    end
+    function template:essentials(args)
+        template.name = args.name or ""
+        if args.hidden then args.hidden = args.hidden:lower() end
+        template.hidden = args.hidden == "true"
+        if args.sticky then args.sticky = args.sticky:lower() end
+        template.sticky = args.sticky == "true"
+        return template
+    end
+
+    function template:coords(args)
+        return template:coordinate(args)
+    end
+    function template:coordinate(args)
+        template.x = tonumber(args.x) or 0
+        template.y = tonumber(args.y) or 0
+        return template
+    end
+
+    function template:dim(args)
+        return template:dimensions(args)
+    end
+    function template:dimensions(args)
+        template.height = tonumber(args.height) or 0
+        template.width = tonumber(args.width) or 0
+        return template
+    end
+
+    function template:sprite(args)
+        sprite = require("colon_apis/colon_objects/sprite")
+        local sprite_args = {
+            x=args.x,
+			y=args.y,
+			width=args.width,
+			height=args.height
+		}
+		local dest = "src"
+		if args.usingTemplate == "true" then dest = "template" end
+		sprite_args[dest] = args.spriteFile
+		template.sprite = sprite.create(sprite_args)
+        return template
+    end
+
+    function template:inBounds(args)
+        return  args.mouse_x >= template.x+args.x_offset and 
+            args.mouse_x < template.x+template.width+args.x_offset and
+            args.mouse_y >= template.y-args.y_offset and
+            args.mouse_y < template.y+template.height-args.y_offset
+    end
+
     return template
 end
 

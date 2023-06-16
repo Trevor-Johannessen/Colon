@@ -2,14 +2,12 @@ template = require("colon_apis/colon_objects/template")
 
 function create(args)
     local switch = template.create(args)
-    switch.x = tonumber(args.x) or 0
-    switch.y = tonumber(args.y) or 0
-    switch.width = tonumber(args.width) or 4 -- total width = 0+width, minimum 4
+    switch:coords(args)
+    switch:dim(args)
+    switch:essentials(args)
     if switch.width < 4 then switch.width = 4 end
-    switch.height = tonumber(args.height) or 2 -- total height = 2+height (height > 0), minimum 3
     switch.height = switch.height+1
     if switch.height < 2 then switch.height = 2 end
-    switch.name = args.name
     switch.position = 0
     switch.color = switch:correctColor(args.color) or colors.yellow
     switch.background = switch:correctColor(args.background) or colors.blue
@@ -31,11 +29,6 @@ function create(args)
     switch.colon.log("DragOnly="..tostring(switch.drag_only))
 
     function switch:draw(x_offset, y_offset)
-        --[[
-             OOOOOOOOO
-            O[] --> []O
-             OOOOOOOOO
-        ]]
         if switch.hidden then return end
         local inner_width = switch.width-2
         local x, y = switch.x+x_offset, switch.y-y_offset
