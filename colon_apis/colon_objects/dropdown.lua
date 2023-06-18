@@ -15,7 +15,7 @@ function create(args)
     dropdown.dynamic = false
     dropdown.interactive = true
     dropdown.optString = args.options
-    dropdown.height = args.height or 10
+    dropdown.height = 1
     dropdown.width = args.width or 10 
     dropdown.color = dropdown:correctColor(args.color) or "lightGray"
     dropdown.textColor = dropdown:correctColor(args.textColor) or colors.black
@@ -48,8 +48,12 @@ function create(args)
 
     function dropdown:draw(x_offset, y_offset)
         if dropdown.hidden then return end
+        dropdown.selected_string.x = dropdown.x
+        dropdown.selected_string.y = dropdown.y
         dropdown.selected_string:draw(x_offset, y_offset)
         if dropdown.selected then
+            dropdown.menu.x = dropdown.x
+            dropdown.menu.y = dropdown.y+1
             dropdown.menu:draw(x_offset, y_offset)
         end
     end
@@ -62,6 +66,7 @@ function create(args)
     end
 
     function dropdown:close(args)
+        dropdown.height=1
         dropdown.selected=false
         dropdown.menu:unfocus()
         dropdown.colon.redraw(args)
@@ -69,11 +74,14 @@ function create(args)
 
     function dropdown:update(args)
         if dropdown.hidden then return end
+        dropdown.button.x = dropdown.x
+        dropdown.button.y = dropdown.y
         local clicked = dropdown.button:update(args)
         if clicked ~= nil then
             if dropdown.selected then
                 dropdown.close(args)
             else
+                dropdown.height = dropdown.menu.height+1
                 dropdown.selected = true
                 dropdown.menu:focus()
                 dropdown:draw(args.x_offset, args.y_offset)

@@ -34,7 +34,9 @@ function create(args)
         menu.buttons = {}
         local offset = 0
         for k, text in next, menu.options do
-            table.insert(menu.buttons, menu:createButton(text, {x=menu.x,y=menu.y+offset}))
+            local btn = menu:createButton(text, {x=menu.x,y=menu.y+offset})
+            btn.meta = {offset=offset}
+            table.insert(menu.buttons, btn)
             offset = offset + menu.hardcodeHeight -- TODO: Change this to the height of the text (with word wrap)
         end
     end
@@ -46,7 +48,7 @@ function create(args)
             x=pos.x,
             y=pos.y,
             width=menu.width,
-            height= menu.hardcodeHeight,
+            height=menu.hardcodeHeight,
             useTemplate="true",
             sprite=colors.bg,
             hoverSprite=menu.selectedColor,
@@ -76,6 +78,7 @@ function create(args)
             table.insert(menu.options, str)
         end
         menu.optCount = #menu.options
+        menu.height = menu.optCount * menu.hardcodeHeight
     end
 
     function menu:calculateYOffset(y_offset)
@@ -86,6 +89,8 @@ function create(args)
         if menu.hidden then return end
         for k, v in next, menu.buttons do
             if k > menu.offset and k <= menu.height+menu.offset then
+                v.x = menu.x
+                v.y = menu.y + v.meta.offset
                 v:draw(x_offset, menu:calculateYOffset(y_offset))
             end
         end

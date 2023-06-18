@@ -83,6 +83,8 @@ function create(args)
 				y_offset = 0 
 			end
 			
+			button.sprite.x=button.x
+			button.sprite.y=button.y
 			button.sprite:draw(x_offset, y_offset)
 			button:writeText(x_offset, y_offset)
 		end
