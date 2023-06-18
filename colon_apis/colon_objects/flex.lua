@@ -41,7 +41,6 @@ function create(args)
             obj.x = flex.x
             obj.y = flex.y + offset.y 
         end
-        flex:adjustOffset(obj, offset)
     end
 
     function flex:adjustOffset(obj,offset)
@@ -108,6 +107,7 @@ function create(args)
                 flex.colon.log(group_name .. "("..obj.width..","..obj.height..")")
                 if not placed[obj] and flex[flex.key] ~= obj[flex.key] then 
                     flex:move(obj,offset) 
+                    flex:adjustOffset(obj, offset)
                 end
                 placed[obj] = true
             end
