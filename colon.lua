@@ -7,8 +7,8 @@ currentPage = currentPage or ""
 -- open file and lex lines into tables
 function run(inArgs)
 	args = inArgs
+	createConsole()
 	initalize(args) -- initalize to load apis
-	console = console.create()
 	process_file(args[1])
 	interaction_loop()
 end
@@ -20,13 +20,17 @@ function initalize(args)
 	apis = fs.list("/colon/colon_apis/colon_objects/")
 	
 	for i=1, table.getn(apis) do
-		if debugMode then print("apis[".. i .. "] = ", apis[i]) end
+		add_log("apis[".. i .. "] = " .. apis[i])
 		if not fs.isDir(apis[i]) then
 			local noExtension = string.sub(apis[i], 1, -5)
 			object_types[noExtension] = require("colon_apis/colon_objects/" .. noExtension)
 		end
-	end
-	console = require("colon_apis/ext/console")	
+	end	
+end
+
+function createConsole()
+	console = require("colon_apis/ext/console")
+	console = console.create()
 end
 
 function process_file(fileName)
@@ -58,16 +62,15 @@ function interpret_line(str, givenPage, whenArgs)
 	str = str:gsub("\\(%d+)", function (m) return string.char(m) end) -- match escape sequences into ascii characters \30 -> V but cool character
 	local new_obj = parse(str, givenPage, whenArgs)
 	if new_obj ~= -1 then
-		if 	not new_obj.unplaceable and 
+		if 	not new_obj.draw and 
 			new_obj.y+new_obj.height > pages[givenPage].end_of_page then 
 				pages[givenPage].end_of_page = new_obj.y+new_obj.height -- adjust total page height
 		end
 		table.insert(pages[givenPage].objects, new_obj)
 		
 		-- add to groups table
-		term.setCursorPos(1,1)
 		for k, group in next, new_obj.groups do
-			print("Adding " .. group .. " to group")
+			add_log("Adding " .. group .. " to group")
 			add_to_group(new_obj, group, givenPage)
 		end
 	end
@@ -94,15 +97,9 @@ function initalize_page(pageName)
 	pages[pageName].name = pageName
 end
 
-function parse(text, givenPage, whenArgs)
-	local found_tag
-	-- find what object type line is
-	local colon_pos = string.find(text, ":") -- position of colon used to mark a command
-	if not colon_pos then return -1 end -- if a colon is missing then ignore
-	
-	-- find object_type
-	local object_type = string.sub(text, 1, colon_pos-1)
-	for tag in next, pages[givenPage].tags do
+function getObjType(object_type, page)
+	local tag
+	for tag in next, pages[page].tags do
 		if string.sub(object_type, 1, 1) == tag then
 			if object_types[string.sub(object_type, 2)] then
 				object_type = string.sub(object_type, 2)
@@ -111,7 +108,19 @@ function parse(text, givenPage, whenArgs)
 			end
 		end
 	end
+	return object_type, tag
+end
+
+function parse(text, givenPage, whenArgs)
+	local found_tag
+	-- find what object type line is
+	local colon_pos = string.find(text, ":") -- position of colon used to mark a command
+	if not colon_pos then return -1 end -- if a colon is missing then ignore
 	
+	-- find object_type
+	local object_type = string.sub(text, 1, colon_pos-1)
+	object_type, tag = getObjType(object_type, givenPage)
+
 	-- create arguments in table
 	local args = {}
 	text = string.sub(text, colon_pos+1)
@@ -130,8 +139,6 @@ function parse(text, givenPage, whenArgs)
 		args[key] = value
 		args.groups = {}
 		if key == "groups" then
-			term.setCursorPos(1,1)
-			term.setTextColor(colors.white)
 			for group in value:gmatch("[^ ]+") do
 				table.insert(args.groups, group)
 			end
