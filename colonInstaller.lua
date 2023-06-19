@@ -42,6 +42,11 @@ print("Getting README.md...")
 req = http.get("https://raw.githubusercontent.com/Trevor-Johannessen/markup/markup-oo/README.md")
 writeFile("/colon/README.md", req)
 print("Done.")
+-- console
+print("Getting console.lua...")
+req = http.get("https://raw.githubusercontent.com/Trevor-Johannessen/markup/markup-oo/colon_apis/ext/console.lua")
+writeFile("/colon/colon_apis/ext/console.lua", req)
+print("Done.")
 -- colon interpreter
 print("Getting colon.lua...")
 req = http.get("https://raw.githubusercontent.com/Trevor-Johannessen/markup/markup-oo/colon.lua")
