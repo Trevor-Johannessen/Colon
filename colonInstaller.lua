@@ -1,6 +1,6 @@
 print("Running installer v0.0.1")
 objects = {
- 'action', 'api', 'block', 'button', 'call', 'dropdown', 'fade', 'gif', 'hook', 'jumpcut', 'loadbar', 'menu', 'rectangle',
+ 'action', 'api', 'block', 'button', 'call', 'dropdown', 'fade', 'flex', 'gif', 'hook', 'jumpcut', 'loadbar', 'menu', 'rectangle',
  'run', 'scroll', 'slider', 'slot', 'sprite', 'swipeLeft', 'swipeRight', 'switch', 
  'template', 'text', 'textbox', 'time'
 }
