@@ -6,15 +6,17 @@ template = require("colon_apis/colon_objects/template")
 ]]
 function create(args)
 	local block = template.create(args)
-    block:coords(args)
-    block:dim(args)
-    block:essentials(args)
-    block:sprite(args)
+    block=block:coords(args)
+    block=block:dim(args)
+    block=block:essentials(args)
+    block=block:sprite(args)
     block.dragging = false
     block.grab_position = {0,0}
 
     function block:draw(x_offset, y_offset)
         if block.hidden then return end
+        block.sprite.x = block.x
+        block.sprite.y = block.y
         block.sprite:draw(x_offset, y_offset)
     end
     
@@ -44,11 +46,10 @@ function create(args)
         elseif block.dragging and args.event == "mouse_drag" then
             block:setPos(args.mouse_x-block.grab_position[1], args.mouse_y-block.grab_position[2])
             block.colon.redraw()
-        elseif args.event == "mouse_up" then
+        elseif block.dragging and args.event == "mouse_up" then
             block.dragging = false
             return {"when"}
         end
-
     end
     
 	return block
