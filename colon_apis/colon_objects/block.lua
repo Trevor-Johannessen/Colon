@@ -46,7 +46,7 @@ function create(args)
             block.colon.redraw()
         elseif args.event == "mouse_up" then
             block.dragging = false
-            return block:snap(args)
+            return "when"
         end
 
     end
