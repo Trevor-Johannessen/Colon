@@ -25,7 +25,8 @@ function initalize(args)
 			local noExtension = string.sub(apis[i], 1, -5)
 			object_types[noExtension] = require("colon_apis/colon_objects/" .. noExtension)
 		end
-	end	
+	end
+	scroll = require('colon_apis/ext/scroll')
 end
 
 function createConsole()
@@ -147,7 +148,6 @@ function parse(text, givenPage, whenArgs)
 			if args[key]:sub(1,1) == "/" then args[key] = args[key]:sub(1) end -- file paths should NOT start with a slash!
 		end
 	end
-	if debugMode then print(object_type) end
 	-- if when command
 	if object_type == "when" then
 		construct_when(args, givenPage)
@@ -350,7 +350,7 @@ end
 
 function check_when_statements(name, args)
 	local matched = false
-	for k, v in next, pages[currentPage].when do
+	for k, v in next, pages[currentPage].when do -- why search through? Just check if list[key] is nil
 		if k == name then
 			for k2,v2 in next, pages[currentPage].when[k] do
 				matched = true
