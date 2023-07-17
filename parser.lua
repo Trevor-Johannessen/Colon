@@ -1,9 +1,10 @@
-function parse(line, page)
+function parse(line)
     line = escapeCharacters(line)
     local line_type
     line_type, line = getType(line)
     if not line_type then return end
     local args = processArguments(line)
+    args.type = line_type
     return args
 end
 
@@ -23,6 +24,7 @@ function processArguments(line)
     local arguments = line:gmatch("[^,]+")
     local args = lexArguments(arguments)
     args = parseArguments(args)
+    return args
 end
 
 function lexArguments(arguments)

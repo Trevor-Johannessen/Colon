@@ -8,14 +8,22 @@ screen_width, screen_height = term.getSize()
 function create(args)
 	local scroll = template.create()
 	scroll.position = 0
+	scroll.anchor = 0
     scroll.lock = false
 
-	function console:update(args)
+	function scroll:update(args)
 		if args.event ~= "mouse_scroll" then return end
-        if scroll.position == 0 or scroll.position > MAXIMUM_HEIGHT then return end
-        if args.no_scroll then return end
+        if scroll.position == 0 or scroll.position > scroll.anchor then return end
+        if args.return_conditions.no_scroll then return end
         position = position + args.event_id
-        scroll.colon.redraw()
+        colon.redraw()
+	end
+
+	function scroll:setAnchor(anchor)
+		scroll.anchor = anchor
+		if anchor > scroll.position then
+			scroll.position = anchor
+		end
 	end
 
 	return scroll
