@@ -55,7 +55,7 @@ function checkReturnConditions(conditions, data, prev_conditions)
 	for k, v in next, conditions do
 		if type(v) == "string" then
 			if v == "when" then -- activate when statements
-				prev_conditions.found_when = prev_conditions.found_when or check_when_statements(data.name, conditions.whenArgs) 
+				prev_conditions.found_when = prev_conditions.found_when or meta.current_page.when:run(data.name, conditions.whenArgs) 
 			elseif v == "scroll" then -- take scroll control away from colon enviornemnt
 				prev_conditions.block_scroll = true
 			elseif v == "nobubble" then -- do not propagate input to any more elements

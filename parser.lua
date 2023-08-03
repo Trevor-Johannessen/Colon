@@ -65,6 +65,12 @@ function parseArguments(input)
         if not arg:find("=") then error("Could not parse argument. Missing '='.") end
         local name = arg:sub(1, arg:find("=")-1)
         local value = arg:sub(arg:find("=")+1)
+        if value:sub(1,1) == "\"" then -- this is bad because it assumes strings like ' "one-side ' don't exist, probably.
+            value = value:sub(2,-2)
+        end
+        value = value:gsub("\\\"", "\"")
+        --print(name .. " = " .. value)
+        --os.sleep(1)
         args[name] = value
     end
     return args
