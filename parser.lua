@@ -37,6 +37,8 @@ function lexArguments(arguments)
             if current:find("[^\\]\"") or current=="\"" then
                 in_quote = false 
                 table.insert(args, quote_string)
+            else
+                quote_string = quote_string .. ","
             end
         else
             current = removeSpaces(current)
@@ -44,7 +46,7 @@ function lexArguments(arguments)
             if quote_pos then
                 if not current:sub(quote_pos+1):find("[^\\]\"") then
                     in_quote = true
-                    quote_string = current
+                    quote_string = current .. ","
                 end
             end
             if not in_quote then table.insert(args, current) end
@@ -69,8 +71,8 @@ function parseArguments(input)
             value = value:sub(2,-2)
         end
         value = value:gsub("\\\"", "\"")
-        --print(name .. " = " .. value)
-        --os.sleep(1)
+        print(name .. " = " .. value)
+        os.sleep(1)
         args[name] = value
     end
     return args
