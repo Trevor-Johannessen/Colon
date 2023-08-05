@@ -1,7 +1,8 @@
-function create()
+function create(page)
 
     local dict = {when={}}
-
+    dict.page = page
+    
     function dict:put(name, command)
         if not dict.when[name] then
             dict.when[name] = {}
@@ -20,11 +21,13 @@ function create()
     function dict:run(name, args)
         if dict:contains(name) then
             for k, v in next, dict.when[name] do
-                local object = parser.parse(v, page)
+                local object = parser.parse(v, dict.page)
                 args = args or {}
                 for k, v in next, args do object[k] = v end
                 if object then
-                    interpreter.interpret(object, page)
+                    local item = interpreter.interpret(object, dict.page)
+                    if item and type(item.draw) == "function" then item:draw(meta.current_page.x_scroll.position, meta.current_page.y_scroll.position) end
+                    --meta.console:addMeta{msg="Adding " .. v}
                 end
             end
             return true

@@ -34,13 +34,14 @@ function interpret(args, page)
     end
     if meta.object_types[args.type] == nil then error("Object type " .. args.type .. " not found.") end
     local obj = meta.object_types[args.type].create(args)
-    if (type(obj) == "table") then -- mandatory attributes for objects.
+    if (type(obj) == "table") then -- if an actual object vs instance object
         obj.groups = obj.groups or args.groups
+        if obj.y and obj.height then
+            if obj.y+obj.height-1 > page.y_scroll.anchor then page.y_scroll:setAnchor(obj.y+obj.height-1) end
+        end
+        table.insert(page.objects, obj)
+        return obj
     end
-    if obj.y and obj.height then
-        if obj.y+obj.height-1 > page.y_scroll.anchor then page.y_scroll:setAnchor(obj.y+obj.height-1-meta.screen_height) end
-    end
-    table.insert(page.objects, obj)
 end
 
 function constructWhen()

@@ -71,8 +71,8 @@ function parseArguments(input)
             value = value:sub(2,-2)
         end
         value = value:gsub("\\\"", "\"")
-        print(name .. " = " .. value)
-        os.sleep(1)
+        --print(name .. " = " .. value)
+        --os.sleep(1)
         args[name] = value
     end
     return args

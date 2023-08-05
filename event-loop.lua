@@ -7,28 +7,37 @@ function start()
         local timer = os.startTimer(0.05)
         local update_args = {}
         formUpdateArgs(update_args, tick)
-        local event
-        while not event do
-            event={os.pullEvent()}
-        end
-        addEventArgs(update_args, event)
-        local return_conditions = {redraw_list={}}
-        -- system objects
-        checkReturnConditions(meta.console:update(update_args), meta.console, return_conditions)
-        -- page objects
-        for k, v in next, meta.current_page.objects do
-            if return_conditions.nobubble then break end
-            if type(v.update) == "function" then
-                local update_params = v:update(update_args) or {}
-                checkReturnConditions(update_params, v, return_conditions)
+        while true do
+            local event = waitForEvent()
+            --if event[1] ~= "timer" then waitForEvent("timer") end
+            --if event[1] ~= "timer" then os.cancelTimer(timer) end
+            addEventArgs(update_args, event)
+            local return_conditions = {redraw_list={}}
+            -- page objects
+            for k, v in next, meta.current_page.objects do
+                if return_conditions.nobubble then break end
+                if type(v.update) == "function" then
+                    local update_params = v:update(update_args) or {}
+                    checkReturnConditions(update_params, v, return_conditions)
+                end
             end
+            -- system objects
+            checkReturnConditions(meta.console:update(update_args), meta.console, return_conditions)
+            if return_conditions.found_when then os.cancelTimer(timer) break end
+            -- bubble redraw here
+            if event[1] == "mouse_scroll" then meta.current_page.y_scroll:update(event, return_conditions) end
+            if event[1] == "timer" then break end
         end
-        -- bubble redraw here
-        
-        if return_conditions.found_when then os.cancelTimer(timer) end
-        if event[1] == "mouse_scroll" then meta.current_page.y_scroll:update(event, return_conditions) end
         tick = tick + 1
     end
+end
+
+function waitForEvent(specific_event)
+    local event
+    while event == nil do
+        event = {os.pullEvent(specific_event)}
+    end
+    return event
 end
 
 function formUpdateArgs(args,tick)
@@ -55,7 +64,7 @@ function checkReturnConditions(conditions, data, prev_conditions)
 	for k, v in next, conditions do
 		if type(v) == "string" then
 			if v == "when" then -- activate when statements
-				prev_conditions.found_when = prev_conditions.found_when or meta.current_page.when:run(data.name, conditions.whenArgs) 
+				prev_conditions.found_when = meta.current_page.when:run(data.name, conditions.whenArgs) or prev_conditions.found_when
 			elseif v == "scroll" then -- take scroll control away from colon enviornemnt
 				prev_conditions.block_scroll = true
 			elseif v == "nobubble" then -- do not propagate input to any more elements

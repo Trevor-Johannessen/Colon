@@ -132,7 +132,6 @@ function addLog(msg)
 end
 
 function getBackground(page)
-    print(page)
     if not page then page = meta.current_page
     else page = meta.pages[page] end
     return page.background
