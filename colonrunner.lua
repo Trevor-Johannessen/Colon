@@ -1,3 +1,3 @@
+colon=require("colon")
 args = {...}
-colon = require("colon")
-colon.run(args)
+colon.run(args[1])

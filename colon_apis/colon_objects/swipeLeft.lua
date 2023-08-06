@@ -17,8 +17,9 @@ function create(args)
 		term.clear()
 		colon.redraw{pageName=from, x_offset=-i, x_inital=0, x_final=screen_width-i}
 		colon.redraw{pageName=to, x_offset=screen_width-i, x_inital=screen_width-i, x_final=screen_width}
-		colon.setBackground(to)
-		colon.setColor(to)
+		
+		term.setBackgroundColor(colon.getBackground(to))
+		term.setTextColor(colon.getColor(to))
 		printColumn(screen_width - i, "|")
 		os.sleep(speed)
 	end

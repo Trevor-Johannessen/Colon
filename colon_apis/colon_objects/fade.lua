@@ -6,7 +6,7 @@ function create(args)
 	local from = args.from
 	local speed = args.speed or 0.05
 	local points_per_tick = tonumber(args.points) or 1
-	colon.setBackground(to)
+	term.setBackgroundColor(colon.getBackground(to))
 	
 	mask = {}
 	for i=1, screen_height*screen_width, 1 do
