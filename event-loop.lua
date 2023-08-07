@@ -25,7 +25,7 @@ function start()
             checkReturnConditions(meta.console:update(update_args), meta.console, return_conditions)
             if return_conditions.found_when then os.cancelTimer(timer) break end
             -- bubble redraw here
-            if event[1] == "mouse_scroll" then meta.current_page.y_scroll:update(event, return_conditions) end
+            if event[1] == "mouse_scroll" and not return_conditions.block_scroll then meta.current_page.y_scroll:update(event, return_conditions) end
             if event[1] == "timer" then break end
         end
         tick = tick + 1
