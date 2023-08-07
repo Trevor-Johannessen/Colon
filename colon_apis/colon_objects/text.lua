@@ -2,9 +2,11 @@ template = require("colon_apis/colon_objects/template")
 
 function create(args)
 	local text = template.create(args)
-	block=block:coords(args)
-    block=block:dim(args)
-    block=block:essentials(args)
+	text=text:coords(args)
+    text=text:dim(args)
+    text=text:essentials(args)
+	text.text = args.text or ""
+
 
 	--[[
 		Features:
@@ -28,6 +30,24 @@ function create(args)
 	function text:update(args)
 	end
 	
+	function text:parseString(text)
+		local text, color, background = text:praseColor(text)
+		local hyperlinks = text:parseHyperlinks(text)
+	end
+
+	function text:parseHyperlinks(str)
+		local hyperlink_locations = {}
+		while true do
+			local s,e = str:find("%[[^%]]*%]%([^%)]*%)")
+			if not s then break end
+			local bracket_string = str:sub(s+1,e):match("[^]]*")
+			local hyperlink = str:sub(s+1,e):match("%(([^)]*)")
+			str=str:sub(1,s-1) .. bracket_string .. str:sub(e+1)
+			table.insert(hyperlink_locations, {s,s-1+bracket_string:len(), hyperlink})
+		end
+		return hyperlink_locations
+	end
+
 	return text
 end
 
