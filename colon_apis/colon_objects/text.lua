@@ -31,26 +31,51 @@ function create(args)
 	end
 	
 	function text:parseString(str)
-		local text, color, background = text:praseColor(str)
-		local hyperlinks = text:parseHyperlinks(str)
 	end
 
 	function text:parseColor(str)
 	end
 
 	function text:parseHyperlinks(str)
-
-	function text:parseBrackets(str)
-		local hyperlink_locations = {}
+	end
+	
+	function text:parseBrackets(default, bracket1, bracket2)
+		local set1, set2 = {bracket1:sub(1,1), bracket1:sub(2,2)}
+		local set2 = {bracket2:sub(1,1), bracket2:sub(2,2)}
+		local pos = 1
+		local openers = {}
+		local color_stack = {}
+		local color_string
 		while true do
-			local s,e = str:find("%[[^%]]*%]%([^%)]*%)")
-			if not s then break end
-			local bracket_string = str:sub(s+1,e):match("[^]]*")
-			local hyperlink = str:sub(s+1,e):match("%(([^)]*)")
-			str=str:sub(1,s-1) .. bracket_string .. str:sub(e+1)
-			table.insert(hyperlink_locations, {s,s-1+bracket_string:len(), hyperlink})
+			local next_bracket_pos = text.text:sub(pos):find("[%"..set1[1].."%"..set1[2].."]")
+			if not next_bracket_pos then
+				color_string = string.rep(default, text.text:len())
+				for i=#color_stack, 1, -1 do
+					local dict = color_stack[i]
+					color_string = color_string:sub(0,dict.start-1) .. string.rep(dict.color, dict.pos+dict.bracket_pos - dict.start) .. color_string:sub(dict.pos+dict.bracket_pos)
+				end
+				return str, color_string
+			elseif text.text:sub(pos):sub(next_bracket_pos, next_bracket_pos) == set1[1] then -- '('
+				-- add position to opened bracket stack
+				openers[#openers+1] = pos + next_bracket_pos
+			elseif text.text:sub(pos):sub(next_bracket_pos, next_bracket_pos) == set1[2] then -- ')'
+				-- make sure stack isn't empty
+				if #openers ~= 0 then
+					-- parse color
+					local bracket_string = text.text:sub(pos+next_bracket_pos-2):match("%"..set2[1].."([^"..set2[2].."]*)%"..set2[2].."")
+					if bracket_string then
+						-- truncate strings
+						text.text=text.text:sub(1,pos+next_bracket_pos-2) .. text.text:sub(pos+next_bracket_pos+bracket_string:len()+2)
+						text.text=text.text:sub(1,openers[#openers]-2) .. text.text:sub(openers[#openers])
+						pos=pos-2
+						-- push to stack
+						color_stack[#color_stack+1] = {start=openers[#openers], color=convertColor(bracket_string, "hex"),pos=pos,bracket_pos=next_bracket_pos}
+						openers[#openers]=nil
+					end
+				end
+			end
+			pos = pos + next_bracket_pos
 		end
-		return hyperlink_locations
 	end
 
 	-- returns table of line cutoffs.
