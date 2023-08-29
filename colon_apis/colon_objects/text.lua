@@ -30,12 +30,17 @@ function create(args)
 	function text:update(args)
 	end
 	
-	function text:parseString(text)
-		local text, color, background = text:praseColor(text)
-		local hyperlinks = text:parseHyperlinks(text)
+	function text:parseString(str)
+		local text, color, background = text:praseColor(str)
+		local hyperlinks = text:parseHyperlinks(str)
+	end
+
+	function text:parseColor(str)
 	end
 
 	function text:parseHyperlinks(str)
+
+	function text:parseBrackets(str)
 		local hyperlink_locations = {}
 		while true do
 			local s,e = str:find("%[[^%]]*%]%([^%)]*%)")
@@ -46,6 +51,11 @@ function create(args)
 			table.insert(hyperlink_locations, {s,s-1+bracket_string:len(), hyperlink})
 		end
 		return hyperlink_locations
+	end
+
+	-- returns table of line cutoffs.
+	function text:processWordWrap()
+		
 	end
 
 	return text
