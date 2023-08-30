@@ -47,7 +47,7 @@ function create(args)
 	end
 
 	function console:add(args)
-		console.logs:add(args.msg .. "\\n")
+		console.logs:append(args.msg .. "\\n")
 		args.x_offset = args.x_offset or 0
 		args.y_offset = args.y_offset or 0
 		console:draw(args.x_offset, args.y_offset)
