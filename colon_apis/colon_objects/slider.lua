@@ -2,32 +2,32 @@ template = require("colon_apis/colon_objects/template")
 
 function create(args)
     local slider = template.create(args)
-    slider.x = tonumber(args.x) or 0
-    slider.y = tonumber(args.y) or 0
+    slider.x = tonumber(args.x) or 0 -- x position of slider
+    slider.y = tonumber(args.y) or 0 -- y position of slider
     slider.width = tonumber(args.width) or 4 -- total width = 0+width, minimum 4
     if slider.width < 4 then slider.width = 4 end
     slider.height = tonumber(args.height) or 1 -- total height = 2+height (height > 0), minimum 3
     slider.height = slider.height+1
     if slider.height < 2 then slider.height = 2 end
-    slider.name = args.name
+    slider.name = args.name -- name to trigger when
     slider.position = 0
-    slider.color = slider:correctColor(args.color) or colors.yellow
-    slider.background = slider:correctColor(args.background) or colors.red
-    slider.knob_color = slider:correctColor(args.knobColor) or colors.orange
-    slider.hidden = args.hidden == "true" or false
-    slider.drag_only = args.dragOnly == "true" or false
+    slider.color = slider:correctColor(args.color) or colors.yellow -- color of border
+    slider.background = slider:correctColor(args.background) or colors.red -- color of inner background
+    slider.knob_color = slider:correctColor(args.knobColor) or colors.orange -- color of knob
+    slider.hidden = args.hidden == "true" or false -- rendering toggle
+    slider.drag_only = args.dragOnly == "true" or false -- toggles knob snapping to cursor
     slider.configuration = "left"
     slider.dragging = false
     slider.grab_position = 0
-    slider.borderless = args.borderless == "true" or false
-    slider.character = args.char or " "
+    slider.borderless = args.borderless == "true" or false -- toggles border
+    slider.character = args.char or " " -- sets character to use as a pattern (max length 1)
     if slider.character:len() > 1 then slider.character = slider.character:sub(1,1) end
     slider.char_color = slider:correctColor(args.charColor) or colors.white
-    slider.spacing = tonumber(args.spacing) or 1
+    slider.spacing = tonumber(args.spacing) or 1 -- distance between characters
     if slider.spacing < 1 then slider.spacing = 1 end
-    slider.knob_width = tonumber(args.knobWidth) or 1
+    slider.knob_width = tonumber(args.knobWidth) or 1 -- width of knob
     if slider.knob_width < 1 or slider.knob_width >= slider.width-2 then slider.knob_width = 1 end
-    slider.colon.log("DragOnly="..tostring(slider.drag_only))
+    slider.vertical = args.vertical == "true" -- toggles vertical slider (NOT IMPLEMENTED)
 
     function slider:draw(x_offset, y_offset)
         --[[
@@ -38,19 +38,42 @@ function create(args)
         if slider.hidden then return end
         local inner_width = slider.width-2
         local x, y = slider.x+x_offset, slider.y-y_offset
-        if not slider.borderless then slider:drawBoarder(x,y,inner_width) end
-        local char_string = string.rep(string.rep(" ", slider.spacing) .. slider.character, math.floor((slider.width-2) / (slider.spacing+1))) .. string.rep(" ", (slider.width-2) % (slider.spacing+1))
-        char_string = char_string:sub(1, slider.position) .. string.rep(" ", slider.knob_width) .. char_string:sub(slider.position + slider.knob_width+1)
-        --local bg_string = bg_string:sub(1,slider.position) .. string.rep(slider:convertColor(slider.knob_color, 'hex'), slider.knob_width) .. bg_string:sub(inner_width-slider.position-slider.knob_width)
-        local bg_string = string.rep(slider:convertColor(slider.background, 'hex'), slider.position) .. string.rep(slider:convertColor(slider.knob_color, 'hex'), slider.knob_width) .. string.rep(slider:convertColor(slider.background, 'hex'), inner_width-slider.position-slider.knob_width)
-        term.setBackgroundColor(slider.background)
-        for i=1, slider.height-1 do
-            term.setCursorPos(x+1,y+i)
-            term.blit(char_string, string.rep(slider:convertColor(slider.char_color, 'hex'), inner_width), bg_string)
+        if not slider.borderless and not slider.vertical then slider:drawHoriBoarder(x,y,inner_width) end
+        if not slider.vertical then
+            local char_string = string.rep(string.rep(" ", slider.spacing) .. slider.character, math.floor((slider.width-2) / (slider.spacing+1))) .. string.rep(" ", (slider.width-2) % (slider.spacing+1))
+            char_string = char_string:sub(1, slider.position) .. string.rep(" ", slider.knob_width) .. char_string:sub(slider.position + slider.knob_width+1)
+            local bg_string = string.rep(slider:convertColor(slider.background, 'hex'), slider.position) .. string.rep(slider:convertColor(slider.knob_color, 'hex'), slider.knob_width) .. string.rep(slider:convertColor(slider.background, 'hex'), inner_width-slider.position-slider.knob_width)
+            term.setBackgroundColor(slider.background)
+            for i=1, slider.height-1 do
+                term.setCursorPos(x+1,y+i)
+                term.blit(char_string, string.rep(slider:convertColor(slider.char_color, 'hex'), inner_width), bg_string)
+            end
+        else
+            local hex_border = slider:convertColor(slider.color, 'hex')
+            term.setCursorPos(x+1, y)
+            term.blit("  ", "aa", hex_border..hex_border)
+            term.setCursorPos(x+1, y+slider.height-1)
+            term.blit("  ", "aa", hex_border..hex_border)
+            for i=y+1,y+slider.height-2 do
+                local current_char = " "
+                if i%slider.spacing == 0 then
+                    current_char = slider.character
+                end
+                local char_string = " " .. string.rep(current_char, slider.width-2) .. " "
+                local bg_string = hex_border .. string.rep(slider:convertColor(slider.background, 'hex'), slider.width-2) .. hex_border
+                if slider.position == i-y-1 then
+                    bg_string = hex_border .. string.rep(slider:convertColor(slider.knob_color, 'hex'), slider.width-2) .. hex_border
+                end 
+                term.setCursorPos(x, i)
+                slider.colon.log("cs="..char_string:len())
+                slider.colon.log("cl="..slider.width)
+                slider.colon.log("bs="..bg_string:len())
+                term.blit(char_string, string.rep(slider:convertColor(slider.char_color, 'hex'), slider.width), bg_string)
+            end
         end
     end
 
-    function slider:drawBoarder(x, y,inner_width)
+    function slider:drawHoriBoarder(x, y,inner_width)
         term.setBackgroundColor(slider.color)
         term.setCursorPos(x+1, y)
         io.write(string.rep(" ", inner_width))
