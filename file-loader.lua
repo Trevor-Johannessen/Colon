@@ -1,5 +1,3 @@
-
-
 --[[
     File loader:
     File loader reads a file and returns an iterator over its contents

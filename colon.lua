@@ -7,7 +7,7 @@ when = require("when")
 eventLoop = require("event-loop")
 redraw = require("redraw")
 
-meta = {
+meta = meta or {
     object_types = {},
     pages = {},
     console = {},
@@ -27,7 +27,7 @@ meta.screen_width, meta.screen_height = term.getSize()
     Enter Event Loop
 ]]
 function run(file)
-    init.initalize(meta)
+    init.initalize()
     fileLoader.handleFile(file)
     eventLoop.start()
 end
@@ -128,7 +128,8 @@ function mapGroup(name, func, page)
 end
 
 function addLog(msg)
-	if type(msg) == "string" then meta.console:add{msg=msg,x_offset=currentPage.x_offset,y_offset=currentPage.y_offset} end
+	if type(msg) == "string" then meta.console:add{msg=msg,x_offset=meta.current_page.x_scroll.position,y_offset=meta.current_page.y_scroll.position} 
+	else error("Log message must be a string. (Got type " .. type(msg) .. ")") end
 end
 
 function getBackground(page)
