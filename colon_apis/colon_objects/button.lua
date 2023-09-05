@@ -1,7 +1,10 @@
 screen_width, screen_height = term.getSize() -- dimensions of screen
 sprite = require("colon_apis/colon_objects/sprite")
 template = require("colon_apis/colon_objects/template")
-
+--[[
+	BUTTON OBJECT
+	This object renders a clickable button on screen. When clicked a button will activate a 'when statement' mapped to its name property. Buttons can rendered using either sprites or templates. Sprites are image files that allow visual customization. Templates are solid color blocks that are easier to use. Buttons take in a default image and a hover variant. Hover images are what is displayed when the button is being depressed. 
+]]
 function create(args)
 	
 	local button = template.create(args)
@@ -10,10 +13,10 @@ function create(args)
 	button.y = tonumber(args.y) or 0
 	pcall(function () button.func = loadstring(args.func) end)
 	button.locked = args.locked or false
-	button.singleClick = args.singleClick or false
-	button.spriteFile = args.sprite
-	button.hoverSpriteFile = args.hoverSprite or args.sprite
-	button.usingTemplate = args.useTemplate == "true" or false
+	button.singleClick = args.singleClick == "true" or false -- Boolean value for whether a button can be pressed multiple times.
+	button.spriteFile = args.sprite -- The sprite displayed on the button.
+	button.hoverSpriteFile = args.hoverSprite or args.sprite -- The sprite displayed on button press.
+	button.usingTemplate = args.useTemplate == "true" or false -- Boolean value for whether a color template will be used in place of a sprite.
 	button.showingHover = false
 	button.dynamic = false
 	button.width = tonumber(args.width)
@@ -73,6 +76,9 @@ function create(args)
 	
 	-- draws the button
 	function button:draw(x_offset, y_offset)
+		--[[
+			Draws the button to the screen
+		]]
 		if button.hidden then return end
 		if not button.transparent or button.transparent and button.hoverVisible and button.showingHover then
 			x_offset = x_offset or 0
@@ -91,6 +97,9 @@ function create(args)
 	end
 
 	function button:writeText(x_offset, y_offset)
+		--[[
+			Writes the buttons text on top of it's image
+		]]
 		local midpoint = math.floor(button.height / 2)
 		term.setCursorPos(math.floor(button.x + x_offset + (button.width - string.len(button.text))/2), button.y+midpoint-y_offset)
 		if button.showingHover then
@@ -104,6 +113,9 @@ function create(args)
 	end
 	
 	function button:drawClicked(obj_args)
+		--[[
+			Sets a buttons image to it's 'hover' version when pressed.
+		]]
 		if (not button.transparent) or (button.transparent and button.hoverVisible) then 
 			if button.hoverVisible then button.sprite:setImage(button.spriteFile, button.usingTemplate) end -- dont need to mess with images for hoverOnly buttons
 			button:draw(obj_args["x_offset"], obj_args["y_offset"])
@@ -118,17 +130,26 @@ function create(args)
 	end
 
 	function button:setHoverImage()
+		--[[
+			Sets the buttons image to its 'hover' version.
+		]]
 		if button.hoverVisible then
 			button.sprite:setImage(button.hoverSpriteFile, button.usingTemplate) -- dont need to mess with images for hoverOnly buttons
 		end
 	end
 
 	function button:setDbclick(tick)
+		--[[
+			Marks the time the button was last clicked.
+		]]
 		if button.dbclick then button.lastClick = tick end
 	end
 
 	-- implements functionality of button
 	function button:update(obj_args)
+		--[[
+			Handles button functionality.
+		]]
 		if button.hidden then return end
 		if button.sticky then 
 			obj_args["x_offset"] = 0
@@ -180,6 +201,9 @@ function create(args)
 	
 	-- applies the buttons function if not locked
 	function button:click(args)
+		--[[
+			Checks if button can be clicked. If possible, it clicks the button.
+		]]
 		if button.locked == false then 
 			if button.singleClick then button.locked = true end
 			if button.func ~= nil then button.func() end
@@ -191,6 +215,9 @@ function create(args)
 	end
 	
 	function button:redraw_background(args)
+		--[[
+			Not sure why this is here?
+		]]
 		term.setBackgroundColor(args.background)
 		for i=0, button.height-1 do
 			term.setCursorPos(button.x-args.x_offset, button.y-args.y_offset+i)

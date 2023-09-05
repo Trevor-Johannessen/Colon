@@ -19,6 +19,8 @@ function initObjectTypes()
 	end
 end
 
+-- NOTE: this causes the text object to be initalized before any page has been loaded. 
+-- This means the text:init function cannot log as that relies on a current page.
 function initConsole()
     if not fs.exists("/colon/colon_apis/colon_objects/console.lua") then error("Console object does not exist, try reinstalling") end
     meta.console = meta.object_types.console.create()

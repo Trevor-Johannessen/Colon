@@ -1,56 +1,4 @@
 template = require("colon_apis/colon_objects/template")
-local colors = require("colon_apis/ext/colors")
-
-function parseBackground(str, default)
-	return parseBrackets(str, default, "{}", "[]")
-end
-
-function parseColor(str, default)
-	return parseBrackets(str, default, "{}", "()")
-end
-
-function parseHyperlinks(str)
-	return parseBrackets(str, "-", "[]", "()")
-end
-
-function parseBrackets(str, default, bracket1, bracket2)
-	local set1, set2 = {bracket1:sub(1,1), bracket1:sub(2,2)}
-	local set2 = {bracket2:sub(1,1), bracket2:sub(2,2)}
-	local pos = 1
-	local openers = {}
-	local color_stack = {}
-	local color_string
-	while true do
-		local next_bracket_pos = str:sub(pos):find("[%"..set1[1].."%"..set1[2].."]")
-		if not next_bracket_pos then
-			color_string = string.rep(default, str:len())
-			for i=#color_stack, 1, -1 do
-				local dict = color_stack[i]
-				color_string = color_string:sub(0,dict.start-1) .. string.rep(dict.color, dict.pos+dict.bracket_pos - dict.start) .. color_string:sub(dict.pos+dict.bracket_pos)
-			end
-			return str, color_string
-		elseif str:sub(pos):sub(next_bracket_pos, next_bracket_pos) == set1[1] then -- '('
-			-- add position to opened bracket stack
-			openers[#openers+1] = pos + next_bracket_pos
-		elseif str:sub(pos):sub(next_bracket_pos, next_bracket_pos) == set1[2] then -- ')'
-			-- make sure stack isn't empty
-			if #openers ~= 0 then
-				-- parse color
-				local bracket_string = str:sub(pos+next_bracket_pos-2):match("%"..set2[1].."([^"..set2[2].."]*)%"..set2[2].."")
-				if bracket_string and bracket_string == 1 then
-					-- truncate strings
-					str=str:sub(1,pos+next_bracket_pos-2) .. str:sub(pos+next_bracket_pos+bracket_string:len()+2)
-					str=str:sub(1,openers[#openers]-2) .. str:sub(openers[#openers])
-					pos=pos-2
-					-- push to stack
-					color_stack[#color_stack+1] = {start=openers[#openers], color=colors.convertColor(bracket_string, "hex"),pos=pos,bracket_pos=next_bracket_pos}
-					openers[#openers]=nil
-				end
-			end
-		end
-		pos = pos + next_bracket_pos
-	end
-end
 
 function create(args)
 	local text = template.create(args)
@@ -70,30 +18,27 @@ function create(args)
 	text.width = tonumber(args.width) or text.text:len()
 	if text.width > text.screen_width then text.width = text.screen_width end
 	text.height = tonumber(args.height) or nil
-	text.textHeight = 0
-	text.autoHeight = text.height == nil -- flag if the text has had its height automatically set
+	text.autoHeight = false -- flag if the text has had its height automatically set
 	text.scrollPos = 0
 	text.scrollable = type(args.scrollable) == "string" and args.scrollable ~= "false"
-	text.background_text = ""
-	text.color_text = ""
-	text.hyperlink_text = ""
-
-
+	text.strTable = {}
+	text.clrTable = {}
+	text.bgdTable = {}
+	
 	--[[
-		Features:
-			Display Text
-			Give text color
-			Give text background color
-			Allow text to be added/deleted (Re-renders the whole text)
-			Render a blinking cursor at a specific position (Without re-rendering the whole text)
-			Enable highlighting text with mouse drag (Without re-rendering the whole text)
-			Enable drag highlighting to highlight text which may be off screen.
-			Utilize word-wrap
-			Change size of text boundaries
-			Print a text background box
-			Scroll if text is too large for boundary
-			Support hyperlinks (Trigger when statements)
+		KNOWN BUGS:
+		-Newline does not render properly if it is the first character
+		-Successive newlines do not render properly
 	]]
+
+
+	function text:drawBackground(x_offset,y_offset)
+		term.setBackgroundColor(text:convertColor(text.background, "int"))
+		for i=0, text.height-1 do
+			term.setCursorPos(text.x+x_offset, text.y-y_offset+i)
+			io.write(string.rep(" ", text.width))
+		end	
+	end
 
 	function text:draw(x_offset, y_offset)
 		if text.hidden then return end
@@ -101,7 +46,6 @@ function create(args)
 		local save_text = term.getTextColor()
 		local save_background = term.getBackgroundColor()
 		local clearString = string.rep(text:convertColor(text.background, "hex"), text.width)
-		local pos = 1
 		x_offset = x_offset or 0 -- default parameter values
 		y_offset = y_offset or 0
 		
@@ -114,26 +58,14 @@ function create(args)
 		end
 		if text.y+text.height > y_offset then
 			local newY = text.scrollPos+1
-			pos = text.width * (newY-1)+1
-			local projected_height = text:getProjectedHeight()
-			while text.height >= newY-text.scrollPos and projected_height >= newY and text.text:sub(pos):len() > 0 do
-				local text_line = text.text:sub(pos, pos+text.width)
-				local color_line = text.color_text:sub(pos, pos+text.width)
-				local background_line = text.background_text:sub(pos, pos+text.width)
-				local write_len = text_line:len()
-				if text_line:find("\\n") then 
-					local newline_pos = text_line:find("\\n")
-					text_line = text_line:sub(1, newline_pos)
-					color_line = color_line:sub(1, newline_pos)
-					background_line = background_line:sub(1, newline_pos)
-					pos=pos+2
-				end
+			while text.height >= newY-text.scrollPos and #text.strTable >= newY and text.strTable[newY] do
+				local write_len = text.strTable[newY]:len()
+				if text.strTable[newY]:sub(-2) == "\\n" then write_len = write_len - 2 end
 				term.setCursorPos(text.x+x_offset, text.y+newY-y_offset-1-text.scrollPos)
 				term.blit(clearString, clearString, clearString)
 				term.setCursorPos(text.x+x_offset, text.y+newY-y_offset-1-text.scrollPos)
-				term.blit(text_line, color_line, background_line)
+				term.blit(text.strTable[newY]:sub(1,write_len), text.clrTable[newY]:sub(1,write_len), text.bgdTable[newY]:sub(1, write_len))
 				newY = newY + 1
-				pos = pos + text_line:len()
 			end
 			term.setCursorPos(save_cursor[1], save_cursor[2])
 			term.setTextColor(save_text)
@@ -141,38 +73,6 @@ function create(args)
 		end
 	end
 	
-	function text:init()
-		text.text, text.background_text = parseBackground(text.text, colors.convertColor(text.background, "hex"))
-		text.text, text.color_text = parseColor(text.text, colors.convertColor(text.color, "hex"))
-		text.text, text.hyperlink_text = parseHyperlinks(text.text)
-		text.textHeight = text:getProjectedHeight()
-		if text.autoHeight then text.height = text.textHeight end
-	end
-
-	function text:drawBackground(x_offset,y_offset)
-		term.setBackgroundColor(text:convertColor(text.background, "int"))
-		for i=0, text.height-1 do
-			term.setCursorPos(text.x+x_offset, text.y-y_offset+i)
-			io.write(string.rep(" ", text.width))
-		end	
-	end
-
-	function text:getProjectedHeight()
-		term.setCursorPos(1,1)
-		local effective_height = 0
-		local pos = 1
-		while true do
-			local next_newline = text.text:sub(pos):find("\\n")
-			if next_newline then
-				effective_height = effective_height + text.text:sub(pos, next_newline-1):len() + (text.text:sub(pos, next_newline-1):len() % text.width)
-				pos = pos+next_newline+1
-			else
-				effective_height = effective_height + text.text:sub(pos):len()
-				return math.ceil(effective_height / text.width)
-			end
-		end
-	end
-
 	function text:inBounds(args)
 		if args["mouse_x"]+args["x_offset"] >= text.x and 
 		text.x + text.width > args["mouse_x"]+args["x_offset"] and
@@ -185,36 +85,111 @@ function create(args)
 	
 	function text:update(args)
 		if text.hidden then return end
-		if args.event == "mouse_scroll" and text:inBounds(args) and text.textHeight > text.height then
+		if args.event == "mouse_scroll" and text:inBounds(args) and #text.strTable > text.height then
 			text.scrollPos = text:monus(text.scrollPos, -args["event_id"])
-			if text.scrollPos > text.textHeight - text.height then text.scrollPos = text.textHeight - text.height end
+			if text.scrollPos > #text.strTable - text.height then text.scrollPos = #text.strTable - text.height end
 			text:draw(args["x_offset"], args["y_offset"])
 			return {"when", "scroll"}
 		end
 	end
-
-	-- returns table of line cutoffs.
-	function text:processWordWrap()
-		-- word wrap will just insert newline characters into the text string
-		-- don't forget to fill the background and color strings with dummy data.
+	
+	function text:parseString(input, addition)
+		local save_cursor = {term.getCursorPos()}
+		local save_text = term.getTextColor()
+		local save_background = term.getBackgroundColor()
+		local length, saveClr, saveBgd
+		term.setTextColor(text:convertColor(text.color, "int"))
+		term.setBackgroundColor(text:convertColor(text.background, "int"))
+		if addition and #text.strTable > 0 then
+			length = text.strTable[#text.strTable]:len() -- first half of incomplete line
+			saveClr = text.clrTable[#text.strTable]
+			saveBgd = text.bgdTable[#text.strTable]
+			input = text.strTable[#text.strTable] .. input
+			table.remove(text.strTable)
+			table.remove(text.clrTable)
+			table.remove(text.bgdTable)
+		end	
+		local str, colorString, backgroundString = text:parseColor(input)
+		if addition and #text.strTable > 0 then
+			colorString = saveClr .. colorString:sub(length+1)
+			backgroundString = saveBgd .. backgroundString:sub(length+1)
+		end
+		while str:len() > 0 do
+			-- need to find the amount to increment the cursor by each loop (should be the amount of characters displayed)
+			local endPointer = text.width
+			local offset = 1
+			local line = str:sub(1, endPointer)
+			if line:sub(2):find('\\n') then
+				endPointer = line:sub(2):find('\\n')+1
+				offset = 2
+			elseif str:len() > text.width and line:find(' ') then
+				endPointer = line:find('[^ ]*$')-1
+			end
+			if(str:sub(endPointer+1,endPointer+1) == " ") then offset = offset + 1 end
+			-- I'm just so done with this, maybe rewrite this code at some point.
+			-- There has to be a better way. 
+			table.insert(text.strTable, str:sub(1,endPointer+offset-1))
+			table.insert(text.clrTable, colorString:sub(1,endPointer+offset-1))
+			table.insert(text.bgdTable, backgroundString:sub(1, endPointer+offset-1))
+			str=str:sub(endPointer+offset)
+			colorString=colorString:sub(endPointer+offset)
+			backgroundString=backgroundString:sub(endPointer+offset)
+		end
+		term.setCursorPos(save_cursor[1], save_cursor[2])
+		term.setTextColor(save_text)
+		term.setBackgroundColor(save_background)
+	end
+	
+	function text:initalize() -- dry render to populate text tables
+		text.strTable = {}
+		text.clrTable = {}
+		text.bgdTable = {}
+		text:parseString(text.text)
+		if text.height == nil or text.autoHeight then
+			text.height = #text.strTable
+			text.autoHeight = true
+		end
+		if #text.strTable > text.height and text.scrollable then text.interactive = true end
+	end
+	
+	function text:set(new_text)
+		text.text=new_text
+		text:initalize()
 	end
 
-	function text:append(str)
-		local color, background, hyperlinks
-		str, background = parseBackground(str, colors.convertColor(text.background, "hex"))
-		str, color = parseColor(str, colors.convertColor(text.color, "hex"))
-		str, hyperlinks = parseHyperlinks(str)
-		text.text = text.text .. str
-		text.background_text = text.background_text .. background
-		text.color_text = text.color_text .. color
-		text.hyperlink_text = text.hyperlink_text .. hyperlinks
-		text.textHeight = text:getProjectedHeight()
+	function text:add(addition)
+		text.text = text.text .. addition
+		local beforeSize = #text.strTable
+		text:parseString(addition, true)
+		if text.height == nil or text.autoHeight then
+			text.height = #text.strTable
+			text.autoHeight = true
+		end
+		if #text.strTable > text.height and text.scrollable then text.interactive = true end
+		if #text.strTable > beforeSize and #text.strTable > text.height then text.scrollPos = text.scrollPos + 1 end
 	end
 
-	function text:insert(str, pos)
+	function text:backspace()
+		text.text = text.text:sub(1, text.text:len()-1)
+		if #text.strTable > 0 then
+			local beforeSize = #text.strTable
+			if text.strTable[#text.strTable]:len() == 0 then
+				table.remove(text.strTable)
+				table.remove(text.clrTable)
+				table.remove(text.bgdTable)
+			else
+				local length = text.strTable[#text.strTable]:len()
+				text.strTable[#text.strTable] = text.strTable[#text.strTable]:sub(1, length-1)
+				text.clrTable[#text.clrTable] = text.clrTable[#text.clrTable]:sub(1, length-1)
+				text.bgdTable[#text.bgdTable] = text.bgdTable[#text.bgdTable]:sub(1, length-1)
+			end
+			if beforeSize > #text.strTable and #text.strTable >= text.height then text.scrollPos = text:monus(text.scrollPos, 1) end
+		end
 	end
 
-	text:init()
+
+	
+	text:initalize()
 
 	return text
 end
