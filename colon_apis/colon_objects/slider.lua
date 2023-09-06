@@ -26,8 +26,9 @@ function create(args)
     slider.spacing = tonumber(args.spacing) or 1 -- distance between characters
     if slider.spacing < 1 then slider.spacing = 1 end
     slider.knob_width = tonumber(args.knobWidth) or 1 -- width of knob
-    if slider.knob_width < 1 or slider.knob_width >= slider.width-2 then slider.knob_width = 1 end
     slider.vertical = args.vertical == "true" -- toggles vertical slider (NOT IMPLEMENTED)
+    if not slider.vertical and (slider.knob_width < 1 or slider.knob_width >= slider.width-2) then slider.knob_width = 1  end
+    if slider.vertical and slider.knob_width < 1 or slider.knob_width >= slider.height-2 then slider.knob_width = 1 end
 
     function slider:draw(x_offset, y_offset)
         --[[
@@ -48,26 +49,24 @@ function create(args)
                 term.setCursorPos(x+1,y+i)
                 term.blit(char_string, string.rep(slider:convertColor(slider.char_color, 'hex'), inner_width), bg_string)
             end
-        else
+        else -- vertical
             local hex_border = slider:convertColor(slider.color, 'hex')
             term.setCursorPos(x+1, y)
             term.blit("  ", "aa", hex_border..hex_border)
             term.setCursorPos(x+1, y+slider.height-1)
             term.blit("  ", "aa", hex_border..hex_border)
-            for i=y+1,y+slider.height-2 do
+            for i=1,slider.height-2 do
                 local current_char = " "
                 if i%slider.spacing == 0 then
                     current_char = slider.character
                 end
                 local char_string = " " .. string.rep(current_char, slider.width-2) .. " "
                 local bg_string = hex_border .. string.rep(slider:convertColor(slider.background, 'hex'), slider.width-2) .. hex_border
-                if slider.position == i-y-1 then
+                --if slider.position <= i-1 and slider.position >= i-slider.knob_width then
+                if slider.position >= i-slider.knob_width and slider.position <= i-1 then
                     bg_string = hex_border .. string.rep(slider:convertColor(slider.knob_color, 'hex'), slider.width-2) .. hex_border
                 end 
-                term.setCursorPos(x, i)
-                slider.colon.log("cs="..char_string:len())
-                slider.colon.log("cl="..slider.width)
-                slider.colon.log("bs="..bg_string:len())
+                term.setCursorPos(x, i+y)
                 term.blit(char_string, string.rep(slider:convertColor(slider.char_color, 'hex'), slider.width), bg_string)
             end
         end
@@ -85,30 +84,62 @@ function create(args)
         end
     end
 
-    function slider:hoveringKnob(x)
-        return x > slider.x+slider.position and 
-            x < slider.x+slider.position+slider.knob_width+1
+    function slider:hoveringKnob(x, y)
+        if slider.vertical then
+            return y > slider.y+slider.position and
+                y < slider.y+slider.position+slider.knob_width+1
+        else
+            return x > slider.x+slider.position and 
+                x < slider.x+slider.position+slider.knob_width+1
+        end
     end
     
     function slider:update(args)
         if slider.hidden then return end
         if args["mouse_x"] == nil or args["mouse_y"] == nil then return end
-        if slider:hoveringKnob(args.mouse_x) and args.event == "mouse_click" then slider.dragging = true; slider.grab_position = args.mouse_x - slider.x - slider.position-1; return end 
+        if slider:hoveringKnob(args.mouse_x, args.mouse_y) and args.event == "mouse_click" then 
+            slider.dragging = true
+            if slider.vertical then 
+                slider.grab_position = args.mouse_y-slider.y-slider.position-1
+            else
+                slider.grab_position = args.mouse_x-slider.x-slider.position-1
+            end
+            return end 
         if args.event == "mouse_up" then slider.dragging = false; slider.grab_position = 0 end
         if slider.drag_only and not slider.dragging then return end
-        local mx = args["mouse_x"]-slider.x-1-slider.grab_position
-        if args.mouse_y < slider.y or args.mouse_y > slider.y+slider.height-1 then return end
-        if mx < 0 then return end
-        if mx > slider.width-2 then return end
-        if mx > slider.width-2-slider.knob_width then mx = slider.width-2-slider.knob_width end
-        slider.position = mx
+
+        if slider.vertical then
+            if args.mouse_x < slider.x or args.mouse_x > slider.x+slider.width-1 then return end
+            local my = args["mouse_y"]-slider.y-1-slider.grab_position
+            if my < 0 then return end
+            if my > slider.height-2 then return end
+            if my > slider.height-2-slider.knob_width then my = slider.height-2-slider.knob_width end
+            slider.position = my
+        else
+            if args.mouse_y < slider.y or args.mouse_y > slider.y+slider.height-1 then return end
+            local mx = args["mouse_x"]-slider.x-1-slider.grab_position
+            if mx < 0 then return end
+            if mx > slider.width-2 then return end
+            if mx > slider.width-2-slider.knob_width then mx = slider.width-2-slider.knob_width end
+            slider.position = mx
+        end
         slider:draw(args.x_offset, args.y_offset)
-        if slider.configuration == "left" and slider.position == slider.width-2 then
-            slider.configuration = "right"
-            return {"when", whenArgs={"triggered", "right"}}
-        elseif slider.position == slider.width+1 then
-            slider.configuration = "left"
-            return {"when", whenArgs={"triggered", "left"}}
+        if slider.vertical then
+            if slider.configuration == "bottom" and slider.position == slider.height-2 then
+                slider.configuration="top"
+                return {"when", whenArgs={"triggered", "top"}}
+            elseif slider.position == slider.height+1 then
+                slider.configuration="bottom"
+                return {"when", whenArgs={"triggered", "bottom"}}
+            end
+        else
+            if slider.configuration == "left" and slider.position == slider.width-2 then
+                slider.configuration = "right"
+                return {"when", whenArgs={"triggered", "right"}}
+            elseif slider.position == slider.width+1 then
+                slider.configuration = "left"
+                return {"when", whenArgs={"triggered", "left"}}
+            end
         end
         return {"when", whenArgs={"moved", slider.position}}
     end
