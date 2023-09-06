@@ -26,7 +26,7 @@ function create(page)
                 for k, v in next, args do object[k] = v end
                 if object then
                     local item = interpreter.interpret(object, dict.page)
-                    if item and type(item.draw) == "function" then item:draw(meta.current_page.x_scroll.position, meta.current_page.y_scroll.position) end
+                    if item and type(item.draw) == "function" then item:draw(0 --[[meta.current_page.x_scroll.position]], meta.current_page.y_scroll.position) end
                     --meta.console:addMeta{msg="Adding " .. v}
                 end
             end

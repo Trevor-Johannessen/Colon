@@ -9,10 +9,10 @@ function start()
         formUpdateArgs(update_args, tick)
         while true do
             local event = waitForEvent()
-            --if event[1] ~= "timer" then waitForEvent("timer") end
-            --if event[1] ~= "timer" then os.cancelTimer(timer) end
             addEventArgs(update_args, event)
             local return_conditions = {redraw_list={}}
+            -- system objects (high priority)
+            checkReturnConditions(meta.current_page.y_scroll:update(event, return_conditions), meta.current_page.page_y, return_conditions)
             -- page objects
             for k, v in next, meta.current_page.objects do
                 if return_conditions.nobubble then break end
@@ -21,11 +21,10 @@ function start()
                     checkReturnConditions(update_params, v, return_conditions)
                 end
             end
-            -- system objects
+            -- system objects (low priority)
             checkReturnConditions(meta.console:update(update_args), meta.console, return_conditions)
             if return_conditions.found_when then os.cancelTimer(timer) break end
             -- bubble redraw here
-            if event[1] == "mouse_scroll" and not return_conditions.block_scroll then meta.current_page.y_scroll:update(event, return_conditions) end
             if event[1] == "timer" then break end
         end
         tick = tick + 1
@@ -42,7 +41,7 @@ end
 
 function formUpdateArgs(args,tick)
     args.tick = tick
-	args.x_offset = meta.current_page.x_scroll.position
+	args.x_offset = 0 -- meta.current_page.x_scroll.position
 	args.y_offset = meta.current_page.y_scroll.position
 	args.screen_height = meta.screen_height
 	args.screen_width = meta.screen_width

@@ -128,7 +128,7 @@ function mapGroup(name, func, page)
 end
 
 function addLog(msg)
-	if type(msg) == "string" then meta.console:add{msg=msg,x_offset=meta.current_page.x_scroll.position,y_offset=meta.current_page.y_scroll.position} 
+	if type(msg) == "string" then meta.console:add{msg=msg,x_offset=0 --[[meta.current_page.x_scroll.position]],y_offset=meta.current_page.y_scroll.position} 
 	else error("Log message must be a string. (Got type " .. type(msg) .. ")") end
 end
 

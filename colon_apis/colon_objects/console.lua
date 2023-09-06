@@ -47,10 +47,7 @@ function create(args)
 	end
 
 	function console:add(args)
-		console.logs:append(args.msg .. "\\n")
-		term.setCursorPos(1,1)
-		print("Appending", args.msg)
-		os.sleep(.5)
+		console.logs:add(args.msg .. "\\n")
 		args.x_offset = args.x_offset or 0
 		args.y_offset = args.y_offset or 0
 		console:draw(args.x_offset, args.y_offset)

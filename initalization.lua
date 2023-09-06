@@ -1,6 +1,5 @@
 function initalize()
     initObjectTypes()
-    initScroll()
     initConsole()
     initLogs()
 end

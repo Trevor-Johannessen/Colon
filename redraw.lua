@@ -2,14 +2,16 @@ function redraw(args)
     args = args or {}
     args.pageName = args.pageName or meta.current_page.name
 	args.page = meta.pages[args.pageName]
-    local x_offset = args.x_offset or args.page.x_scroll.position
+    local x_offset = args.x_offset or 0 -- args.page.x_scroll.position
 	local y_offset = args.y_offset or args.page.y_scroll.position
+	meta.console:add{msg="Redrawing", x_offset=x_offset, y_offset=y_offset}
 	if not args.y_offset and not args.page then error("Both args y_offset and page y_offset are nil. (" .. args.page.name .. ")" ) end
 	fillScreen(args)
     --meta.console:add{msg="Redrawing at " .. x_offset .. ", " .. y_offset}
 	for k, v in next, args.page.objects do
 		if type(v.draw) == "function" then v:draw(x_offset, y_offset) end
 	end
+	meta.current_page.y_scroll:draw(x_offset,y_offset)
 end
 
 function redrawIfAwaiting(args, obj)

@@ -1,7 +1,7 @@
 local when = require("when")
 
 function initalizePage(name)
-	local scroll = require("colon_apis/colon_objects/page-scroll")
+	local scroll = require("colon_apis/colon_objects/scrollbar")
 	if not meta.pages then error("Page cannot be initalized. Missing variable: meta.pages") end
 	if not name then error("Page cannot be initalized. Missing variable: name.") end
 	if type(meta.pages) ~= "table" then error("Page cannot be initalized. meta.pages must be of type table.") end
@@ -12,8 +12,15 @@ function initalizePage(name)
 	new_page.when = when.create(new_page)
 	new_page.objects = {} -- storage for all objects
 	new_page.tags = {}
-	new_page.x_scroll = scroll:create()
-	new_page.y_scroll = scroll:create()
+	--new_page.x_scroll = scroll:create{}
+	new_page.y_scroll = scroll.create{
+		anchor=0,
+		knobPercent=.15,
+		x=50,
+		y=1,
+		width=1,
+		height=meta.screen_height
+	}
 	new_page.end_of_page = 0
 	new_page.background = colors.black
 	new_page.color = colors.white
@@ -27,6 +34,16 @@ function initalizePage(name)
 	if not meta.current_page then meta.current_page = new_page end
 
     return new_page
+end
+
+function initScrollbar()
+    return meta.object_types.scrollbar.create{
+        width=1,
+        height = meta.screen_height,
+        x=51,
+        y=1,
+        scrollRange=0
+    }
 end
 
 return {

@@ -173,7 +173,6 @@ function create(args)
         template.name = args.name or ""
         if args.hidden then args.hidden = args.hidden:lower() end
         template.hidden = args.hidden == "true"
-        if args.sticky then args.sticky = args.sticky:lower() end
         template.sticky = args.sticky == "true"
         return template
     end

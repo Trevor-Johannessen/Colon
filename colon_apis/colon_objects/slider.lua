@@ -29,6 +29,7 @@ function create(args)
     slider.vertical = args.vertical == "true" -- toggles vertical slider (NOT IMPLEMENTED)
     if not slider.vertical and (slider.knob_width < 1 or slider.knob_width >= slider.width-2) then slider.knob_width = 1  end
     if slider.vertical and slider.knob_width < 1 or slider.knob_width >= slider.height-2 then slider.knob_width = 1 end
+    slider.sticky = args.sticky == "true"
 
     function slider:draw(x_offset, y_offset)
         --[[
@@ -38,7 +39,10 @@ function create(args)
         ]]
         if slider.hidden then return end
         local inner_width = slider.width-2
-        local x, y = slider.x+x_offset, slider.y-y_offset
+        local x, y = slider.x, slider.y
+        if not slider.sticky then 
+            x, y = x+x_offset, y-y_offset
+        end
         if not slider.borderless and not slider.vertical then slider:drawHoriBoarder(x,y,inner_width) end
         if not slider.vertical then
             local char_string = string.rep(string.rep(" ", slider.spacing) .. slider.character, math.floor((slider.width-2) / (slider.spacing+1))) .. string.rep(" ", (slider.width-2) % (slider.spacing+1))
@@ -51,23 +55,31 @@ function create(args)
             end
         else -- vertical
             local hex_border = slider:convertColor(slider.color, 'hex')
-            term.setCursorPos(x+1, y)
-            term.blit("  ", "aa", hex_border..hex_border)
-            term.setCursorPos(x+1, y+slider.height-1)
-            term.blit("  ", "aa", hex_border..hex_border)
+            if not slider.borderless then
+                term.setCursorPos(x+1, y)
+                term.blit("  ", "aa", hex_border..hex_border)
+                term.setCursorPos(x+1, y+slider.height-1)
+                term.blit("  ", "aa", hex_border..hex_border)
+            end
             for i=1,slider.height-2 do
                 local current_char = " "
                 if i%slider.spacing == 0 then
                     current_char = slider.character
                 end
-                local char_string = " " .. string.rep(current_char, slider.width-2) .. " "
-                local bg_string = hex_border .. string.rep(slider:convertColor(slider.background, 'hex'), slider.width-2) .. hex_border
+                local char_string = string.rep(current_char, slider.width-2)
+                local bg_string = string.rep(slider:convertColor(slider.background, 'hex'), slider.width-2)
                 --if slider.position <= i-1 and slider.position >= i-slider.knob_width then
                 if slider.position >= i-slider.knob_width and slider.position <= i-1 then
-                    bg_string = hex_border .. string.rep(slider:convertColor(slider.knob_color, 'hex'), slider.width-2) .. hex_border
+                    bg_string = string.rep(slider:convertColor(slider.knob_color, 'hex'), slider.width-2)
                 end 
+                local borderless_offset = 2
+                if not slider.borderless then
+                    char_string = " "..char_string.." "
+                    bg_string = hex_border..bg_string..hex_border
+                    borderless_offset = 0
+                end
                 term.setCursorPos(x, i+y)
-                term.blit(char_string, string.rep(slider:convertColor(slider.char_color, 'hex'), slider.width), bg_string)
+                term.blit(char_string, string.rep(slider:convertColor(slider.char_color, 'hex'), slider.width-borderless_offset), bg_string)
             end
         end
     end
