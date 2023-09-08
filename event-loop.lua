@@ -11,8 +11,6 @@ function start()
             local event = waitForEvent()
             addEventArgs(update_args, event)
             local return_conditions = {redraw_list={}}
-            -- system objects (high priority)
-            checkReturnConditions(meta.current_page.y_scroll:update(event, return_conditions), meta.current_page.page_y, return_conditions)
             -- page objects
             for k, v in next, meta.current_page.objects do
                 if return_conditions.nobubble then break end
@@ -23,6 +21,7 @@ function start()
             end
             -- system objects (low priority)
             checkReturnConditions(meta.console:update(update_args), meta.console, return_conditions)
+            checkReturnConditions(meta.current_page.y_scroll:update(update_args, return_conditions), meta.current_page.page_y, return_conditions)
             if return_conditions.found_when then os.cancelTimer(timer) break end
             -- bubble redraw here
             if event[1] == "timer" then break end

@@ -9,6 +9,7 @@ function create(args)
 	scrollbar.anchor = args.anchor -- the total amount of lines it is possible to scroll.
 	scrollbar.lock = false
 	scrollbar.position = 0
+	scrollbar.redraw = args.redraw
 	if scrollbar.knob_percent > 1 then scrollbar.knob_percent=1 end
 	scrollbar.slider = slider.create{
 		knobColor="gray",
@@ -29,33 +30,41 @@ function create(args)
 		end
 	end
 
-	function scrollbar:update(obj_args)
+	function scrollbar:update(obj_args, conditions)
 		if scrollbar.lock then return end
+		if conditions.block_scroll then return end
+		local current_slider_pos = scrollbar.slider.position
 		-- activate the update function with the current scroll position
-		if obj_args[1] == "mouse_scroll" then
-			if scrollbar.position == 0 and obj_args[2] == -1 or scrollbar.position >= scrollbar.anchor and obj_args[2] == 1 then return end
-			scrollbar.position = scrollbar.position + obj_args[2]
-			scrollbar.slider.position = math.floor(scrollbar.position/scrollbar.anchor*scrollbar.slider.height)
-			--meta.console:add{msg="scroll pos = " .. scroll.position .. " dir = " .. args[2],x_offset=0,y_offset=0}
-			colon.redraw()
+		if obj_args.event == "mouse_scroll" then
+			if (scrollbar.position <= 0 and obj_args.event_id == -1) or (scrollbar.position >= scrollbar.anchor and obj_args.event_id == 1) then return end
+			scrollbar.slider.position = math.floor(scrollbar.position / scrollbar.anchor * (scrollbar.slider.height-1))
+			scrollbar:setScrollPos(scrollbar.position + obj_args.event_id)
 		else
 			if scrollbar.slider:update(obj_args) then
-				local new_pos = math.floor(scrollbar.anchor / scrollbar.height)*scrollbar.slider.position
+				if current_slider_pos == scrollbar.slider.position then return end
+				local new_pos = math.floor(scrollbar.anchor * (scrollbar.slider.position / (scrollbar.slider.height-1)))
 				if new_pos ~= scrollbar.position then
-					scrollbar.position = new_pos
-					colon.redraw()
+					if obj_args.mouse_y == scrollbar.height then new_pos = scrollbar.anchor
+					elseif obj_args.mousey == 0 then new_pos = 0 end
+					scrollbar:setScrollPos(new_pos)
 				end
 			end
 		end
 	end
 
+	function scrollbar:setScrollPos(pos)
+		scrollbar.position = pos
+		scrollbar.redraw()
+	end
+
 	function scrollbar:setAnchor(anchor)
-		scrollbar.anchor = anchor
-		--meta.console:add{msg="Anchor has been set to "..scroll.anchor}
+		scrollbar.anchor = anchor-meta.screen_height
+		scrollbar.colon.log("Setting anchor to " .. anchor-screen_height)
 		if anchor < scrollbar.position then
-			scrollbar.position = anchor
+			scrollbar.position = anchor+meta.screen_height
 		end
 	end
+
 
 	return scrollbar
 end

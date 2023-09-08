@@ -15,6 +15,7 @@ meta = meta or {
     api = {
 
     },
+	redraw = redraw.redraw
 }
 meta.screen_width, meta.screen_height = term.getSize()
 
