@@ -74,6 +74,7 @@ function create(args)
 	end
 	
 	function text:inBounds(args)
+		if text.sticky then args.x_offset,args.y_offset = 0,0 end
 		if args["mouse_x"]+args["x_offset"] >= text.x and 
 		text.x + text.width > args["mouse_x"]+args["x_offset"] and
 		args["mouse_y"]+args["y_offset"] >= text.y and
