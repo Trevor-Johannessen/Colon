@@ -34,17 +34,19 @@ function create(args)
 		if scrollbar.lock then return end
 		if conditions.block_scroll then return end
 		local current_slider_pos = scrollbar.slider.position
-		-- activate the update function with the current scroll position
+		-- mouse scrolling
 		if obj_args.event == "mouse_scroll" then
 			if (scrollbar.position <= 0 and obj_args.event_id == -1) or (scrollbar.position >= scrollbar.anchor and obj_args.event_id == 1) then return end
-			scrollbar.slider.position = math.floor(scrollbar.position / scrollbar.anchor * (scrollbar.slider.height-1))
+			scrollbar.slider.position = math.floor(scrollbar.position / scrollbar.anchor * (scrollbar.slider.height-2))
+			scrollbar.colon.log("pos = " .. scrollbar.slider.position)
 			scrollbar:setScrollPos(scrollbar.position + obj_args.event_id)
 		else
+			-- slider drag
 			if scrollbar.slider:update(obj_args) then
 				if current_slider_pos == scrollbar.slider.position then return end
 				local new_pos = math.floor(scrollbar.anchor * (scrollbar.slider.position / (scrollbar.slider.height-1)))
 				if new_pos ~= scrollbar.position then
-					if obj_args.mouse_y == scrollbar.height then new_pos = scrollbar.anchor
+					if obj_args.mouse_y >= scrollbar.height then new_pos = scrollbar.anchor
 					elseif obj_args.mousey == 0 then new_pos = 0 end
 					scrollbar:setScrollPos(new_pos)
 				end
