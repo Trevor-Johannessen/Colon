@@ -3,6 +3,7 @@ colon = require("colon")
 
 function create(args)
 	colon.setCurrentPage(args.to)
+	colon.redraw()
 	return -1
 end
 

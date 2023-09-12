@@ -23,6 +23,7 @@ function create(args)
 		os.sleep(speed)
 	end
 	colon.setCurrentPage(to)
+	colon.redraw()
 	return -1
 end
 
