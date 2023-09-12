@@ -98,6 +98,7 @@ function editObject(args)
 end
 
 function setCurrentPage(newPage)
+	print(newPage)
 	meta.current_page = meta.pages[newPage]
 	for i, obj in next, meta.current_page.objects do -- should this go in interpreter?
 		if obj.staged then

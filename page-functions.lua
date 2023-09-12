@@ -20,11 +20,10 @@ function initalizePage(name)
 	new_page.scroll_lock = false
 	new_page.groups = {}
 	new_page.name = fs.getName(name)
-	new_page.path = "/" .. fs.getDir(name) .. "/"
-
+	new_page.path =  fs.getDir(name) .. "/"
     --table.insert(meta.pages, new_page)
-	meta.pages[name] = new_page
-	if not meta.current_page then meta.current_page = new_page end
+	meta.pages[new_page.name] = new_page
+	if not meta.current_page then meta.current_page = new_page; end
 
     return new_page
 end

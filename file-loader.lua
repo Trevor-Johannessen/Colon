@@ -18,9 +18,20 @@ function interpretFile(file, page)
     end
 end
 
-function handleFile(file)
+function handleFile(file, page)
+    file = completePath(file, page)
     local page = pageFunctions.initalizePage(file)
     interpretFile(file, page)
+end
+
+function completePath(path, page)
+
+    if not page then return path end
+    new_path = page.path .. "/"
+    if path:sub(1,1) == "/" then
+        new_path = "/"
+    end
+    return new_path .. "/" .. path
 end
 
 return {

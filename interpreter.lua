@@ -29,7 +29,7 @@ function interpret(args, page)
         if page == meta.current_page then term.setTextColor(page.color) end
         return
     elseif args.type == "load" then -- takes file, initalizes new page
-        fileLoader.handleFile(args.file)
+        fileLoader.handleFile(args.file, page)
         return
     end
     if meta.object_types[args.type] == nil then error("Object type " .. args.type .. " not found.") end
