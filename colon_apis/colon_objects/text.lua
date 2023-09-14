@@ -11,8 +11,8 @@ function create(args)
 	text.name = args.name
 	text.type = "text"
 	text.fillBackground = args.fillBackground ~= "false"
-	text.color = args.color or term.getTextColor()
-	text.background = args.background or term.getBackgroundColor()
+	text.color = args.color or text.colon.getColor(args.page)
+	text.background = args.background or text.colon.getBackground(args.page)
 	text.sticky = args.sticky or false
 	text.length = string.len(text.text)
 	text.width = tonumber(args.width) or text.text:len()
@@ -156,6 +156,7 @@ function create(args)
 	function text:set(new_text)
 		text.text=new_text
 		text:initalize()
+		text:draw(0,0)
 	end
 
 	function text:add(addition)
