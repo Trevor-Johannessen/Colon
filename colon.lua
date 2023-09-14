@@ -60,7 +60,7 @@ function subarray(arr, start, stop)
 end
 
 function getObjectByName(page, name)
-	for key, obj in next, meta.pages[page].objects do
+	for key, obj in next, page.objects do
 		if obj.name == name then
 			return obj
 		end
@@ -68,9 +68,9 @@ function getObjectByName(page, name)
 end
 
 function setObjectByName(page, name, newObject)
-	for key, obj in next, meta.pages[page].objects do
+	for key, obj in next, page.objects do
 		if obj.name == name then
-			pages[page].objects[key] = newObject
+			page.objects[key] = newObject
 		end
 	end
 end
@@ -79,13 +79,13 @@ end
 function getObject(args)
 	if not args.page then args.page = meta.current_page
     else args.page = meta.pages[args.page] end
-	return get_object_by_name(args.page, args.name)
+	return getObjectByName(args.page, args.name)
 end
 
 function setObject(args)
 	if not args.page then args.page = meta.current_page
     else args.page = meta.pages[args.page] end
-	set_object_by_name(args.page, args.name, args.obj)
+	getObjectByName(args.page, args.name, args.obj)
 end
 
 -- requires: name, property, value... page is optional
@@ -98,13 +98,19 @@ function editObject(args)
 end
 
 function setCurrentPage(newPage)
-	print(newPage)
 	meta.current_page = meta.pages[newPage]
 	for i, obj in next, meta.current_page.objects do -- should this go in interpreter?
 		if obj.staged then
 			obj:staged()
 		end
 	end
+	redraw.redraw()
+end
+
+function createPage(name, obj_list)
+	local page = pageFunctions.initalizePage(name)
+	page.objects = obj_list
+	return page
 end
 
 function getCurrentPage()
@@ -116,13 +122,13 @@ function getPage(name)
 end
 
 function getGroup(name, page)
-	if not page then page = meta.currentPage
+	if not page then page = meta.current_page
     else page = meta.pages[page] end
 	return page.groups[name]
 end
 
 function mapGroup(name, func, page)
-	if not page then page = meta.currentPage
+	if not page then page = meta.current_page
     else page = meta.pages[page] end
 	for k, obj in next, page.groups[name] do
 		func(obj)
@@ -150,6 +156,10 @@ function setBackground(color, page)
     if page == meta.current_page then
 	    term.setBackgroundColor(page.background)
     end
+end
+
+function getObjectTypes()
+	return meta.object_types
 end
 
 function getColor(page)
@@ -203,4 +213,6 @@ return{
 	mapGroup=mapGroup,
 	bubbleRedraw=bubbleRedraw,
     redraw=redraw.redraw,
+	getObjectTypes=getObjectTypes,
+	createPage=createPage,
 }
