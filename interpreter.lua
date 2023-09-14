@@ -12,7 +12,6 @@ function interpret(args, page)
 
         check what groups the object is apart of
     ]]
-
     if args.type == "when" then
         page.when:put(args.name, args.command)
         return
@@ -31,8 +30,12 @@ function interpret(args, page)
     elseif args.type == "load" then -- takes file, initalizes new page
         fileLoader.handleFile(args.file, page)
         return
+    elseif args.type == "disableScroll" then
+        page.y_scroll.hidden=true
+        return
     end
     if meta.object_types[args.type] == nil then error("Object type " .. args.type .. " not found.") end
+    args.page = page.name
     local obj = meta.object_types[args.type].create(args)
     if (type(obj) == "table") then -- if an actual object vs instance object
         obj.groups = obj.groups or args.groups

@@ -31,6 +31,7 @@ function create(args)
 	end
 
 	function scrollbar:update(obj_args, conditions)
+		if scrollbar.hidden then return end
 		if scrollbar.lock then return end
 		if conditions.block_scroll then return end
 		local current_slider_pos = scrollbar.slider.position
