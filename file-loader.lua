@@ -20,7 +20,7 @@ end
 
 function handleFile(file, page)
     file = completePath(file, page)
-    local page = pageFunctions.initalizePage(file)
+    page = pageFunctions.initalizePage(file)
     interpretFile(file, page)
 end
 
