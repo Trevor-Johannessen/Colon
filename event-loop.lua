@@ -16,7 +16,7 @@ function start()
                 if return_conditions.nobubble then break end
                 if type(v.update) == "function" then
                     local update_params = v:update(update_args) or {}
-                    checkReturnConditions(update_params, v, return_conditions)
+                    checkReturnConditions(update_params, v, return_conditions, args)
                 end
             end
             -- system objects (low priority)
@@ -57,12 +57,12 @@ function addEventArgs(args, event)
     args.mouse_y = event[4]
 end
 
-function checkReturnConditions(conditions, data, prev_conditions)
+function checkReturnConditions(conditions, data, prev_conditions, args)
 	if not conditions then return end
 	for k, v in next, conditions do
 		if type(v) == "string" then
 			if v == "when" then -- activate when statements
-				prev_conditions.found_when = meta.current_page.when:run(data.name, conditions.whenArgs) or prev_conditions.found_when
+				prev_conditions.found_when = meta.current_page.when:run(data.name, conditions.whenArgs, args) or prev_conditions.found_when
 			elseif v == "scroll" then -- take scroll control away from colon enviornemnt
 				prev_conditions.block_scroll = true
 			elseif v == "nobubble" then -- do not propagate input to any more elements
